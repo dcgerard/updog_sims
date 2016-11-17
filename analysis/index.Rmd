@@ -7,3 +7,4 @@ title: "Home"
 **Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
 
 
+* [First analysis of SNP data](snp_analysis.html)
