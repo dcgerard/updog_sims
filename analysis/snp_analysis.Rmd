@@ -1,0 +1,151 @@
+---
+title: "First SNP Analaysis"
+author: "First Last"
+date: "`r Sys.Date()`"
+---
+
+**Last updated:** `r Sys.Date()`
+
+**Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
+
+```{r chunk-options, include=FALSE}
+source("chunk-options.R")
+```
+
+This is a template for writing reports with R Markdown.
+
+## Read in SNPs and look at data
+
+```{r}
+library(updog)
+set.seed(3452)
+load("../data/subset_David.Rdata")
+dat <- subset_david
+lastp <- 12 ## number of final rows that are parents
+
+for(index in 1:length(dat)) {
+  cmat  <- dat[[index]]
+  p1dat <- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
+  p2dat <- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
+  odat  <- cmat[1:(nrow(cmat) - lastp), ]
+  plot_geno(ocounts = odat[, 1], osize = odat[, 2] + odat[, 1], ploidy = 6,
+            p1counts = p1dat[, 1], p1size = p1dat[, 1] + p1dat[, 2],
+            p2counts = p2dat[, 1], p2size = p2dat[, 1] + p2dat[, 2])
+}
+
+
+```
+
+In the last three datasets, there appear to be three two observations that do not align with the rest of the data. 
+This is curious, but they are not the same observation.
+```{r}
+cmat <- dat[[8]]
+sort(cmat[, 1] / (cmat[, 1] + cmat[, 2]))[1:4]
+cmat <- dat[[9]]
+sort(cmat[, 1] / (cmat[, 1] + cmat[, 2]))[1:4]
+cmat <- dat[[10]]
+sort(cmat[, 1] / (cmat[, 1] + cmat[, 2]))[1:4]
+```
+
+## Run `updog`
+
+We now run updog both with and without parental genotypes.
+```{r}
+cmat <- dat[[10]]
+p1dat <- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
+p2dat <- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
+odat  <- cmat[1:(nrow(cmat) - lastp), ]
+uout <- updog(ocounts = odat[, 1], osize = rowSums(odat), ploidy = 6,
+              p1counts = p1dat[, 1], p1size = rowSums(p1dat),
+              p2counts = p2dat[, 1], p2size = rowSums(p2dat))
+
+uout2 <- updog(ocounts = odat[, 1], osize = rowSums(odat), ploidy = 6,
+               p1counts = p1dat[, 1], p1size = rowSums(p1dat),
+               p2counts = p2dat[, 1], p2size = rowSums(p2dat),
+               do_mcmc = TRUE)
+
+uout3 <- updog(ocounts = odat[, 1], osize = rowSums(odat), ploidy = 6,
+               do_mcmc = TRUE)
+```
+
+The parental genotypes are chosen with near certainty
+```{r}
+aprobs <- cmat[1:(nrow(cmat) - 12), 1]/ rowSums(cmat[1:(nrow(cmat) - 12),])
+corder <- order(aprobs)
+uout$p1postprob
+uout$p2postprob
+uout2$m_p1postprob
+uout2$m_p2postprob
+
+aprobs[corder[1:4]]
+uout$opostprob[, corder[1:4]]
+uout2$m_opostprob[, corder[1:4]]
+```
+
+Plot output
+```{r}
+labelvec <- apply(uout$opostprob, 2, which.max)
+pl <- plot_geno(ocounts = odat[, 1], osize = rowSums(odat),
+                p1counts = p1dat[, 1], p1size = rowSums(p1dat),
+                p2counts = p2dat[, 1], p2size = rowSums(p2dat),
+                ploidy = 6,
+                col = labelvec)
+
+labelvec <- apply(uout2$m_opostprob, 2, which.max)
+pl <- plot_geno(ocounts = odat[, 1], osize = rowSums(odat),
+                p1counts = p1dat[, 1], p1size = rowSums(p1dat),
+                p2counts = p2dat[, 1], p2size = rowSums(p2dat),
+                ploidy = 6,
+                col = labelvec)
+
+labelvec <- apply(uout3$m_opostprob, 2, which.max)
+pl <- plot_geno(ocounts = odat[, 1], osize = rowSums(odat),
+                p1counts = p1dat[, 1], p1size = rowSums(p1dat),
+                p2counts = p2dat[, 1], p2size = rowSums(p2dat),
+                ploidy = 6,
+                col = labelvec)
+
+```
+
+It seems that the MCMC gives me what Felipe wants when I don't use the parental data, this is because the few extreme offspring points draw one of the parents to have an "a" when the sequence data says that it shouldn't:
+```{r}
+cbind(uout3$m_p1postprob,
+      uout2$m_p1postprob,
+      round(uout$p1postprob, digits = 2))
+
+cbind(uout3$m_p2postprob,
+      uout2$m_p2postprob,
+      round(uout$p2postprob, digits = 2))
+```
+
+
+I am getting very different results from the MCMC for the parental genotypes depending on the seed I use in the case when the parental genotypes are not provided. This might be because of the identifiability issue in the parents labeling, but I don't think so because we see probabilities near 1:
+```{r}
+set.seed(195)
+getmc1 <- updog(ocounts = odat[, 1], osize = rowSums(odat), ploidy = 6,
+                do_mcmc = TRUE)
+set.seed(196)
+getmc2 <- updog(ocounts = odat[, 1], osize = rowSums(odat), ploidy = 6,
+                do_mcmc = TRUE)
+
+cbind(getmc1$m_p1postprob, getmc2$m_p1postprob)
+cbind(getmc1$m_p2postprob, getmc2$m_p2postprob)
+
+plot(getmc1$m_opostprob, getmc2$m_opostprob)
+```
+
+## Take aways:
+
+1. There's a bug in my MCMC and I need to fix it.
+2. We should probably model a fudge factor.
+
+
+
+
+
+
+## Session information
+
+```{r info}
+sessionInfo()
+```
