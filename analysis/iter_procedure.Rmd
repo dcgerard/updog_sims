@@ -1,0 +1,127 @@
+---
+title: "First SNP Analaysis"
+author: "First Last"
+date: "`r Sys.Date()`"
+---
+
+**Last updated:** `r Sys.Date()`
+
+**Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
+
+```{r chunk-options, include=FALSE}
+source("chunk-options.R")
+```
+
+This is a template for writing reports with R Markdown.
+
+## Read in SNPs
+
+```{r}
+library(updog)
+set.seed(3452)
+load("../data/subset_David.Rdata")
+dat <- subset_david
+lastp <- 12 ## number of final rows that are parents
+```
+
+## Run `updog` iterative procedure on 10th SNP
+
+We now run updog both with and without parental genotypes.
+```{r}
+cmat <- dat[[8]]
+p1dat <- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
+p2dat <- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
+odat  <- cmat[1:(nrow(cmat) - lastp), ]
+uout1 <- updog(ocounts = odat[, 1], osize = rowSums(odat), ploidy = 6,
+               p1counts = p1dat[, 1], p1size = rowSums(p1dat),
+               p2counts = p2dat[, 1], p2size = rowSums(p2dat), iterate = TRUE)
+
+uout2 <- updog(ocounts = odat[, 1], osize = rowSums(odat), ploidy = 6,
+               iterate = TRUE)
+uout3 <- updog(ocounts = odat[, 1], osize = rowSums(odat), ploidy = 6)
+
+
+```
+
+The parental genotypes are chosen with near certainty
+```{r}
+round(uout1$p1postprob, digits = 2)
+round(uout2$p1postprob, digits = 2)
+round(uout3$p1postprob, digits = 2)
+
+round(uout1$p2postprob, digits = 2)
+round(uout2$p2postprob, digits = 2)
+round(uout3$p2postprob, digits = 2)
+```
+
+Plot output
+```{r}
+## one at a time procedure
+labelvec <- apply(uout1$opostprob, 2, which.max)
+pl <- plot_geno(ocounts = odat[, 1], osize = rowSums(odat),
+                p1counts = p1dat[, 1], p1size = rowSums(p1dat),
+                p2counts = p2dat[, 1], p2size = rowSums(p2dat),
+                ploidy = 6,
+                col = labelvec)
+
+## iterative procedure
+labelvec <- apply(uout2$opostprob, 2, which.max)
+pl <- plot_geno(ocounts = odat[, 1], osize = rowSums(odat),
+                p1counts = p1dat[, 1], p1size = rowSums(p1dat),
+                p2counts = p2dat[, 1], p2size = rowSums(p2dat),
+                ploidy = 6,
+                col = labelvec)
+
+## uniform prior
+labelvec <- apply(uout3$opostprob, 2, which.max)
+pl <- plot_geno(ocounts = odat[, 1], osize = rowSums(odat),
+                p1counts = p1dat[, 1], p1size = rowSums(p1dat),
+                p2counts = p2dat[, 1], p2size = rowSums(p2dat),
+                ploidy = 6,
+                col = labelvec)
+```
+
+## Uniform
+What does a uniform prior on the parents mean for the prior on the children?
+
+``` {r}
+pvec <- rep(1/7, length = 7) ## prior on parents
+qarray <- get_q_array(6)
+harray <- sweep(qarray, MARGIN = 1, STATS = pvec, FUN = `*`)
+harray <- sweep(harray, MARGIN = 2, STATS = pvec, FUN = `*`)
+
+max(abs(qarray / 49 - harray))
+
+hl <- apply(harray, 3, sum)
+hl
+```
+
+So a uniform prior on the q-array is actually a pretty strong prior on the children.
+
+Try a uniform prior on the children
+```{r}
+pout <- mapply(FUN = bin_post, odat[, 1], rowSums(odat), MoreArgs = list(prior = pvec))
+labelvec <- apply(pout, 2, which.max)
+pl <- plot_geno(ocounts = odat[, 1], osize = rowSums(odat),
+                p1counts = p1dat[, 1], p1size = rowSums(p1dat),
+                p2counts = p2dat[, 1], p2size = rowSums(p2dat),
+                ploidy = 6,
+                col = labelvec)
+
+pout <- mapply(FUN = bin_post, odat[, 1], rowSums(odat), MoreArgs = list(prior = hl))
+labelvec <- apply(pout, 2, which.max)
+pl <- plot_geno(ocounts = odat[, 1], osize = rowSums(odat),
+                p1counts = p1dat[, 1], p1size = rowSums(p1dat),
+                p2counts = p2dat[, 1], p2size = rowSums(p2dat),
+                ploidy = 6,
+                col = labelvec)
+```
+
+But the prior doesn't seem to change things that much.
+
+
+## Session information
+
+```{r info}
+sessionInfo()
+```

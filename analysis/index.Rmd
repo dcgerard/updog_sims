@@ -8,3 +8,4 @@ title: "Home"
 
 
 * [First analysis of SNP data](snp_analysis.html)
+* [Look at iterative procedure and effect of uniform prior on parents](iter_procedure.html). This results in a non-uniform prior on the children, as can be expected.
