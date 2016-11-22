@@ -1,0 +1,54 @@
+---
+title: "First SNP Analaysis"
+author: "First Last"
+date: "`r Sys.Date()`"
+---
+
+**Last updated:** `r Sys.Date()`
+
+**Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
+
+```{r chunk-options, include=FALSE}
+source("chunk-options.R")
+```
+
+This is a template for writing reports with R Markdown.
+
+## Read in SNPs
+
+```{r}
+library(updog)
+set.seed(772)
+load("../data/subset_David.Rdata")
+dat <- subset_david
+lastp <- 12 ## number of final rows that are parents
+```
+
+## Run `updog` iterative procedure on 10th SNP
+
+We now run updog both with and without parental genotypes.
+```{r}
+ploidy <- 6
+cmat <- dat[[8]]
+p1dat <- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
+p2dat <- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
+odat  <- cmat[1:(nrow(cmat) - lastp), ]
+
+pl <- plot_geno(ocounts = odat[, 1], osize = rowSums(odat),
+                p1counts = p1dat[, 1], p1size = rowSums(p1dat),
+                p2counts = p2dat[, 1], p2size = rowSums(p2dat),
+                ploidy = 6)
+
+unif_prior <- rep(1/(ploidy + 1), length = ploidy + 1)
+bin_post(ncounts = p1dat[, 1], ssize = rowSums(p1dat), prior = unif_prior)
+bin_post(ncounts = p2dat[, 1], ssize = rowSums(p2dat), prior = unif_prior)
+
+```
+
+
+
+## Session information
+
+```{r info}
+sessionInfo()
+```

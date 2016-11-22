@@ -1,0 +1,95 @@
+---
+title: "Look at updot performance on overdispersion"
+author: "First Last"
+date: "`r Sys.Date()`"
+---
+
+**Last updated:** `r Sys.Date()`
+
+**Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
+
+```{r chunk-options, include=FALSE}
+source("chunk-options.R")
+```
+
+Here, I try out overdispersed updog.
+
+## Read in SNPs
+
+```{r}
+library(updog)
+set.seed(483)
+load("../data/subset_David.Rdata")
+dat <- subset_david
+lastp <- 12 ## number of final rows that are parents
+
+## Run `updog`
+cmat <- dat[[10]]
+p1dat <- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
+p2dat <- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
+odat  <- cmat[1:(nrow(cmat) - lastp), ]
+
+p1counts <- p1dat[, 1]
+p1size   <- rowSums(p1dat)
+p2counts <- p2dat[, 1]
+p2size   <- rowSums(p2dat)
+ocounts  <- odat[, 1]
+osize    <- rowSums(odat)
+ploidy <- 6
+```
+
+
+This one is a little weird. There are so many observations that have almost all A,
+but they are mostly uncertain, with a lot of them having the highest posterior probability
+of having just 5 A.
+```{r, cache = TRUE}
+uout1 <- updog(ocounts = ocounts, osize = osize, ploidy = ploidy,
+              update_rho = TRUE, overdispersion = TRUE,
+              update_geno = TRUE, update_outlier = TRUE, update_pi = TRUE,
+              seq_error = 0.01)
+
+pl <- plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, p1counts = p1counts, p1size = p1size,
+                p2counts = p2counts, p2size = p2size, col = uout1$ogeno, theta = uout1$prob_ok, seq_error = 0.01)
+```
+
+A few things, first the parental genotypes estimated by updog are very different than those by the binomial model. The binomial model says the parental genotypes are 3 and 6
+```{r}
+bin_post(ncounts = p1counts, ssize = p1size, prior = rep(1 / (ploidy + 1), ploidy + 1))
+bin_post(ncounts = p2counts, ssize = p2size, prior = rep(1 / (ploidy + 1), ploidy + 1))
+```
+while updog says the parental genotypes are `r uout1$p1geno` and `r uout1$p2geno`. If we use the parental data to influence our prior then we get
+```{r, cache = TRUE}
+uout2 <- updog(ocounts = ocounts, osize = osize, ploidy = ploidy,
+              p1counts = p1counts, p1size = p1size,
+              p2counts = p2counts, p2size = p2size, 
+              update_rho = TRUE, overdispersion = TRUE,
+              update_geno = TRUE, update_outlier = TRUE, update_pi = TRUE)
+
+pl <- plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, p1counts = p1counts, p1size = p1size,
+                p2counts = p2counts, p2size = p2size, col = uout2$ogeno, theta = uout2$prob_ok, seq_error = 0.01)
+```
+We observe parental genotypes of `r uout2$p1geno` and `r uout2$p2geno`. But we still see a lot of weird things. For example, most of the observations that have all A's are blue and with small thetas. But if the true parental genotypes were 6 and 3 then the probability of observing an all A child (not in counts but in genotype) would only be `r get_q_array(ploidy)[7, 4, 7]`. But actually `r sum(ocounts / osize > 0.999) / length(ocounts)` of the observations have more than 99.9 percent of A. So there is naturally a large discrepancy between the parental and offspring counts that our model is picking up.
+
+I also think sequencing error rate is huge here. For example, if I lower it just a little bit then I get
+```{r, cache = TRUE}
+uout_lessseq <- updog(ocounts = ocounts, osize = osize, ploidy = ploidy,
+                      update_rho = TRUE, overdispersion = TRUE,
+                      update_geno = TRUE, update_outlier = TRUE, update_pi = TRUE,
+                      seq_error = 0.001)
+
+pl <- plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, p1counts = p1counts, p1size = p1size,
+                p2counts = p2counts, p2size = p2size, col = uout_lessseq$ogeno,
+                theta = uout_lessseq$prob_ok, seq_error = 0.001)
+```
+which seem to give us the exact results we intuitively want.
+
+## Take aways
+
+1. Updog correctly shows that the parental sequencing data does not align with the child sequencing data.
+2. Updog is super sensitive to the sequencing error rate.
+
+## Session information
+
+```{r info}
+sessionInfo()
+```

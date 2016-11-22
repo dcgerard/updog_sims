@@ -1,0 +1,95 @@
+---
+title: "First SNP Analaysis"
+author: "First Last"
+date: "`r Sys.Date()`"
+---
+
+**Last updated:** `r Sys.Date()`
+
+**Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
+
+```{r chunk-options, include=FALSE}
+source("chunk-options.R")
+```
+
+I am going to check if modelling overdispersion is necessary.
+
+## Read in SNPs and look at data
+
+```{r}
+library(updog)
+library(ggplot2)
+set.seed(3452)
+load("../data/subset_David.Rdata")
+dat <- subset_david
+lastp <- 12 ## number of final rows that are parents
+ploidy <- 6
+
+index <- 10
+cmat  <- dat[[index]]
+p1dat <- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
+p2dat <- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
+odat  <- cmat[1:(nrow(cmat) - lastp), ]
+
+p1counts <- p1dat[, 1]
+p1size   <- rowSums(p1dat)
+
+p2counts <- p2dat[, 1]
+p2size   <- rowSums(p2dat)
+
+prior_vec <- rep(1/(ploidy + 1), ploidy + 1)
+
+p1post <- bin_post(ncounts = p1counts, ssize = p1size, prior = prior_vec)
+p2post <- bin_post(ncounts = p2counts, ssize = p2size, prior = prior_vec)
+```
+
+The posteriors on the genotypes are very large
+``` {r}
+p1post
+p2post
+
+p1geno <- which.max(p1post) - 1
+p2geno <- which.max(p2post) - 1
+```
+
+Set up the possible probabilities
+```{r}
+seq_error <- 0.01
+pk <- seq(0, ploidy) / ploidy ## the possible probabilities
+pk <- (1 - seq_error) * pk + seq_error * (1 - pk)
+pk
+```
+
+Parent 1 sims
+```{r}
+itermax <- 1000
+p1simsout <- sapply(p1size, stats::rbinom, n = itermax, prob = pk[p1geno + 1])
+p1sims_prob <- sweep(x = p1simsout, MARGIN = 2, STATS = p1size, FUN = `/`)
+longdat <- reshape2::melt(as.data.frame(p1sims_prob), id.vars = NULL)
+smalldat <- data.frame(variable = names(p1counts), value = p1counts / p1size)
+ggplot(data = longdat, mapping = aes(x = value)) +
+  facet_wrap(~variable) +
+  geom_histogram() +
+  geom_vline(data = smalldat, mapping = aes(xintercept = value), color = 2, lty = 2)
+```
+
+Parent 2 sims
+```{r}
+itermax <- 1000
+p2simsout <- sapply(p2size, stats::rbinom, n = itermax, prob = pk[p2geno + 1])
+p2sims_prob <- sweep(x = p2simsout, MARGIN = 2, STATS = p2size, FUN = `/`)
+longdat <- reshape2::melt(as.data.frame(p2sims_prob), id.vars = NULL)
+smalldat <- data.frame(variable = names(p2counts), value = p2counts / p2size)
+ggplot(data = longdat, mapping = aes(x = value)) +
+  facet_wrap(~variable) +
+  geom_histogram() +
+  geom_vline(data = smalldat, mapping = aes(xintercept = value), color = 2, lty = 2)
+```
+
+
+
+## Session information
+
+```{r info}
+sessionInfo()
+```

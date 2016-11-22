@@ -1,0 +1,74 @@
+---
+title: "Look at updot performance on overdispersion"
+author: "First Last"
+date: "`r Sys.Date()`"
+---
+
+**Last updated:** `r Sys.Date()`
+
+**Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
+
+```{r chunk-options, include=FALSE}
+source("chunk-options.R")
+```
+
+Here, I just run through the datasets Felipe gave me.
+
+## Read in SNPs
+
+```{r}
+library(updog)
+set.seed(345)
+load("../data/subset_David.Rdata")
+dat <- subset_david
+lastp <- 12 ## number of final rows that are parents
+
+```
+
+From a previous write-up, I set the sequencing error to be 0.1 percent.
+```{r, cache = TRUE}
+for (index in 1:10) {
+  ## Run `updog`
+cmat <- dat[[index]]
+p1dat <- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
+p2dat <- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
+odat  <- cmat[1:(nrow(cmat) - lastp), ]
+
+p1counts <- p1dat[, 1]
+p1size   <- rowSums(p1dat)
+p2counts <- p2dat[, 1]
+p2size   <- rowSums(p2dat)
+ocounts  <- odat[, 1]
+osize    <- rowSums(odat)
+ploidy <- 6
+
+update_outlier <- TRUE
+if (index %in% c(5, 7)) {
+  update_outlier <- FALSE
+}
+uout1 <- updog(ocounts = ocounts, osize = osize, ploidy = ploidy,
+              update_rho = TRUE, overdispersion = TRUE,
+              update_geno = TRUE, update_outlier = update_outlier,
+              update_pi = TRUE, seq_error = 0.001)
+
+pl <- plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, p1counts = p1counts, p1size = p1size,
+                p2counts = p2counts, p2size = p2size, col = uout1$ogeno, prob_ok = uout1$prob_ok, seq_error = 0.001,
+                maxpostprob = apply(uout1$opostprob, 2, max))
+print(pl)
+
+pl <- plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, p1counts = p1counts, p1size = p1size,
+                p2counts = p2counts, p2size = p2size, seq_error = 0.001)
+print(pl)
+}
+```
+
+I think I have a bug somewhere. On a couple datasets, I observed non-monotonicity in the objective function when I estimate the outlier distribution. I need to fix this.
+
+Though, a lot of the "messy" points have dissapeard. Compare it to the raw data above.
+
+
+## Session information
+
+```{r info}
+sessionInfo()
+```

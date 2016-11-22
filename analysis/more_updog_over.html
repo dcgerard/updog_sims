@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="First Last" />
+
+<meta name="date" content="2016-11-22" />
+
+<title>Look at updot performance on overdispersion</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/united.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+
+<style type="text/css">
+
+/* padding for bootstrap navbar */
+body {
+  padding-top: 50px;
+  padding-bottom: 40px;
+}
+
+
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h2 {
+  padding-top: 55px;
+  margin-top: -55px;
+}
+.section h3 {
+  padding-top: 55px;
+  margin-top: -55px;
+}
+
+
+
+/* don't use link color in navbar */
+.dropdown-menu>li>a {
+  color: black;
+}
+
+/* some padding for disqus */
+#disqus_thread {
+  margin-top: 45px;
+}
+
+</style>
+
+<link rel="stylesheet" href="libs/font-awesome-4.1.0/css/font-awesome.min.css"/>
+
+<style type="text/css">code{white-space: pre;}</style>
+<link rel="stylesheet"
+      href="libs/highlight/textmate.css"
+      type="text/css" />
+<script src="libs/highlight/highlight.js"></script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">updog_sims</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="LICENSE">License</a></li>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Look at updot performance on overdispersion</h1>
+<h4 class="author"><em>First Last</em></h4>
+<h4 class="date"><em>2016-11-22</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#read-in-snps">Read in SNPs</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<p><strong>Last updated:</strong> 2016-11-22</p>
+<p><strong>Code version:</strong> 131c257aef9a0bdd91365390a2a51ccf7f3f60a4</p>
+<p>Here, I just run through the datasets Felipe gave me.</p>
+<div id="read-in-snps" class="section level2">
+<h2>Read in SNPs</h2>
+<pre class="r"><code>library(updog)
+set.seed(345)
+load(&quot;../data/subset_David.Rdata&quot;)
+dat &lt;- subset_david
+lastp &lt;- 12 ## number of final rows that are parents</code></pre>
+<p>From a previous write-up, I set the sequencing error to be 0.1 percent.</p>
+<pre class="r"><code>for (index in 1:10) {
+  ## Run `updog`
+cmat &lt;- dat[[index]]
+p1dat &lt;- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
+p2dat &lt;- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
+odat  &lt;- cmat[1:(nrow(cmat) - lastp), ]
+
+p1counts &lt;- p1dat[, 1]
+p1size   &lt;- rowSums(p1dat)
+p2counts &lt;- p2dat[, 1]
+p2size   &lt;- rowSums(p2dat)
+ocounts  &lt;- odat[, 1]
+osize    &lt;- rowSums(odat)
+ploidy &lt;- 6
+
+update_outlier &lt;- TRUE
+if (index %in% c(5, 7)) {
+  update_outlier &lt;- FALSE
+}
+uout1 &lt;- updog(ocounts = ocounts, osize = osize, ploidy = ploidy,
+              update_rho = TRUE, overdispersion = TRUE,
+              update_geno = TRUE, update_outlier = update_outlier,
+              update_pi = TRUE, seq_error = 0.001)
+
+pl &lt;- plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, p1counts = p1counts, p1size = p1size,
+                p2counts = p2counts, p2size = p2size, col = uout1$ogeno, prob_ok = uout1$prob_ok, seq_error = 0.001,
+                maxpostprob = apply(uout1$opostprob, 2, max))
+print(pl)
+
+pl &lt;- plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, p1counts = p1counts, p1size = p1size,
+                p2counts = p2counts, p2size = p2size, seq_error = 0.001)
+print(pl)
+}</code></pre>
+<p><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-5.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-6.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-7.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-8.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-9.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-10.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-11.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-12.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-13.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-14.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-15.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-16.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-17.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-18.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-19.png" width="672" style="display: block; margin: auto;" /><img src="figure/more_updog_over.Rmd/unnamed-chunk-2-20.png" width="672" style="display: block; margin: auto;" /></p>
+<p>I think I have a bug somewhere. On a couple datasets, I observed non-monotonicity in the objective function when I estimate the outlier distribution. I need to fix this.</p>
+<p>Though, a lot of the “messy” points have dissapeard. Compare it to the raw data above.</p>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.3.2 (2016-10-31)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 14.04.5 LTS
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] updog_0.1.0 knitr_1.15 
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.7      codetools_0.2-15 digest_0.6.10    assertthat_0.1  
+ [5] plyr_1.8.4       grid_3.3.2       gtable_0.2.0     magrittr_1.5    
+ [9] evaluate_0.10    scales_0.4.1     ggplot2_2.2.0    stringi_1.1.2   
+[13] lazyeval_0.2.0   rmarkdown_1.1    labeling_0.3     tools_3.3.2     
+[17] stringr_1.1.0    munsell_0.4.3    yaml_2.1.14      colorspace_1.3-0
+[21] htmltools_0.3.5  tibble_1.2      </code></pre>
+</div>
+
+
+<!-- some extra javascript for older browsers -->
+<script type="text/javascript" src="libs/polyfill.js"></script>
+
+<script>
+
+// manage active state of menu based on current page
+$(document).ready(function () {
+
+    // active menu
+    href = window.location.pathname
+    href = href.substr(href.lastIndexOf('/') + 1)
+    $('a[href="' + href + '"]').parent().addClass('active');
+
+    // manage active menu header
+    if (href.startsWith('authoring_'))
+      $('a[href="' + 'authoring' + '"]').parent().addClass('active');
+    else if (href.endsWith('_format.html'))
+      $('a[href="' + 'formats' + '"]').parent().addClass('active');
+    else if (href.startsWith('developer_'))
+      $('a[href="' + 'developer' + '"]').parent().addClass('active');
+
+});
+
+</script>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="First Last" />
+
+<meta name="date" content="2016-11-21" />
+
+<title>First SNP Analaysis</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/united.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+
+<style type="text/css">
+
+/* padding for bootstrap navbar */
+body {
+  padding-top: 50px;
+  padding-bottom: 40px;
+}
+
+
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h2 {
+  padding-top: 55px;
+  margin-top: -55px;
+}
+.section h3 {
+  padding-top: 55px;
+  margin-top: -55px;
+}
+
+
+
+/* don't use link color in navbar */
+.dropdown-menu>li>a {
+  color: black;
+}
+
+/* some padding for disqus */
+#disqus_thread {
+  margin-top: 45px;
+}
+
+</style>
+
+<link rel="stylesheet" href="libs/font-awesome-4.1.0/css/font-awesome.min.css"/>
+
+<style type="text/css">code{white-space: pre;}</style>
+<link rel="stylesheet"
+      href="libs/highlight/textmate.css"
+      type="text/css" />
+<script src="libs/highlight/highlight.js"></script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">updog_sims</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="LICENSE">License</a></li>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">First SNP Analaysis</h1>
+<h4 class="author"><em>First Last</em></h4>
+<h4 class="date"><em>2016-11-21</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#read-in-snps-and-look-at-data">Read in SNPs and look at data</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<p><strong>Last updated:</strong> 2016-11-21</p>
+<p><strong>Code version:</strong> 131c257aef9a0bdd91365390a2a51ccf7f3f60a4</p>
+<p>I am going to check if modelling overdispersion is necessary.</p>
+<div id="read-in-snps-and-look-at-data" class="section level2">
+<h2>Read in SNPs and look at data</h2>
+<pre class="r"><code>library(updog)
+library(ggplot2)
+set.seed(3452)
+load(&quot;../data/subset_David.Rdata&quot;)
+dat &lt;- subset_david
+lastp &lt;- 12 ## number of final rows that are parents
+ploidy &lt;- 6
+
+index &lt;- 10
+cmat  &lt;- dat[[index]]
+p1dat &lt;- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
+p2dat &lt;- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
+odat  &lt;- cmat[1:(nrow(cmat) - lastp), ]
+
+p1counts &lt;- p1dat[, 1]
+p1size   &lt;- rowSums(p1dat)
+
+p2counts &lt;- p2dat[, 1]
+p2size   &lt;- rowSums(p2dat)
+
+prior_vec &lt;- rep(1/(ploidy + 1), ploidy + 1)
+
+p1post &lt;- bin_post(ncounts = p1counts, ssize = p1size, prior = prior_vec)
+p2post &lt;- bin_post(ncounts = p2counts, ssize = p2size, prior = prior_vec)</code></pre>
+<p>The posteriors on the genotypes are very large</p>
+<pre class="r"><code>p1post</code></pre>
+<pre><code>[1]  0.000e+00 3.697e-115  1.768e-28  1.000e+00  2.139e-11  8.276e-76
+[7]  0.000e+00</code></pre>
+<pre class="r"><code>p2post</code></pre>
+<pre><code>[1]  0.000e+00  0.000e+00  0.000e+00  0.000e+00  0.000e+00 2.121e-211
+[7]  1.000e+00</code></pre>
+<pre class="r"><code>p1geno &lt;- which.max(p1post) - 1
+p2geno &lt;- which.max(p2post) - 1</code></pre>
+<p>Set up the possible probabilities</p>
+<pre class="r"><code>seq_error &lt;- 0.01
+pk &lt;- seq(0, ploidy) / ploidy ## the possible probabilities
+pk &lt;- (1 - seq_error) * pk + seq_error * (1 - pk)
+pk</code></pre>
+<pre><code>[1] 0.0100 0.1733 0.3367 0.5000 0.6633 0.8267 0.9900</code></pre>
+<p>Parent 1 sims</p>
+<pre class="r"><code>itermax &lt;- 1000
+p1simsout &lt;- sapply(p1size, stats::rbinom, n = itermax, prob = pk[p1geno + 1])
+p1sims_prob &lt;- sweep(x = p1simsout, MARGIN = 2, STATS = p1size, FUN = `/`)
+longdat &lt;- reshape2::melt(as.data.frame(p1sims_prob), id.vars = NULL)
+smalldat &lt;- data.frame(variable = names(p1counts), value = p1counts / p1size)
+ggplot(data = longdat, mapping = aes(x = value)) +
+  facet_wrap(~variable) +
+  geom_histogram() +
+  geom_vline(data = smalldat, mapping = aes(xintercept = value), color = 2, lty = 2)</code></pre>
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="figure/check_overdispersion.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Parent 2 sims</p>
+<pre class="r"><code>itermax &lt;- 1000
+p2simsout &lt;- sapply(p2size, stats::rbinom, n = itermax, prob = pk[p2geno + 1])
+p2sims_prob &lt;- sweep(x = p2simsout, MARGIN = 2, STATS = p2size, FUN = `/`)
+longdat &lt;- reshape2::melt(as.data.frame(p2sims_prob), id.vars = NULL)
+smalldat &lt;- data.frame(variable = names(p2counts), value = p2counts / p2size)
+ggplot(data = longdat, mapping = aes(x = value)) +
+  facet_wrap(~variable) +
+  geom_histogram() +
+  geom_vline(data = smalldat, mapping = aes(xintercept = value), color = 2, lty = 2)</code></pre>
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="figure/check_overdispersion.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.3.2 (2016-10-31)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 14.04.5 LTS
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_2.2.0 updog_0.1.0   knitr_1.15   
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.7      digest_0.6.10    assertthat_0.1   plyr_1.8.4      
+ [5] grid_3.3.2       gtable_0.2.0     magrittr_1.5     evaluate_0.10   
+ [9] scales_0.4.1     stringi_1.1.2    reshape2_1.4.2   lazyeval_0.2.0  
+[13] rmarkdown_1.1    labeling_0.3     tools_3.3.2      stringr_1.1.0   
+[17] munsell_0.4.3    yaml_2.1.14      colorspace_1.3-0 htmltools_0.3.5 
+[21] tibble_1.2      </code></pre>
+</div>
+
+
+<!-- some extra javascript for older browsers -->
+<script type="text/javascript" src="libs/polyfill.js"></script>
+
+<script>
+
+// manage active state of menu based on current page
+$(document).ready(function () {
+
+    // active menu
+    href = window.location.pathname
+    href = href.substr(href.lastIndexOf('/') + 1)
+    $('a[href="' + href + '"]').parent().addClass('active');
+
+    // manage active menu header
+    if (href.startsWith('authoring_'))
+      $('a[href="' + 'authoring' + '"]').parent().addClass('active');
+    else if (href.endsWith('_format.html'))
+      $('a[href="' + 'formats' + '"]').parent().addClass('active');
+    else if (href.startsWith('developer_'))
+      $('a[href="' + 'developer' + '"]').parent().addClass('active');
+
+});
+
+</script>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
