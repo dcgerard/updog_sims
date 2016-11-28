@@ -11,3 +11,5 @@ title: "Home"
 * [Look at iterative procedure and effect of uniform prior on parents](iter_procedure.html). This results in a non-uniform prior on the children, as can be expected.
 * [First try at overdispersed updog](updot_overdispersion.html)
 * [Run overdispersed updog on all of the datasets Felipe gave me](more_updog_over.html)
+* [Look at estimating sequencing error rate and results look promising. No more errors when I bound the overdispersion parameter.](updog_overdispersion_seq_est.html)
+* [Run through all datasets when overdispersion parameter is bounded and I estimate the sequencing error rate.](more_updog_over_seq_est.html)

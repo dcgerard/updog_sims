@@ -1,0 +1,81 @@
+---
+title: "Look at updog performance when estimating sequencing error"
+author: "David Gerard"
+date: "`r Sys.Date()`"
+---
+
+**Last updated:** `r Sys.Date()`
+
+**Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
+
+```{r chunk-options, include=FALSE}
+source("chunk-options.R")
+```
+
+Here, I look at my new sequencing error estimation procedure and how it plays with updog.
+
+## Read in SNPs
+
+```{r}
+library(updog)
+set.seed(483)
+load("../data/subset_David.Rdata")
+dat <- subset_david
+lastp <- 12 ## number of final rows that are parents
+
+## Run `updog`
+cmat <- dat[[7]]
+p1dat <- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
+p2dat <- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
+odat  <- cmat[1:(nrow(cmat) - lastp), ]
+
+p1counts <- p1dat[, 1]
+p1size   <- rowSums(p1dat)
+p2counts <- p2dat[, 1]
+p2size   <- rowSums(p2dat)
+ocounts  <- odat[, 1]
+osize    <- rowSums(odat)
+ploidy <- 6
+```
+
+## Description of updates
+I think I was having trouble because of something weird with the beta-binomial. For some values of the shape parameters (when either is less than 1), you can get the highest densities on the extremes 0 and 1. This is at the very least non-intuitive behavior for an overdispersed model. To counter this, I bound the overdispersion parameter so that the beta-density is finite at 0 and 1 for the smallest value of the non-sequencing error probabilities. That is, I find $\alpha$ and $\beta$ such that
+\begin{align}
+\frac{1}{ploidy} &= \frac{\alpha}{\alpha + \beta},\\
+\beta &\geq \alpha \geq 1.
+\end{align}
+The solution to this is to set $\alpha = 1$ and $\beta = ploidy - 1$. In terms of the mean ($\mu$) and overdispersion parameter ($\rho$) of the beta-binomial, this is equivalent to setting
+\begin{align}
+\mu &= \frac{1}{ploidy} \\
+\rho &= \frac{1}{ploidy + 1}.
+\end{align}
+Hence, I bound the overdispersion parameter to be a maximum of 1 / (ploidy + 1).
+
+## Description of estimating the sequencing error rate.
+I think we might be able to estimate this by maximum likelihood, but I also have a heuristic scheme to do so too. Let $\hat{p}$ be the estimated proportions. Keep the values such that $\hat{p} \geq 1 - \epsilon$ for some fixed $\epsilon$, then estimate the probability of an "a" given these values. The idea is that the reference allele will be common enough to have many offspring with all "A"'s, in which case we can look how often these observations deviate from all A's.
+
+## Re-run updog on problem dataset.
+
+```{r, cache = TRUE}
+uout1 <- updog(ocounts = ocounts, osize = osize, ploidy = ploidy,
+              update_rho = TRUE, overdispersion = TRUE,
+              update_geno = TRUE, update_outlier = TRUE, update_pi = TRUE)
+```
+
+The estimated sequencing error was `r uout1$seq_error`.
+
+```{r}
+pl <- plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, p1counts = p1counts, p1size = p1size,
+                p2counts = p2counts, p2size = p2size, col = uout1$ogeno, prob_ok = uout1$prob_ok)
+print(pl, seq_error = uout1$seq_error)
+```
+
+There are no errors here and I am getting something that looks a lot more intuitive. The estimated overdispersion parameter is `r uout1$rho`.
+
+
+
+## Session information
+
+```{r info}
+sessionInfo()
+```
