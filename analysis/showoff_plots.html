@@ -11,7 +11,7 @@
 
 <meta name="author" content="First Last" />
 
-<meta name="date" content="2016-12-20" />
+<meta name="date" content="2016-12-21" />
 
 <title>Look at updated estimate of sequencing error</title>
 
@@ -99,6 +99,9 @@ h5 {
 h6 {
   font-size: 12px;
 }
+.table th:not([align]) {
+  text-align: left;
+}
 </style>
 
 
@@ -129,10 +132,11 @@ button.code-folding-btn:focus {
 </style>
 
 
+
 <div class="container-fluid main-container">
 
 <!-- tabsets -->
-<script src="libs/navigation-1.0/tabsets.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
 <script>
 $(document).ready(function () {
   window.buildTabsets("TOC");
@@ -171,7 +175,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Look at updated estimate of sequencing error</h1>
 <h4 class="author"><em>First Last</em></h4>
-<h4 class="date"><em>2016-12-20</em></h4>
+<h4 class="date"><em>2016-12-21</em></h4>
 
 </div>
 
@@ -181,8 +185,8 @@ $(document).ready(function () {
 </ul>
 </div>
 
-<p><strong>Last updated:</strong> 2016-12-20</p>
-<p><strong>Code version:</strong> ‘a37f297679bf9aeafae91812996f826c1a4ae1df’</p>
+<p><strong>Last updated:</strong> 2016-12-21</p>
+<p><strong>Code version:</strong> a1f5c62a1f6362884e8b196c44ebe69d5a9ba4b8</p>
 <p>Here, I demonstrate some new methods for the output of <code>updog</code>.</p>
 <div id="demonstration" class="section level2">
 <h2>Demonstration</h2>
@@ -216,12 +220,16 @@ ploidy &lt;- 6</code></pre>
 <p><img src="figure/showoff_plots.Rmd/unnamed-chunk-3-3.png" width="672" style="display: block; margin: auto;" /></p>
 <p>The second plot above is the estimated beta distribution for the outlier model. The third plot is for the overdisperion model for each possible genotype. You can ignore these with <code>plot_beta = FALSE</code>.</p>
 <p>If you prefer “classic” base R graphics, you can set <code>gg = FALSE</code>.</p>
-<pre class="r"><code>plot(uout, gg = FALSE, plot_beta = FALSE)</code></pre>
+<pre class="r"><code>plot(uout, gg = FALSE)</code></pre>
 <p><img src="figure/showoff_plots.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Press [enter] to continue</code></pre>
+<p><img src="figure/showoff_plots.Rmd/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Press [enter] to continue</code></pre>
+<p><img src="figure/showoff_plots.Rmd/unnamed-chunk-4-3.png" width="672" style="display: block; margin: auto;" /></p>
 <p>The <code>summary</code> method now works with the <code>updog</code> output.</p>
 <pre class="r"><code>summary(uout)</code></pre>
 <pre><code>$prop_ok
-[1] 0.9783944
+[1] 0.9784
 
 $genotypes
 
@@ -229,39 +237,39 @@ $genotypes
   0   0   0   0  48 161  64 
 
 $summ_prob
-        maxpostprob   prob_ok
-Min.         0.5999 1.541e-06
-1st Qu.      0.9942 9.834e-01
-Median       0.9986 9.956e-01
-Mean         0.9866 9.784e-01
-3rd Qu.      0.9990 9.967e-01
-Max.         1.0000 1.000e+00</code></pre>
+        maxpostprob  prob_ok
+Min.          0.600 1.54e-06
+1st Qu.       0.994 9.83e-01
+Median        0.999 9.96e-01
+Mean          0.987 9.78e-01
+3rd Qu.       0.999 9.97e-01
+Max.          1.000 1.00e+00</code></pre>
 <pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>R version 3.2.4 Revised (2016-03-16 r70336)
-Platform: x86_64-w64-mingw32/x64 (64-bit)
-Running under: Windows 10 x64 (build 14393)
+<pre><code>R version 3.3.2 (2016-10-31)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 14.04.5 LTS
 
 locale:
-[1] LC_COLLATE=English_United States.1252 
-[2] LC_CTYPE=English_United States.1252   
-[3] LC_MONETARY=English_United States.1252
-[4] LC_NUMERIC=C                          
-[5] LC_TIME=English_United States.1252    
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] updog_0.1.0   knitr_1.12.23
+[1] updog_0.1.0 knitr_1.15 
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.5       digest_0.6.9      assertthat_0.1   
- [4] plyr_1.8.3        grid_3.2.4        gtable_0.2.0     
- [7] formatR_1.3       magrittr_1.5      evaluate_0.8.3   
-[10] scales_0.4.0      ggplot2_2.1.0     stringi_1.0-1    
-[13] rmarkdown_0.9.5.9 labeling_0.3      tools_3.2.4      
-[16] stringr_1.0.0     munsell_0.4.3     yaml_2.1.13      
-[19] colorspace_1.2-6  htmltools_0.3.5  </code></pre>
+ [1] Rcpp_0.12.8      digest_0.6.10    assertthat_0.1   plyr_1.8.4      
+ [5] grid_3.3.2       gtable_0.2.0     magrittr_1.5     evaluate_0.10   
+ [9] scales_0.4.1     ggplot2_2.2.0    stringi_1.1.2    lazyeval_0.2.0  
+[13] rmarkdown_1.1    labeling_0.3     tools_3.3.2      stringr_1.1.0   
+[17] munsell_0.4.3    yaml_2.1.14      colorspace_1.3-0 htmltools_0.3.5 
+[21] tibble_1.2      </code></pre>
 </div>
 
 
@@ -300,6 +308,7 @@ $(document).ready(function () {
 $(document).ready(function () {
   $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
 });
+
 
 </script>
 

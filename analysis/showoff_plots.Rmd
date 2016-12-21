@@ -54,7 +54,7 @@ The second plot above is the estimated beta distribution for the outlier model. 
 If you prefer "classic" base R graphics, you can set `gg = FALSE`.
 
 ```{r}
-plot(uout, gg = FALSE, plot_beta = FALSE)
+plot(uout, gg = FALSE)
 ```
 
 The `summary` method now works with the `updog` output.
