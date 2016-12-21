@@ -186,7 +186,7 @@ $(document).ready(function () {
 </div>
 
 <p><strong>Last updated:</strong> 2016-12-21</p>
-<p><strong>Code version:</strong> a1f5c62a1f6362884e8b196c44ebe69d5a9ba4b8</p>
+<p><strong>Code version:</strong> 9a0c63a1077f70c09805c4e0eb2bf206480c6f10</p>
 <p>Here, I demonstrate some new methods for the output of <code>updog</code>.</p>
 <div id="demonstration" class="section level2">
 <h2>Demonstration</h2>
@@ -228,6 +228,22 @@ ploidy &lt;- 6</code></pre>
 <p><img src="figure/showoff_plots.Rmd/unnamed-chunk-4-3.png" width="672" style="display: block; margin: auto;" /></p>
 <p>The <code>summary</code> method now works with the <code>updog</code> output.</p>
 <pre class="r"><code>summary(uout)</code></pre>
+<pre><code>Outlier Distribution:
+  3 +-+---------+---------+----------+---------+---------+-+
+    |                                *******               |
+2.5 +                               **     **              +
+    |                             **        **             |
+  2 +                            **          **            +
+    |                           **            **           |
+1.5 +                          *               **          +
+    |                         *                 *          |
+  1 +                       **                   *         +
+    |                      **                     *        |
+0.5 +                    **                        *       +
+    |                  ***                          *      |
+  0 + *****************                              ****  +
+    +-+---------+---------+----------+---------+---------+-+
+      0        0.2       0.4        0.6       0.8        1  </code></pre>
 <pre><code>$prop_ok
 [1] 0.9784
 
@@ -264,12 +280,12 @@ other attached packages:
 [1] updog_0.1.0 knitr_1.15 
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.8      digest_0.6.10    assertthat_0.1   plyr_1.8.4      
- [5] grid_3.3.2       gtable_0.2.0     magrittr_1.5     evaluate_0.10   
- [9] scales_0.4.1     ggplot2_2.2.0    stringi_1.1.2    lazyeval_0.2.0  
-[13] rmarkdown_1.1    labeling_0.3     tools_3.3.2      stringr_1.1.0   
-[17] munsell_0.4.3    yaml_2.1.14      colorspace_1.3-0 htmltools_0.3.5 
-[21] tibble_1.2      </code></pre>
+ [1] Rcpp_0.12.8      digest_0.6.10    assertthat_0.1   txtplot_1.0-3   
+ [5] plyr_1.8.4       grid_3.3.2       gtable_0.2.0     magrittr_1.5    
+ [9] evaluate_0.10    scales_0.4.1     ggplot2_2.2.0    stringi_1.1.2   
+[13] lazyeval_0.2.0   rmarkdown_1.1    labeling_0.3     tools_3.3.2     
+[17] stringr_1.1.0    munsell_0.4.3    yaml_2.1.14      colorspace_1.3-0
+[21] htmltools_0.3.5  tibble_1.2      </code></pre>
 </div>
 
 
