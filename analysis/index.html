@@ -97,9 +97,6 @@ h5 {
 h6 {
   font-size: 12px;
 }
-.table th:not([align]) {
-  text-align: left;
-}
 </style>
 
 
@@ -130,11 +127,10 @@ button.code-folding-btn:focus {
 </style>
 
 
-
 <div class="container-fluid main-container">
 
 <!-- tabsets -->
-<script src="libs/navigation-1.1/tabsets.js"></script>
+<script src="libs/navigation-1.0/tabsets.js"></script>
 <script>
 $(document).ready(function () {
   window.buildTabsets("TOC");
@@ -176,8 +172,8 @@ $(document).ready(function () {
 </div>
 
 
-<p><strong>Last updated:</strong> 2016-11-28</p>
-<p><strong>Code version:</strong> 012a46db0668ec4ca7c1a37bb42d86ef68c1006b</p>
+<p><strong>Last updated:</strong> 2016-12-20</p>
+<p><strong>Code version:</strong> ‘a33730a715706c862e5a62cecf71a8c7169dee12’</p>
 <ul>
 <li><a href="snp_analysis.html">First analysis of SNP data</a></li>
 <li><a href="iter_procedure.html">Look at iterative procedure and effect of uniform prior on parents</a>. This results in a non-uniform prior on the children, as can be expected.</li>
@@ -185,6 +181,7 @@ $(document).ready(function () {
 <li><a href="more_updog_over.html">Run overdispersed updog on all of the datasets Felipe gave me</a></li>
 <li><a href="updog_overdispersion_seq_est.html">Look at estimating sequencing error rate and results look promising. No more errors when I bound the overdispersion parameter.</a></li>
 <li><a href="more_updog_over_seq_est.html">Run through all datasets when overdispersion parameter is bounded and I estimate the sequencing error rate.</a></li>
+<li><a href="showoff_plots.html">Show off new methods for updog for plotting and summarizing.</a></li>
 </ul>
 
 
@@ -223,7 +220,6 @@ $(document).ready(function () {
 $(document).ready(function () {
   $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
 });
-
 
 </script>
 
