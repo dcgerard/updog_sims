@@ -1,0 +1,314 @@
+---
+title: "Generate Raw Figures"
+author: "David Gerard"
+date: "February 22, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(updog)
+library(dplyr)
+library(ggplot2)
+load("../data/subset_David.Rdata")
+ploidy <- 6
+
+dat_list <- list()
+for (col in 1:length(subset_david)){
+  dat <- as_data_frame(subset_david[[col]])
+  dat$id <- rownames(subset_david[[col]])
+  names(dat) <- c("A", "a", "id")
+  dat <- dat %>% mutate(ocounts = A, osize = a + A)
+  pdat <- filter(dat, grepl("Beauregard", id) | grepl("Tanzania", id))
+  cdat <- filter(dat, !(grepl("Beauregard", id) | grepl("Tanzania", id)))
+  pdf(file = paste0("../output/raw_plots/geno_plot", col, ".pdf"), family = "Times", height = 4, width = 6)
+  pl <- plot_geno(ocounts = cdat$ocounts, osize = cdat$osize, ploidy = ploidy, seq_error = 0)
+  print(pl)
+  dev.off()
+  dat_list[[col]] <- cdat
+  print(sort(dat$osize)[1:5])
+}
+
+```
+
+
+```{r}
+dat <- dat_list[[6]]
+uout6 <- updog(ocounts = dat$ocounts,
+              osize = dat$osize,
+              ploidy = 6, update_geno = TRUE, overdispersion = FALSE)
+
+pk_index <- 4
+bindat <- filter(dat, uout6$ogeno == pk_index) %>%
+  select(ocounts, osize)
+
+pk <- 0:ploidy / ploidy
+pvec <- (1 - uout6$seq_error) * pk + uout6$seq_error * (1 - pk)
+
+plot(bindat)
+
+itermax <- 10000
+simmat <- matrix(NA, nrow = itermax, ncol = nrow(bindat))
+for (index in 1:itermax){
+  sim_out <- rbinom(n = nrow(bindat), size = bindat$osize, prob = pvec[pk_index + 1])  
+  simmat[index, ] <- sim_out
+}
+
+
+lower <- apply(simmat, 2, quantile, 0.025)
+upper <- apply(simmat, 2, quantile, 0.975)
+sim_df <- data_frame(lower = lower, upper = upper, ocounts = bindat$ocounts, osize = bindat$osize)
+sim_df$mean <- pvec[pk_index + 1] * bindat$ocounts
+
+pl <- ggplot(data = sim_df, mapping = aes(x = osize, y = ocounts)) +
+  geom_point() +
+  geom_line(mapping = aes(y = lower), col = "Blue") +
+  geom_line(mapping = aes(y = upper), col = "Blue") +
+  theme_bw() +
+  xlab("Total Reads") +
+  ylab("Counts A")
+
+pdf(file = "../output/overdispersion/over4.pdf", family = "Times", height = 4, width = 6)
+print(pl)
+dev.off()
+
+mean(sim_df$ocounts < lower | sim_df$ocounts > upper)
+
+
+pbinom(q = sum(sim_df$ocounts < lower | sim_df$ocounts > upper),
+       size = nrow(bindat), prob = 0.05, lower.tail = FALSE)
+
+
+pbinom(q = bindat$ocounts, size = bindat$osize, prob = pvec[pk_index], lower.tail = FALSE)
+
+```
+
+
+
+```{r}
+
+dat <- dat_list[[6]]
+uout6 <- updog(ocounts = dat$ocounts,
+              osize = dat$osize,
+              ploidy = 6, update_geno = TRUE, overdispersion = FALSE)
+
+
+pk_index <- 5
+bindat <- filter(dat, uout6$ogeno == pk_index) %>%
+  select(ocounts, osize)
+
+pk <- 0:ploidy / ploidy
+pvec <- (1 - uout6$seq_error) * pk + uout6$seq_error * (1 - pk)
+
+plot(bindat)
+
+itermax <- 10000
+simmat <- matrix(NA, nrow = itermax, ncol = nrow(bindat))
+for (index in 1:itermax){
+  sim_out <- rbinom(n = nrow(bindat), size = bindat$osize, prob = pvec[pk_index + 1])  
+  simmat[index, ] <- sim_out
+}
+
+
+lower <- apply(simmat, 2, quantile, 0.025)
+upper <- apply(simmat, 2, quantile, 0.975)
+sim_df <- data_frame(lower = lower, upper = upper, ocounts = bindat$ocounts, osize = bindat$osize)
+sim_df$mean <- pvec[pk_index + 1] * bindat$ocounts
+
+pl <- ggplot(data = sim_df, mapping = aes(x = osize, y = ocounts)) +
+  geom_point() +
+  geom_line(mapping = aes(y = lower), col = "Blue") +
+  geom_line(mapping = aes(y = upper), col = "Blue") +
+  theme_bw() +
+  xlab("Total Reads") +
+  ylab("Counts A")
+
+pdf(file = "../output/overdispersion/over5.pdf", family = "Times", height = 4, width = 6)
+print(pl)
+dev.off()
+
+mean(sim_df$ocounts < lower | sim_df$ocounts > upper)
+
+```
+
+
+
+```{r}
+
+dat <- dat_list[[6]]
+uout6 <- updog(ocounts = dat$ocounts,
+              osize = dat$osize,
+              ploidy = 6, update_geno = TRUE, overdispersion = FALSE)
+
+
+pk_index <- 3
+bindat <- filter(dat, uout6$ogeno == pk_index) %>%
+  select(ocounts, osize)
+
+pk <- 0:ploidy / ploidy
+pvec <- (1 - uout6$seq_error) * pk + uout6$seq_error * (1 - pk)
+
+plot(bindat)
+
+itermax <- 10000
+simmat <- matrix(NA, nrow = itermax, ncol = nrow(bindat))
+for (index in 1:itermax){
+  sim_out <- rbinom(n = nrow(bindat), size = bindat$osize, prob = pvec[pk_index + 1])  
+  simmat[index, ] <- sim_out
+}
+
+
+lower <- apply(simmat, 2, quantile, 0.025)
+upper <- apply(simmat, 2, quantile, 0.975)
+sim_df <- data_frame(lower = lower, upper = upper, ocounts = bindat$ocounts, osize = bindat$osize)
+sim_df$mean <- pvec[pk_index + 1] * bindat$ocounts
+
+pl <- ggplot(data = sim_df, mapping = aes(x = osize, y = ocounts)) +
+  geom_point() +
+  geom_line(mapping = aes(y = lower), col = "Blue") +
+  geom_line(mapping = aes(y = upper), col = "Blue") +
+  theme_bw() +
+  xlab("Total Reads") +
+  ylab("Counts A")
+
+pdf(file = "../output/overdispersion/over3.pdf", family = "Times", height = 4, width = 6)
+print(pl)
+dev.off()
+
+mean(sim_df$ocounts < lower | sim_df$ocounts > upper)
+
+```
+
+
+Plot a lot of betas
+```{r}
+rhoseq <- c(0.005, 0.01, 0.05, 0.1, 0.1666, 0.2)
+mu <- 0.2
+dat <- data_frame(x = as.numeric(c()), y = as.numeric(c()))
+for (index in 1:length(rhoseq)) {
+  rho <- rhoseq[index]  
+  alpha <- mu * (1 - rho)/rho
+  beta <- (1 - mu) * (1 - rho)/rho
+  x <- seq(0.0, 1, length = 100)
+  y <- dbeta(x, alpha, beta)
+  tempdat <- data_frame(x = x, y = y)
+  tempdat$rho <- rho
+  dat <- bind_rows(dat, tempdat)
+}
+dat$rho <- as.factor(paste0("p = 0.2, s = ", dat$rho))
+
+
+pl <- ggplot(data = dat, mapping = aes(x = x, y = y)) +
+  facet_wrap(~rho) +
+  geom_line() +
+  theme_bw() +
+  ylab("Density") +
+  xlab("q") +
+  theme(strip.background = element_rect(fill = "white")) +
+  geom_vline(xintercept = mu, lty = 2, col = "grey")
+pdf(file = "../output/overdispersion/beta_plots.pdf", family = "Times", height = 4, width = 6)
+print(pl)
+dev.off()
+
+```
+
+
+```{r}
+dat <- dat_list[[10]]
+uout <- updog(ocounts = dat$ocounts, osize = dat$osize, ploidy = 6, update_geno = TRUE)
+
+uout$p1
+uout$p2
+
+
+
+
+dat$osize[dat$ocounts <= 5]
+dat$ocounts[dat$ocounts <= 5]
+
+library(VGAM)
+VGAM::pbetabinom(q = 0, size = 116, prob = 4/6, rho = uout$rho)
+VGAM::pbetabinom(q = 2, size = 116, prob = 4/6, rho = uout$rho)
+VGAM::pbetabinom(q = 1, size = 84, prob = 4/6, rho = uout$rho)
+
+pbinom(0, 116, 2/3)
+pbinom(2, 116, 2/3)
+pbinom(1, 84, 2/3)
+
+```
+
+Fit all updog
+```{r}
+col <- 1
+for(col in 1:length(dat_list)) {
+  dat <- dat_list[[col]]
+  uout <- updog(ocounts = dat$ocounts, osize = dat$osize, ploidy = 6, update_geno = TRUE)
+
+  pdf(file = paste0("../output/updog_plots/uout", col, ".pdf"), family = "Times", height = 5, width = 5)
+  plot(uout, plot_beta = FALSE)
+  dev.off()
+  
+  pl <- plot_geno(ocounts = dat$ocounts, osize = dat$osize, ploidy = ploidy, seq_error = 0)
+  pdf(file = paste0("../output/updog_plots/rout", col, ".pdf"), family = "Times", height = 5, width = 5)
+  print(pl)
+  dev.off()
+}
+
+## no overdispersion
+  col <- 6
+  dat <- dat_list[[col]]
+  uout <- updog(ocounts = dat$ocounts, osize = dat$osize, ploidy = 6, update_geno = TRUE,
+                overdispersion = FALSE)
+
+  pdf(file = paste0("../output/updog_plots/uout_alt", col, ".pdf"), family = "Times", height = 5, width = 5)
+  plot(uout, plot_beta = FALSE)
+  dev.off()
+  
+  
+```
+
+
+How likely are some aaaAAA child genotypes when AAAAAA and aaaAAA?
+```{r}
+qout <- get_q_array(6)
+qout[4, 7, 4] * nrow(dat)
+qout[5, 6, 4] * nrow(dat)
+```
+
+
+Look at how likely each obs is an outlier in dat_list[[3]]
+```{r}
+dat <- dat_list[[3]]
+uout <- updog(ocounts = dat$ocounts, osize = dat$osize, ploidy = 6, update_geno = TRUE)
+names(uout)
+uout$pival
+plot_beta_dist_gg(mu = uout$out_mu, rho = uout$out_rho)
+
+
+## Plot the overdispersed beta
+mu <- uout$out_mu
+rho <- uout$out_rho
+alpha <- mu * (1 - rho)/rho
+beta <- (1 - mu) * (1 - rho)/rho
+x <- seq(0.0, 1, length = 100)
+y <- dbeta(x, alpha, beta)
+tempdat <- data_frame(x = x, y = y)
+pl <- ggplot(data = tempdat, mapping = aes(x = x, y = y)) +
+  geom_line() +
+  theme_bw() +
+  ylab("Density") +
+  xlab("q") +
+  geom_vline(xintercept = mu, lty = 2, col = "grey") +
+  ylim(0, 1.4)
+  
+pdf(file = "../output/overdispersion/dat3.pdf", family = "Times", height = 5, width = 5)
+print(pl)
+dev.off()
+```
+
+
+
+
