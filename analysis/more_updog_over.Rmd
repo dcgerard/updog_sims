@@ -8,9 +8,6 @@ date: "`r Sys.Date()`"
 
 **Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
 
-```{r chunk-options, include=FALSE}
-source("chunk-options.R")
-```
 
 Here, I just run through the datasets Felipe gave me.
 
@@ -51,13 +48,7 @@ uout1 <- updog(ocounts = ocounts, osize = osize, ploidy = ploidy,
               update_geno = TRUE, update_outlier = update_outlier,
               update_pi = TRUE, seq_error = 0.001)
 
-pl <- plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, p1counts = p1counts, p1size = p1size,
-                p2counts = p2counts, p2size = p2size, col = uout1$ogeno, prob_ok = uout1$prob_ok, seq_error = 0.001,
-                maxpostprob = apply(uout1$opostprob, 2, max))
-print(pl)
-
-pl <- plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, p1counts = p1counts, p1size = p1size,
-                p2counts = p2counts, p2size = p2size, seq_error = 0.001)
+pl <- plot(uout1, plot_beta = FALSE)
 print(pl)
 }
 ```

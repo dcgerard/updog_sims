@@ -8,9 +8,6 @@ date: "`r Sys.Date()`"
 
 **Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
 
-```{r chunk-options, include=FALSE}
-source("chunk-options.R")
-```
 
 Here, I look at my new sequencing error estimation procedure and how it plays with updog.
 
@@ -66,7 +63,7 @@ The estimated sequencing error was `r uout1$seq_error`.
 
 ```{r}
 pl <- plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, p1counts = p1counts, p1size = p1size,
-                p2counts = p2counts, p2size = p2size, col = uout1$ogeno, prob_ok = uout1$prob_ok)
+                p2counts = p2counts, p2size = p2size, ogeno = uout1$ogeno, prob_ok = uout1$prob_ok)
 print(pl, seq_error = uout1$seq_error)
 ```
 

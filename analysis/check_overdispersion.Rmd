@@ -8,10 +8,6 @@ date: "`r Sys.Date()`"
 
 **Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
 
-```{r chunk-options, include=FALSE}
-source("chunk-options.R")
-```
-
 I am going to check if modelling overdispersion is necessary.
 
 ## Read in SNPs and look at data

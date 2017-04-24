@@ -7,11 +7,6 @@ date: "`r Sys.Date()`"
 **Last updated:** `r Sys.Date()`
 
 **Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
-
-```{r chunk-options, include=FALSE}
-source("chunk-options.R")
-```
-
 Here, I try out overdispersed updog.
 
 ## Read in SNPs
@@ -49,7 +44,8 @@ uout1 <- updog(ocounts = ocounts, osize = osize, ploidy = ploidy,
               seq_error = 0.01)
 
 pl <- plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, p1counts = p1counts, p1size = p1size,
-                p2counts = p2counts, p2size = p2size, col = uout1$ogeno, theta = uout1$prob_ok, seq_error = 0.01)
+                p2counts = p2counts, p2size = p2size, ogeno = uout1$ogeno, prob_ok = uout1$prob_ok, seq_error = 0.01)
+print(pl)
 ```
 
 A few things, first the parental genotypes estimated by updog are very different than those by the binomial model. The binomial model says the parental genotypes are 3 and 6
@@ -66,7 +62,8 @@ uout2 <- updog(ocounts = ocounts, osize = osize, ploidy = ploidy,
               update_geno = TRUE, update_outlier = TRUE, update_pi = TRUE)
 
 pl <- plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, p1counts = p1counts, p1size = p1size,
-                p2counts = p2counts, p2size = p2size, col = uout2$ogeno, theta = uout2$prob_ok, seq_error = 0.01)
+                p2counts = p2counts, p2size = p2size, ogeno = uout2$ogeno, prob_ok = uout2$prob_ok, seq_error = 0.01)
+print(pl)
 ```
 We observe parental genotypes of `r uout2$p1geno` and `r uout2$p2geno`. But we still see a lot of weird things. For example, most of the observations that have all A's are blue and with small thetas. But if the true parental genotypes were 6 and 3 then the probability of observing an all A child (not in counts but in genotype) would only be `r get_q_array(ploidy)[7, 4, 7]`. But actually `r sum(ocounts / osize > 0.999) / length(ocounts)` of the observations have more than 99.9 percent of A. So there is naturally a large discrepancy between the parental and offspring counts that our model is picking up.
 
@@ -78,8 +75,9 @@ uout_lessseq <- updog(ocounts = ocounts, osize = osize, ploidy = ploidy,
                       seq_error = 0.001)
 
 pl <- plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, p1counts = p1counts, p1size = p1size,
-                p2counts = p2counts, p2size = p2size, col = uout_lessseq$ogeno,
-                theta = uout_lessseq$prob_ok, seq_error = 0.001)
+                p2counts = p2counts, p2size = p2size, ogeno = uout_lessseq$ogeno,
+                prob_ok = uout_lessseq$prob_ok, seq_error = 0.001)
+print(pl)
 ```
 which seem to give us the exact results we intuitively want.
 

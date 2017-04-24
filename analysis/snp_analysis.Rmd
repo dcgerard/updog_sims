@@ -8,12 +8,6 @@ date: "`r Sys.Date()`"
 
 **Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
 
-```{r chunk-options, include=FALSE}
-source("chunk-options.R")
-```
-
-This is a template for writing reports with R Markdown.
-
 ## Read in SNPs and look at data
 
 ```{r}
@@ -61,11 +55,9 @@ uout <- updog(ocounts = odat[, 1], osize = rowSums(odat), ploidy = 6,
 
 uout2 <- updog(ocounts = odat[, 1], osize = rowSums(odat), ploidy = 6,
                p1counts = p1dat[, 1], p1size = rowSums(p1dat),
-               p2counts = p2dat[, 1], p2size = rowSums(p2dat),
-               do_mcmc = TRUE)
+               p2counts = p2dat[, 1], p2size = rowSums(p2dat))
 
-uout3 <- updog(ocounts = odat[, 1], osize = rowSums(odat), ploidy = 6,
-               do_mcmc = TRUE)
+uout3 <- updog(ocounts = odat[, 1], osize = rowSums(odat), ploidy = 6)
 ```
 
 The parental genotypes are chosen with near certainty
@@ -89,56 +81,26 @@ pl <- plot_geno(ocounts = odat[, 1], osize = rowSums(odat),
                 p1counts = p1dat[, 1], p1size = rowSums(p1dat),
                 p2counts = p2dat[, 1], p2size = rowSums(p2dat),
                 ploidy = 6,
-                col = labelvec)
+                ogeno = labelvec)
+print(pl)
 
-labelvec <- apply(uout2$m_opostprob, 2, which.max)
+labelvec <- apply(uout2$opostprob, 2, which.max)
 pl <- plot_geno(ocounts = odat[, 1], osize = rowSums(odat),
                 p1counts = p1dat[, 1], p1size = rowSums(p1dat),
                 p2counts = p2dat[, 1], p2size = rowSums(p2dat),
                 ploidy = 6,
-                col = labelvec)
+                ogeno = labelvec)
+print(pl)
 
-labelvec <- apply(uout3$m_opostprob, 2, which.max)
+labelvec <- apply(uout3$opostprob, 2, which.max)
 pl <- plot_geno(ocounts = odat[, 1], osize = rowSums(odat),
                 p1counts = p1dat[, 1], p1size = rowSums(p1dat),
                 p2counts = p2dat[, 1], p2size = rowSums(p2dat),
                 ploidy = 6,
-                col = labelvec)
+                ogeno = labelvec)
+print(pl)
 
 ```
-
-It seems that the MCMC gives me what Felipe wants when I don't use the parental data, this is because the few extreme offspring points draw one of the parents to have an "a" when the sequence data says that it shouldn't:
-```{r}
-cbind(uout3$m_p1postprob,
-      uout2$m_p1postprob,
-      round(uout$p1postprob, digits = 2))
-
-cbind(uout3$m_p2postprob,
-      uout2$m_p2postprob,
-      round(uout$p2postprob, digits = 2))
-```
-
-
-I am getting very different results from the MCMC for the parental genotypes depending on the seed I use in the case when the parental genotypes are not provided. This might be because of the identifiability issue in the parents labeling, but I don't think so because we see probabilities near 1:
-```{r}
-set.seed(195)
-getmc1 <- updog(ocounts = odat[, 1], osize = rowSums(odat), ploidy = 6,
-                do_mcmc = TRUE)
-set.seed(196)
-getmc2 <- updog(ocounts = odat[, 1], osize = rowSums(odat), ploidy = 6,
-                do_mcmc = TRUE)
-
-cbind(getmc1$m_p1postprob, getmc2$m_p1postprob)
-cbind(getmc1$m_p2postprob, getmc2$m_p2postprob)
-
-plot(getmc1$m_opostprob, getmc2$m_opostprob)
-```
-
-## Take aways:
-
-1. There's a bug in my MCMC and I need to fix it.
-2. We should probably model a fudge factor.
-
 
 
 

@@ -8,10 +8,6 @@ date: "`r Sys.Date()`"
 
 **Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
 
-```{r chunk-options, include=FALSE}
-source("chunk-options.R")
-```
-
 Here, I demonstrate some new methods for the output of `updog`.
 
 ## Demonstration
