@@ -17,12 +17,14 @@ I am just going to plot tons of raw data so that I can look at it.
 
 ```{r}
 obj <- readRDS(file = "../output/allele_counts/chr9_ct.RDS")
-mean_counts <- rowMeans(obj$A + obj$a, na.rm = TRUE)
-quants <- quantile(mean_counts, probs = seq(1, 0.8, length = 300), na.rm = TRUE)
-match_vec <- match(round(quants, digits = 1), round(mean_counts, digits = 1))
-
-sub_A <- obj$A[match_vec, ]
-sub_a <- obj$a[match_vec, ]
+row_meansA <- rowMeans(obj$A, na.rm = TRUE)
+row_meansa <- rowMeans(obj$a, na.rm = TRUE)
+mean_counts <- row_meansA + row_meansa
+mean_counts[is.nan(row_meansA) | is.nan(row_meansa)] <- NA
+order_mc <- order(mean_counts, decreasing = TRUE)
+pos <- order_mc[round(seq(1, round(length(order_mc) * .2), length = 300))]
+sub_A <- obj$A[pos, ]
+sub_a <- obj$a[pos, ]
 ```
 
 ```{r}
