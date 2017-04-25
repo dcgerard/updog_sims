@@ -22,4 +22,4 @@ Much of this code doesn't work anymore because of modifications to the [`updog`]
 # Alfalfa Project:
 
 * [Parse vcf files, extract readcounts, filter out all variants with more than two alleles](parse_vcf.html). This file contains some EDA on the VCF files. But mostly, this code gets the read-count matrices.
-
+* [Initial fits for some SNPs](initial_updog_fits.html). These data seem messier than the sweet potato data. Though, there seems to be much less sequencing error. Bias is still a possible problem for some SNPs.
