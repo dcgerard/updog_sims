@@ -1,0 +1,199 @@
+---
+title: "First SNP Analaysis"
+author: "First Last"
+date: "`r Sys.Date()`"
+---
+
+**Last updated:** `r Sys.Date()`
+
+**Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
+
+# Abstract
+
+This is just some EDA of the vcf files Felipe gave me.
+
+# EDA
+
+First, I'll read in chromosome 1 from the files Felipe gave me.
+
+```{r}
+library(vcfR)
+vcf <- read.vcfR(file = "../data/vcf_Guilherme/myGBSGenos_mergedSNPs_mergedTaxa_chr1.vcf",
+                 verbose = FALSE)
+```
+
+The first few lines of the `gt` part. Recall that each row is a variant and each column is a sample
+
+```{r}
+vcf@gt[50:150, 1:3]
+```
+
+The colon separated variables are (in order)
+
+```{r}
+queryMETA(vcf)
+queryMETA(vcf, element = "GT")
+queryMETA(vcf, element = "AD")
+queryMETA(vcf, element = "DP")
+queryMETA(vcf, element = "GQ")
+queryMETA(vcf, element = "PL")
+```
+
+There are others that I don't see in the above sample:
+```{r}
+queryMETA(vcf, element = "NS")
+queryMETA(vcf, element = "AF")
+```
+
+Reading up on VCF files, It seems that 0/0 indicates that there is no alternative allele in that sample, and "./."" indicates that there is not enough counts to indicate if there is an alternative or reference allele in that sample. In general, "." indicates missing. Remember that each column is a variant
+
+Allele distribution of reference column.
+```{r}
+table(getFIX(vcf)[, 4])
+```
+
+Allele distribution of alternative column
+```{r}
+tb <- table(getFIX(vcf)[, 5])
+tb
+```
+
+The number of tri-alleleic counts is just (excluding missing)
+```{r}
+sum(tb[!stringr::str_detect(names(tb), "-") & stringr::str_length(names(tb)) > 1])
+```
+and with missing it is
+```{r}
+sum(tb[stringr::str_length(names(tb)) > 1])
+```
+
+These aren't too many, so I'll just exclude all of them.
+
+# Now filter data
+
+```{r}
+library(tidyverse)
+fixMat <- as_data_frame(getFIX(vcf))
+which_keep <- !(stringr::str_length(fixMat$ALT) > 1)
+```
+
+Now extract the matrix of GT and AD
+
+```{r}
+gt_mat <- extract.gt(x = vcf, element = "GT")
+ad_mat <- extract.gt(x = vcf, element = "AD")
+```
+
+```{r}
+rm(vcf)
+gt_split <- stringr::str_split(gt_mat, "/", simplify = TRUE)
+ad_split <- stringr::str_split(ad_mat, ",", simplify = TRUE)
+class(ad_split) <- "numeric"
+```
+
+```{r}
+unique(gt_split[, 1])
+unique(gt_split[, 2])
+gt_split[is.na(gt_split[, 1]), 2] <- NA
+unique(gt_split[, 2])
+
+is_zero_mat <- gt_split == 0
+is_one_mat <- gt_split == 1
+is_na_mat <- is.na(gt_split)
+```
+
+Make sure `NA` in `gt_split` only occurs when `ad_split` has all zeros
+```{r}
+all(ad_split[, 1:2][is_na_mat][1:10] == 0)
+```
+
+```{r}
+zero_count_mat <- matrix(rowSums(ad_split[, 1:2] * is_zero_mat),
+                         nrow = nrow(ad_mat), ncol = ncol(ad_mat))
+one_count_mat  <- matrix(rowSums(ad_split[, 1:2] * is_one_mat),
+                         nrow = nrow(ad_mat), ncol = ncol(ad_mat))
+rownames(zero_count_mat) <- rownames(ad_mat)
+colnames(zero_count_mat) <- colnames(ad_mat)
+rownames(one_count_mat) <- rownames(ad_mat)
+colnames(one_count_mat) <- colnames(ad_mat)
+```
+
+Visually inspect count matrices vs ad_matrix
+```{r}
+for (index in 1:20) {
+  crow <- sample(1:nrow(ad_mat), 1)
+  ccol <- sample(1:ncol(ad_mat), 1)
+
+  cat(" GT: ", gt_mat[crow, ccol], "\n",
+      "AD: ", ad_mat[crow, ccol], "\n",
+      " 0: ", zero_count_mat[crow, ccol], "\n",
+      " 1: ", one_count_mat[crow, ccol], "\n\n")
+}
+```
+
+Now remove all variants with more than two alleles
+
+```{r}
+zero_count_mat <- zero_count_mat[which_keep, ]
+one_count_mat  <- one_count_mat[which_keep, ]
+```
+
+Save Data
+
+```{r}
+saveRDS(object = list(A = zero_count_mat, a = one_count_mat),
+        file = "../output/allele_counts/chr1_ct.RDS")
+```
+
+# Automate for all chromosomes
+
+```{r}
+library(vcfR)
+library(tidyverse)
+
+for (chr_index in 1:9) {
+  inname <- paste0("../data/vcf_Guilherme/myGBSGenos_mergedSNPs_mergedTaxa_chr", chr_index, ".vcf")
+  outname <- paste0("../output/allele_counts/chr", chr_index, "_ct.RDS")
+  vcf <- read.vcfR(file = inname,
+                   verbose = FALSE)
+  fixMat <- as_data_frame(getFIX(vcf))
+  which_keep <- !(stringr::str_length(fixMat$ALT) > 1)
+  fixMat <- fixMat[which_keep, ]
+  gt_mat <- extract.gt(x = vcf, element = "GT")
+  ad_mat <- extract.gt(x = vcf, element = "AD")
+  rm(vcf)
+  gt_split <- stringr::str_split(gt_mat, "/", simplify = TRUE)
+  ad_split <- stringr::str_split(ad_mat, ",", simplify = TRUE)
+  class(ad_split) <- "numeric"
+  unique(gt_split[, 1])
+  unique(gt_split[, 2])
+  gt_split[is.na(gt_split[, 1]), 2] <- NA
+  unique(gt_split[, 2])
+  is_zero_mat <- gt_split == 0
+  is_one_mat <- gt_split == 1
+  is_na_mat <- is.na(gt_split)
+  stopifnot(all(ad_split[, 1:2][is_na_mat][1:10] == 0))
+  zero_count_mat <- matrix(rowSums(ad_split[, 1:2] * is_zero_mat),
+                           nrow = nrow(ad_mat), ncol = ncol(ad_mat))
+  one_count_mat  <- matrix(rowSums(ad_split[, 1:2] * is_one_mat),
+                           nrow = nrow(ad_mat), ncol = ncol(ad_mat))
+  rownames(zero_count_mat) <- rownames(ad_mat)
+  colnames(zero_count_mat) <- colnames(ad_mat)
+  rownames(one_count_mat) <- rownames(ad_mat)
+  colnames(one_count_mat) <- colnames(ad_mat)
+  zero_count_mat <- zero_count_mat[which_keep, ]
+  one_count_mat  <- one_count_mat[which_keep, ]
+  saveRDS(object = list(fixMat = fixMat, A = zero_count_mat, a = one_count_mat),
+          file = outname)
+  rm(list = c("ad_split", "gt_split", "ad_mat", "gt_mat", "is_zero_mat", "is_one_mat",
+              "is_na_mat", "zero_count_mat", "one_count_mat", "fixMat", "which_keep"))
+}
+
+```
+
+
+## Session information
+
+```{r info}
+sessionInfo()
+```
