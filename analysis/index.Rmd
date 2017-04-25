@@ -7,6 +7,10 @@ title: "Home"
 **Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
 
 
+# Sweet Potato Project
+
+Much of this code doesn't work anymore because of modifications to the [`updog`](https://github.com/dcgerard/updog) package
+
 * [First analysis of SNP data](snp_analysis.html)
 * [Look at iterative procedure and effect of uniform prior on parents](iter_procedure.html). This results in a non-uniform prior on the children, as can be expected.
 * [First try at overdispersed updog](updot_overdispersion.html)
@@ -14,4 +18,8 @@ title: "Home"
 * [Look at estimating sequencing error rate and results look promising. No more errors when I bound the overdispersion parameter.](updog_overdispersion_seq_est.html)
 * [Run through all datasets when overdispersion parameter is bounded and I estimate the sequencing error rate.](more_updog_over_seq_est.html)
 * [Show off new methods for updog for plotting and summarizing.](showoff_plots.html)
-* [Parse vcf files, extract readcounts, filter out all variants with more than two alleles](parse_vcf.html)
+
+# Alfalfa Project:
+
+* [Parse vcf files, extract readcounts, filter out all variants with more than two alleles](parse_vcf.html). This file contains some EDA on the VCF files. But mostly, this code gets the read-count matrices.
+
