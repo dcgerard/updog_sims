@@ -1,0 +1,43 @@
+---
+title: "Tons of Raw Plots"
+author: "David Gerard"
+date: "April 25, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I am just going to plot tons of raw data so that I can look at it.
+
+# Read in data and plot!
+
+```{r}
+obj <- readRDS(file = "../output/allele_counts/chr9_ct.RDS")
+mean_counts <- rowMeans(obj$A + obj$a, na.rm = TRUE)
+quants <- quantile(mean_counts, probs = seq(1, 0.8, length = 300), na.rm = TRUE)
+match_vec <- match(round(quants, digits = 1), round(mean_counts, digits = 1))
+
+sub_A <- obj$A[match_vec, ]
+sub_a <- obj$a[match_vec, ]
+```
+
+```{r}
+library(updog)
+ploidy  <- 4
+ocounts <- sub_A
+osize   <- sub_A + sub_a
+
+for (index in 1:nrow(ocounts)) {
+ pl <- plot_geno(ocounts = ocounts[index, ], osize = osize[index, ],
+                 ploidy = 4, seq_error = 0)  
+ print(pl)
+}
+```
+
+```{r}
+sessionInfo()
+```
