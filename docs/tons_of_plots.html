@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="David Gerard" />
+
+<meta name="date" content="2017-04-25" />
+
+<title>Tons of Raw Plots</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">temp</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Tons of Raw Plots</h1>
+<h4 class="author"><em>David Gerard</em></h4>
+<h4 class="date"><em>April 25, 2017</em></h4>
+
+</div>
+
+
+<div id="abstract" class="section level1">
+<h1>Abstract</h1>
+<p>I am just going to plot tons of raw data so that I can look at it.</p>
+</div>
+<div id="read-in-data-and-plot" class="section level1">
+<h1>Read in data and plot!</h1>
+<pre class="r"><code>obj &lt;- readRDS(file = &quot;../output/allele_counts/chr9_ct.RDS&quot;)
+row_meansA &lt;- rowMeans(obj$A, na.rm = TRUE)
+row_meansa &lt;- rowMeans(obj$a, na.rm = TRUE)
+mean_counts &lt;- row_meansA + row_meansa
+mean_counts[is.nan(row_meansA) | is.nan(row_meansa)] &lt;- NA
+order_mc &lt;- order(mean_counts, decreasing = TRUE)
+pos &lt;- order_mc[round(seq(1, round(length(order_mc) * .2), length = 300))]
+sub_A &lt;- obj$A[pos, ]
+sub_a &lt;- obj$a[pos, ]</code></pre>
+<pre class="r"><code>library(updog)
+ploidy  &lt;- 4
+ocounts &lt;- sub_A
+osize   &lt;- sub_A + sub_a
+
+for (index in 1:nrow(ocounts)) {
+ pl &lt;- plot_geno(ocounts = ocounts[index, ], osize = osize[index, ],
+                 ploidy = 4, seq_error = 0)  
+ print(pl)
+}</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-1.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-2.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-3.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-4.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-5.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-6.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-7.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-8.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-9.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-10.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-11.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-12.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-13.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-14.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-15.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-16.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-17.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-18.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-19.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-20.png" width="672" /></p>
+<pre><code>## Warning: Removed 71 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-21.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-22.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-23.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-24.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-25.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-26.png" width="672" /></p>
+<pre><code>## Warning: Removed 66 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-27.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-28.png" width="672" /></p>
+<pre><code>## Warning: Removed 131 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-29.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-30.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-31.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-32.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-33.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-34.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-35.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-36.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-37.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-38.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-39.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-40.png" width="672" /></p>
+<pre><code>## Warning: Removed 5 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-41.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-42.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-43.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-44.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-45.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-46.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-47.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-48.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-49.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-50.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-51.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-52.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-53.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-54.png" width="672" /></p>
+<pre><code>## Warning: Removed 11 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-55.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-56.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-57.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-58.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-59.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-60.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-61.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-62.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-63.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-64.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-65.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-66.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-67.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-68.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-69.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-70.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-71.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-72.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-73.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-74.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-75.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-76.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-77.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-78.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-79.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-80.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-81.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-82.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-83.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-84.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-85.png" width="672" /></p>
+<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-86.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-87.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-88.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-89.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-90.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-91.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-92.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-93.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-94.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-95.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-96.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-97.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-98.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-99.png" width="672" /></p>
+<pre><code>## Warning: Removed 22 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-100.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-101.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-102.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-103.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-104.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-105.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-106.png" width="672" /></p>
+<pre><code>## Warning: Removed 67 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-107.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-108.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-109.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-110.png" width="672" /></p>
+<pre><code>## Warning: Removed 22 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-111.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-112.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-113.png" width="672" /></p>
+<pre><code>## Warning: Removed 13 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-114.png" width="672" /></p>
+<pre><code>## Warning: Removed 10 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-115.png" width="672" /></p>
+<pre><code>## Warning: Removed 96 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-116.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-117.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-118.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-119.png" width="672" /></p>
+<pre><code>## Warning: Removed 10 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-120.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-121.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-122.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-123.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-124.png" width="672" /></p>
+<pre><code>## Warning: Removed 201 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-125.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-126.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-127.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-128.png" width="672" /></p>
+<pre><code>## Warning: Removed 43 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-129.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-130.png" width="672" /></p>
+<pre><code>## Warning: Removed 24 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-131.png" width="672" /></p>
+<pre><code>## Warning: Removed 194 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-132.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-133.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-134.png" width="672" /></p>
+<pre><code>## Warning: Removed 9 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-135.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-136.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-137.png" width="672" /></p>
+<pre><code>## Warning: Removed 24 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-138.png" width="672" /></p>
+<pre><code>## Warning: Removed 40 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-139.png" width="672" /></p>
+<pre><code>## Warning: Removed 24 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-140.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-141.png" width="672" /></p>
+<pre><code>## Warning: Removed 6 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-142.png" width="672" /></p>
+<pre><code>## Warning: Removed 5 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-143.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-144.png" width="672" /></p>
+<pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-145.png" width="672" /></p>
+<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-146.png" width="672" /></p>
+<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-147.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-148.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-149.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-150.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-151.png" width="672" /></p>
+<pre><code>## Warning: Removed 7 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-152.png" width="672" /></p>
+<pre><code>## Warning: Removed 5 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-153.png" width="672" /></p>
+<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-154.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-155.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-156.png" width="672" /></p>
+<pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-157.png" width="672" /></p>
+<pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-158.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-159.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-160.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-161.png" width="672" /></p>
+<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-162.png" width="672" /></p>
+<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-163.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-164.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-165.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-166.png" width="672" /></p>
+<pre><code>## Warning: Removed 24 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-167.png" width="672" /></p>
+<pre><code>## Warning: Removed 65 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-168.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-169.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-170.png" width="672" /></p>
+<pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-171.png" width="672" /></p>
+<pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-172.png" width="672" /></p>
+<pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-173.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-174.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-175.png" width="672" /></p>
+<pre><code>## Warning: Removed 7 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-176.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-177.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-178.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-179.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-180.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-181.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-182.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-183.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-184.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-185.png" width="672" /></p>
+<pre><code>## Warning: Removed 13 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-186.png" width="672" /></p>
+<pre><code>## Warning: Removed 7 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-187.png" width="672" /></p>
+<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-188.png" width="672" /></p>
+<pre><code>## Warning: Removed 38 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-189.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-190.png" width="672" /></p>
+<pre><code>## Warning: Removed 274 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-191.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-192.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-193.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-194.png" width="672" /></p>
+<pre><code>## Warning: Removed 6 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-195.png" width="672" /></p>
+<pre><code>## Warning: Removed 10 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-196.png" width="672" /></p>
+<pre><code>## Warning: Removed 11 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-197.png" width="672" /></p>
+<pre><code>## Warning: Removed 35 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-198.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-199.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-200.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-201.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-202.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-203.png" width="672" /></p>
+<pre><code>## Warning: Removed 8 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-204.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-205.png" width="672" /></p>
+<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-206.png" width="672" /></p>
+<pre><code>## Warning: Removed 9 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-207.png" width="672" /></p>
+<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-208.png" width="672" /></p>
+<pre><code>## Warning: Removed 78 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-209.png" width="672" /></p>
+<pre><code>## Warning: Removed 9 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-210.png" width="672" /></p>
+<pre><code>## Warning: Removed 7 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-211.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-212.png" width="672" /></p>
+<pre><code>## Warning: Removed 6 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-213.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-214.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-215.png" width="672" /></p>
+<pre><code>## Warning: Removed 36 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-216.png" width="672" /></p>
+<pre><code>## Warning: Removed 36 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-217.png" width="672" /></p>
+<pre><code>## Warning: Removed 6 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-218.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-219.png" width="672" /></p>
+<pre><code>## Warning: Removed 38 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-220.png" width="672" /></p>
+<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-221.png" width="672" /></p>
+<pre><code>## Warning: Removed 17 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-222.png" width="672" /></p>
+<pre><code>## Warning: Removed 17 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-223.png" width="672" /></p>
+<pre><code>## Warning: Removed 8 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-224.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-225.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-226.png" width="672" /></p>
+<pre><code>## Warning: Removed 8 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-227.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-228.png" width="672" /></p>
+<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-229.png" width="672" /></p>
+<pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-230.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-231.png" width="672" /></p>
+<pre><code>## Warning: Removed 9 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-232.png" width="672" /></p>
+<pre><code>## Warning: Removed 6 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-233.png" width="672" /></p>
+<pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-234.png" width="672" /></p>
+<pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-235.png" width="672" /></p>
+<pre><code>## Warning: Removed 289 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-236.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-237.png" width="672" /></p>
+<pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-238.png" width="672" /></p>
+<pre><code>## Warning: Removed 9 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-239.png" width="672" /><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-240.png" width="672" /></p>
+<pre><code>## Warning: Removed 96 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-241.png" width="672" /></p>
+<pre><code>## Warning: Removed 21 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-242.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-243.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-244.png" width="672" /></p>
+<pre><code>## Warning: Removed 17 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-245.png" width="672" /></p>
+<pre><code>## Warning: Removed 133 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-246.png" width="672" /></p>
+<pre><code>## Warning: Removed 109 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-247.png" width="672" /></p>
+<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-248.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-249.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-250.png" width="672" /></p>
+<pre><code>## Warning: Removed 27 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-251.png" width="672" /></p>
+<pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-252.png" width="672" /></p>
+<pre><code>## Warning: Removed 41 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-253.png" width="672" /></p>
+<pre><code>## Warning: Removed 19 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-254.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-255.png" width="672" /></p>
+<pre><code>## Warning: Removed 5 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-256.png" width="672" /></p>
+<pre><code>## Warning: Removed 8 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-257.png" width="672" /></p>
+<pre><code>## Warning: Removed 17 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-258.png" width="672" /></p>
+<pre><code>## Warning: Removed 22 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-259.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-260.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-261.png" width="672" /></p>
+<pre><code>## Warning: Removed 46 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-262.png" width="672" /></p>
+<pre><code>## Warning: Removed 46 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-263.png" width="672" /></p>
+<pre><code>## Warning: Removed 11 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-264.png" width="672" /></p>
+<pre><code>## Warning: Removed 51 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-265.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-266.png" width="672" /></p>
+<pre><code>## Warning: Removed 7 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-267.png" width="672" /></p>
+<pre><code>## Warning: Removed 9 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-268.png" width="672" /></p>
+<pre><code>## Warning: Removed 9 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-269.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-270.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-271.png" width="672" /></p>
+<pre><code>## Warning: Removed 45 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-272.png" width="672" /></p>
+<pre><code>## Warning: Removed 104 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-273.png" width="672" /></p>
+<pre><code>## Warning: Removed 9 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-274.png" width="672" /></p>
+<pre><code>## Warning: Removed 8 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-275.png" width="672" /></p>
+<pre><code>## Warning: Removed 25 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-276.png" width="672" /></p>
+<pre><code>## Warning: Removed 6 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-277.png" width="672" /></p>
+<pre><code>## Warning: Removed 73 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-278.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-279.png" width="672" /></p>
+<pre><code>## Warning: Removed 59 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-280.png" width="672" /></p>
+<pre><code>## Warning: Removed 203 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-281.png" width="672" /></p>
+<pre><code>## Warning: Removed 20 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-282.png" width="672" /></p>
+<pre><code>## Warning: Removed 12 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-283.png" width="672" /></p>
+<pre><code>## Warning: Removed 8 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-284.png" width="672" /></p>
+<pre><code>## Warning: Removed 9 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-285.png" width="672" /></p>
+<pre><code>## Warning: Removed 9 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-286.png" width="672" /></p>
+<pre><code>## Warning: Removed 200 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-287.png" width="672" /></p>
+<pre><code>## Warning: Removed 6 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-288.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-289.png" width="672" /></p>
+<pre><code>## Warning: Removed 178 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-290.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-291.png" width="672" /></p>
+<pre><code>## Warning: Removed 13 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-292.png" width="672" /></p>
+<pre><code>## Warning: Removed 143 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-293.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-294.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-295.png" width="672" /></p>
+<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-296.png" width="672" /></p>
+<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-297.png" width="672" /></p>
+<pre><code>## Warning: Removed 5 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-298.png" width="672" /></p>
+<pre><code>## Warning: Removed 19 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-299.png" width="672" /></p>
+<pre><code>## Warning: Removed 9 rows containing missing values (geom_point).</code></pre>
+<p><img src="tons_of_plots_files/figure-html/unnamed-chunk-2-300.png" width="672" /></p>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.3.2 (2016-10-31)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: Ubuntu 16.04.2 LTS
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] updog_0.1.0
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rcpp_0.12.10     assertthat_0.2.0 digest_0.6.12    rprojroot_1.2   
+##  [5] plyr_1.8.4       grid_3.3.2       gtable_0.2.0     backports_1.0.5 
+##  [9] magrittr_1.5     evaluate_0.10    scales_0.4.1     ggplot2_2.2.1   
+## [13] stringi_1.1.2    lazyeval_0.2.0   rmarkdown_1.3    labeling_0.3    
+## [17] tools_3.3.2      stringr_1.2.0    munsell_0.4.3    yaml_2.1.14     
+## [21] colorspace_1.3-2 htmltools_0.3.5  knitr_1.15.1     tibble_1.2</code></pre>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

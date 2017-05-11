@@ -1,0 +1,116 @@
+---
+title: "Initial Updog Fits"
+author: "David Gerard"
+date: "April 25, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Here, I am going to run some EDA on a few alfalfa SNP's. I want to see if I observe the same problems that I saw in sweet potatoes. Namely, do I observe:
+
+1. Sequencing errors,
+2. Overdispersion,
+3. Outliers
+4. Bias
+
+Hopefully, I won't see systematic Bias. Since there is no reference genome, we won't be able to use WASP, so I would probably need to model this bias directly.
+
+# Subset Data
+
+```{r}
+obj <- readRDS(file = "../output/allele_counts/chr1_ct.RDS")
+str(obj)
+```
+
+I will choose SNP's that are at various levels of total read-counts.
+
+```{r}
+suppressMessages(library(tidyverse))
+med_counts <- apply(obj$A + obj$a, 1, median, na.rm = TRUE)
+mean_counts <- rowMeans(obj$A + obj$a, na.rm = TRUE)
+qplot(log10(med_counts), geom = "histogram", color = I("black"), 
+      fill = I("white"), bins = 30, xlab = "Log10-median-read-counts", ylab = "Counts") + theme_bw()
+qplot(log10(mean_counts), geom = "histogram", color = I("black"), 
+      fill = I("white"), bins = 30, xlab = "Log10-median-read-counts", ylab = "Counts") + theme_bw()
+```
+
+There seem to be `r sum(is.na(med_counts))` variants with all missing data.
+```{r}
+sum(is.na(med_counts))
+```
+
+```{r}
+quants <- quantile(mean_counts, probs = seq(0, 1, length = 30), na.rm = TRUE)
+quants
+match_vec <- match(round(quants, digits = 1), round(mean_counts, digits = 1))
+mean_counts[match_vec]
+
+sub_A <- obj$A[match_vec, ]
+sub_a <- obj$a[match_vec, ]
+rowMeans(sub_a + sub_A, na.rm = TRUE)
+```
+
+For the smaller counts alleles, most of the samples don't have any read-counts (indicated by `NA`) (though, this isn't a guarantee).
+
+```{r}
+plot(rowMeans(is.na(sub_a)), type = "l")
+plot(rowMeans(is.na(sub_A)), type = "l")
+```
+
+# Raw Plots
+
+First, some plots of the maximum expressed variants
+
+```{r}
+library(updog)
+ploidy  <- 4
+ocounts <- sub_A
+osize   <- sub_A + sub_a
+
+for (index in 1:nrow(ocounts)) {
+ pl <- plot_geno(ocounts = ocounts[index, ], osize = osize[index, ],
+                 ploidy = 4, seq_error = 0)  
+ print(pl)
+}
+
+```
+
+This last SNP makes no sense. Why are they all clustered at 0.75? Is this a technical artifact? This would only make sense biologically if segregation happened in pairs. E.g. if the parental genotypes were AAAA and ABAB and AB have to cluster together in the second parent. If they all segregated independently, then you would expect to see some AABB's and some AAAA's. This is weird. 
+
+Of course, when we fit `updog`, we get weird results.
+```{r, cache = TRUE}
+uout <- updog(ocounts = ocounts[nrow(ocounts), ], osize = osize[nrow(osize), ],
+              seq_error = 0.01, ploidy = 4, update_geno = TRUE, update_outlier = TRUE,
+              update_pi = TRUE, update_rho = TRUE)
+plot(uout)
+```
+
+Some of these don't look too bad!
+
+```{r, cache = TRUE}
+for (index in 20:29) {
+  ocounts_nona <- ocounts[index, ]
+  ocounts_nona <- ocounts_nona[!is.na(ocounts_nona)]
+  osize_nona <- osize[index, ]
+  osize_nona <- osize_nona[!is.na(osize_nona)]
+
+  saveRDS(file = "alpha_err_dat.RDS", object = list(ocounts = ocounts_nona, osize = osize_nona, ploidy = 4))
+
+  suppressMessages(uout <- updog(ocounts = ocounts_nona, osize = osize_nona, ploidy = ploidy,
+                                 overdispersion = FALSE, update_geno = TRUE))
+  pl <- plot(uout, plot_beta = FALSE)
+  print(pl)
+  pl <- plot_geno(ocounts = ocounts_nona, osize = osize_nona, ploidy = 4, seq_error = 0)
+  print(pl)
+}
+
+```
+
+```{r}
+sessionInfo()
+```

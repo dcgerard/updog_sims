@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="First Last" />
+
+<meta name="date" content="2017-04-25" />
+
+<title>First SNP Analaysis</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">temp</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">First SNP Analaysis</h1>
+<h4 class="author"><em>First Last</em></h4>
+<h4 class="date"><em>2017-04-25</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2017-04-25</p>
+<p><strong>Code version:</strong> 111bef78615abcdd7dbef82a6371c39aa6a42e54</p>
+<div id="abstract" class="section level1">
+<h1>Abstract</h1>
+<p>This is just some EDA of the vcf files Felipe gave me.</p>
+</div>
+<div id="eda" class="section level1">
+<h1>EDA</h1>
+<p>First, I’ll read in chromosome 1 from the files Felipe gave me.</p>
+<pre class="r"><code>library(vcfR)</code></pre>
+<pre><code>## 
+##    *****       ***   vcfR   ***       *****
+##    This is vcfR 1.4.0 
+##      browseVignettes(&#39;vcfR&#39;) # Documentation
+##      citation(&#39;vcfR&#39;) # Citation
+##    *****       *****      *****       *****</code></pre>
+<pre class="r"><code>vcf &lt;- read.vcfR(file = &quot;../data/vcf_Guilherme/myGBSGenos_mergedSNPs_mergedTaxa_chr1.vcf&quot;,
+                 verbose = FALSE)</code></pre>
+<p>The first few lines of the <code>gt</code> part. Recall that each row is a variant and each column is a sample</p>
+<pre class="r"><code>vcf@gt[50:150, 1:3]</code></pre>
+<pre><code>##        FORMAT           DM3.1:SRR1266111:7:124151   
+##   [1,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##   [2,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##   [3,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##   [4,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/0:13,14:27:100:255,0,255&quot;
+##   [5,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/0:13,14:27:100:255,0,255&quot;
+##   [6,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/0:8,19:27:100:255,0,207&quot; 
+##   [7,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/1:22,5:27:99:99,0,255&quot;   
+##   [8,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/0:5,10:15:99:255,0,135&quot;  
+##   [9,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:15,0:15:99:0,45,255&quot;   
+##  [10,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:16,0:16:99:0,48,255&quot;   
+##  [11,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:7,0:7:99:0,21,252&quot;     
+##  [12,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [13,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [14,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [15,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [16,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [17,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [18,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [19,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [20,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [21,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [22,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [23,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [24,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [25,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [26,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [27,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:2,0:2:79:0,6,72&quot;       
+##  [28,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [29,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [30,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:6,0:6:98:0,18,216&quot;     
+##  [31,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:2,0:2:79:0,6,72&quot;       
+##  [32,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [33,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [34,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [35,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [36,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [37,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [38,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:3,0:3:88:0,9,108&quot;      
+##  [39,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/1:3,2:5:99:57,0,93&quot;      
+##  [40,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/1:3,2:5:99:57,0,93&quot;      
+##  [41,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/1:4,1:5:99:21,0,129&quot;     
+##  [42,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/1:3,2:5:99:57,0,93&quot;      
+##  [43,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/1:3,2:5:99:57,0,93&quot;      
+##  [44,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:5,0:5:96:0,15,180&quot;     
+##  [45,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:5,0:5:96:0,15,180&quot;     
+##  [46,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:5,0:5:96:0,15,180&quot;     
+##  [47,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/1:3,2:5:99:57,0,93&quot;      
+##  [48,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [49,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [50,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [51,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [52,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [53,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [54,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [55,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:9,0:9:99:0,27,255&quot;     
+##  [56,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [57,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:2,0:2:79:0,6,72&quot;       
+##  [58,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:2,0:2:79:0,6,72&quot;       
+##  [59,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:2,0:2:79:0,6,72&quot;       
+##  [60,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/1:0,3:3:88:108,9,0&quot;      
+##  [61,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:3,0:3:88:0,9,108&quot;      
+##  [62,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:3,0:3:88:0,9,108&quot;      
+##  [63,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/1:1,1:2:99:30,0,30&quot;      
+##  [64,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/1:1,1:2:99:30,0,30&quot;      
+##  [65,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [66,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/1:0,1:1:66:36,3,0&quot;       
+##  [67,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [68,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [69,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [70,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/1:0,1:1:66:36,3,0&quot;       
+##  [71,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/1:0,1:1:66:36,3,0&quot;       
+##  [72,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/1:0,1:1:66:36,3,0&quot;       
+##  [73,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/1:0,1:1:66:36,3,0&quot;       
+##  [74,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [75,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/1:0,1:1:66:36,3,0&quot;       
+##  [76,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [77,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [78,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/1:0,1:1:66:36,3,0&quot;       
+##  [79,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/1:0,1:1:66:36,3,0&quot;       
+##  [80,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/1:0,1:1:66:36,3,0&quot;       
+##  [81,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [82,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/1:0,1:1:66:36,3,0&quot;       
+##  [83,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [84,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [85,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [86,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [87,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [88,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##  [89,] &quot;GT:AD:DP:GQ:PL&quot; &quot;1/1:0,1:1:66:36,3,0&quot;       
+##  [90,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:2,0:2:79:0,6,72&quot;       
+##  [91,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:2,0:2:79:0,6,72&quot;       
+##  [92,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:2,0:2:79:0,6,72&quot;       
+##  [93,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:2,0:2:79:0,6,72&quot;       
+##  [94,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [95,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+##  [96,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:5,0:5:96:0,15,180&quot;     
+##  [97,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/1:1,1:2:99:30,0,30&quot;      
+##  [98,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/1:1,1:2:99:30,0,30&quot;      
+##  [99,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+## [100,] &quot;GT:AD:DP:GQ:PL&quot; &quot;./.:0,0:0:33:0,0,0&quot;        
+## [101,] &quot;GT:AD:DP:GQ:PL&quot; &quot;0/0:1,0:1:66:0,3,36&quot;       
+##        DM3.10:SRR1586329:6:123939
+##   [1,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##   [2,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##   [3,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##   [4,] &quot;0/1:9,6:15:100:171,0,255&quot;
+##   [5,] &quot;0/1:9,6:15:100:171,0,255&quot;
+##   [6,] &quot;1/0:4,11:15:99:255,0,99&quot; 
+##   [7,] &quot;0/1:10,5:15:99:135,0,255&quot;
+##   [8,] &quot;0/1:5,3:8:99:84,0,156&quot;   
+##   [9,] &quot;0/0:8,0:8:99:0,24,255&quot;   
+##  [10,] &quot;0/0:7,0:7:99:0,21,252&quot;   
+##  [11,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [12,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [13,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [14,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [15,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [16,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [17,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [18,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [19,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [20,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [21,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [22,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [23,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [24,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [25,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [26,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [27,] &quot;0/0:3,0:3:88:0,9,108&quot;    
+##  [28,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [29,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [30,] &quot;0/0:6,0:6:98:0,18,216&quot;   
+##  [31,] &quot;0/0:6,0:6:98:0,18,216&quot;   
+##  [32,] &quot;0/0:3,0:3:88:0,9,108&quot;    
+##  [33,] &quot;0/0:3,0:3:88:0,9,108&quot;    
+##  [34,] &quot;0/0:3,0:3:88:0,9,108&quot;    
+##  [35,] &quot;0/0:3,0:3:88:0,9,108&quot;    
+##  [36,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [37,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [38,] &quot;0/0:3,0:3:88:0,9,108&quot;    
+##  [39,] &quot;1/0:2,10:12:99:255,0,36&quot; 
+##  [40,] &quot;1/0:2,10:12:99:255,0,36&quot; 
+##  [41,] &quot;0/1:6,6:12:100:180,0,180&quot;
+##  [42,] &quot;1/0:2,10:12:99:255,0,36&quot; 
+##  [43,] &quot;1/0:2,10:12:99:255,0,36&quot; 
+##  [44,] &quot;0/0:12,0:12:99:0,36,255&quot; 
+##  [45,] &quot;0/0:12,0:12:99:0,36,255&quot; 
+##  [46,] &quot;0/0:12,0:12:99:0,36,255&quot; 
+##  [47,] &quot;1/0:2,10:12:99:255,0,36&quot; 
+##  [48,] &quot;1/1:0,1:1:66:36,3,0&quot;     
+##  [49,] &quot;1/1:0,1:1:66:36,3,0&quot;     
+##  [50,] &quot;1/1:0,1:1:66:36,3,0&quot;     
+##  [51,] &quot;1/1:0,1:1:66:36,3,0&quot;     
+##  [52,] &quot;1/1:0,1:1:66:36,3,0&quot;     
+##  [53,] &quot;1/1:0,1:1:66:36,3,0&quot;     
+##  [54,] &quot;1/1:0,1:1:66:36,3,0&quot;     
+##  [55,] &quot;0/0:17,0:17:99:0,51,255&quot; 
+##  [56,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [57,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [58,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [59,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [60,] &quot;0/1:4,1:5:99:21,0,129&quot;   
+##  [61,] &quot;0/0:5,0:5:96:0,15,180&quot;   
+##  [62,] &quot;0/0:5,0:5:96:0,15,180&quot;   
+##  [63,] &quot;0/1:6,2:8:99:48,0,192&quot;   
+##  [64,] &quot;0/1:6,2:8:99:48,0,192&quot;   
+##  [65,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [66,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [67,] &quot;0/1:3,2:5:99:57,0,93&quot;    
+##  [68,] &quot;0/0:5,0:5:96:0,15,180&quot;   
+##  [69,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [70,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [71,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [72,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [73,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [74,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [75,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [76,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [77,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [78,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [79,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [80,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [81,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [82,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [83,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [84,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [85,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [86,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [87,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [88,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [89,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [90,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [91,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [92,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [93,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [94,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [95,] &quot;./.:0,0:0:33:0,0,0&quot;      
+##  [96,] &quot;0/0:6,0:6:98:0,18,216&quot;   
+##  [97,] &quot;1/1:0,1:1:66:36,3,0&quot;     
+##  [98,] &quot;0/0:1,0:1:66:0,3,36&quot;     
+##  [99,] &quot;./.:0,0:0:33:0,0,0&quot;      
+## [100,] &quot;1/1:0,1:1:66:36,3,0&quot;     
+## [101,] &quot;0/0:4,0:4:94:0,12,144&quot;</code></pre>
+<p>The colon separated variables are (in order)</p>
+<pre class="r"><code>queryMETA(vcf)</code></pre>
+<pre><code>## [1] &quot;FORMAT=ID=GT&quot;                      &quot;FORMAT=ID=AD&quot;                     
+## [3] &quot;FORMAT=ID=DP&quot;                      &quot;FORMAT=ID=GQ&quot;                     
+## [5] &quot;FORMAT=ID=PL&quot;                      &quot;INFO=ID=NS&quot;                       
+## [7] &quot;INFO=ID=DP&quot;                        &quot;INFO=ID=AF&quot;                       
+## [9] &quot;contig=&lt;ID omitted from queryMETA&quot;</code></pre>
+<pre class="r"><code>queryMETA(vcf, element = &quot;GT&quot;)</code></pre>
+<pre><code>## [[1]]
+## [1] &quot;FORMAT=ID=GT&quot;         &quot;Number=1&quot;             &quot;Type=String&quot;         
+## [4] &quot;Description=Genotype&quot;</code></pre>
+<pre class="r"><code>queryMETA(vcf, element = &quot;AD&quot;)</code></pre>
+<pre><code>## [[1]]
+## [1] &quot;FORMAT=ID=AD&quot;                                                                          
+## [2] &quot;Number=.&quot;                                                                              
+## [3] &quot;Type=Integer&quot;                                                                          
+## [4] &quot;Description=Allelic depths for the reference and alternate alleles in the order listed&quot;</code></pre>
+<pre class="r"><code>queryMETA(vcf, element = &quot;DP&quot;)</code></pre>
+<pre><code>## [[1]]
+## [1] &quot;FORMAT=ID=DP&quot;                                                 
+## [2] &quot;Number=1&quot;                                                     
+## [3] &quot;Type=Integer&quot;                                                 
+## [4] &quot;Description=Read Depth (only filtered reads used for calling)&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=DP&quot;              &quot;Number=1&quot;               
+## [3] &quot;Type=Integer&quot;            &quot;Description=Total Depth&quot;</code></pre>
+<pre class="r"><code>queryMETA(vcf, element = &quot;GQ&quot;)</code></pre>
+<pre><code>## [[1]]
+## [1] &quot;FORMAT=ID=GQ&quot;                 &quot;Number=1&quot;                    
+## [3] &quot;Type=Float&quot;                   &quot;Description=Genotype Quality&quot;</code></pre>
+<pre class="r"><code>queryMETA(vcf, element = &quot;PL&quot;)</code></pre>
+<pre><code>## [[1]]
+## [1] &quot;FORMAT=ID=PL&quot;                                                               
+## [2] &quot;Number=3&quot;                                                                   
+## [3] &quot;Type=Float&quot;                                                                 
+## [4] &quot;Description=Normalized&quot;                                                     
+## [5] &quot; Phred-scaled likelihoods for AA&quot;                                           
+## [6] &quot;AB&quot;                                                                         
+## [7] &quot;BB genotypes where A=ref and B=alt; not applicable if site is not biallelic&quot;</code></pre>
+<p>There are others that I don’t see in the above sample:</p>
+<pre class="r"><code>queryMETA(vcf, element = &quot;NS&quot;)</code></pre>
+<pre><code>## [[1]]
+## [1] &quot;INFO=ID=NS&quot;                             
+## [2] &quot;Number=1&quot;                               
+## [3] &quot;Type=Integer&quot;                           
+## [4] &quot;Description=Number of Samples With Data&quot;</code></pre>
+<pre class="r"><code>queryMETA(vcf, element = &quot;AF&quot;)</code></pre>
+<pre><code>## [[1]]
+## [1] &quot;INFO=ID=AF&quot;                   &quot;Number=.&quot;                    
+## [3] &quot;Type=Float&quot;                   &quot;Description=Allele Frequency&quot;</code></pre>
+<p>Reading up on VCF files, It seems that 0/0 indicates that there is no alternative allele in that sample, and “./.”&quot; indicates that there is not enough counts to indicate if there is an alternative or reference allele in that sample. In general, “.” indicates missing. Remember that each column is a variant</p>
+<p>Allele distribution of reference column.</p>
+<pre class="r"><code>table(getFIX(vcf)[, 4])</code></pre>
+<pre><code>## 
+##     -     A     C     G     T 
+##  7852 15987 11321 11373 15701</code></pre>
+<p>Allele distribution of alternative column</p>
+<pre class="r"><code>tb &lt;- table(getFIX(vcf)[, 5])
+tb</code></pre>
+<pre><code>## 
+##     -     A   -,A   A,-   A,C   A,G   A,T     C   -,C   C,-   C,A   C,G 
+##  9032 14773     3     5    15     9    19 11897     3     3     5    12 
+##   C,T     G   -,G   G,-   G,A   G,C   G,T     T   -,T   T,-   T,A   T,C 
+##    11 11672     2     9     6     8    10 14677     5    11    12     6 
+##   T,G 
+##     4</code></pre>
+<p>The number of tri-alleleic counts is just (excluding missing)</p>
+<pre class="r"><code>sum(tb[!stringr::str_detect(names(tb), &quot;-&quot;) &amp; stringr::str_length(names(tb)) &gt; 1])</code></pre>
+<pre><code>## [1] 117</code></pre>
+<p>and with missing it is</p>
+<pre class="r"><code>sum(tb[stringr::str_length(names(tb)) &gt; 1])</code></pre>
+<pre><code>## [1] 158</code></pre>
+<p>These aren’t too many, so I’ll just exclude all of them.</p>
+</div>
+<div id="now-filter-data" class="section level1">
+<h1>Now filter data</h1>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## Loading tidyverse: ggplot2
+## Loading tidyverse: tibble
+## Loading tidyverse: tidyr
+## Loading tidyverse: readr
+## Loading tidyverse: purrr
+## Loading tidyverse: dplyr</code></pre>
+<pre><code>## Conflicts with tidy packages ----------------------------------------------</code></pre>
+<pre><code>## filter(): dplyr, stats
+## lag():    dplyr, stats</code></pre>
+<pre class="r"><code>fixMat &lt;- as_data_frame(getFIX(vcf))
+which_keep &lt;- !(stringr::str_length(fixMat$ALT) &gt; 1)</code></pre>
+<p>Now extract the matrix of GT and AD</p>
+<pre class="r"><code>gt_mat &lt;- extract.gt(x = vcf, element = &quot;GT&quot;)
+ad_mat &lt;- extract.gt(x = vcf, element = &quot;AD&quot;)</code></pre>
+<pre class="r"><code>rm(vcf)
+gt_split &lt;- stringr::str_split(gt_mat, &quot;/&quot;, simplify = TRUE)
+ad_split &lt;- stringr::str_split(ad_mat, &quot;,&quot;, simplify = TRUE)
+class(ad_split) &lt;- &quot;numeric&quot;</code></pre>
+<pre class="r"><code>unique(gt_split[, 1])</code></pre>
+<pre><code>## [1] &quot;0&quot; NA  &quot;1&quot; &quot;2&quot;</code></pre>
+<pre class="r"><code>unique(gt_split[, 2])</code></pre>
+<pre><code>## [1] &quot;0&quot; &quot;1&quot; &quot;&quot;  &quot;2&quot;</code></pre>
+<pre class="r"><code>gt_split[is.na(gt_split[, 1]), 2] &lt;- NA
+unique(gt_split[, 2])</code></pre>
+<pre><code>## [1] &quot;0&quot; &quot;1&quot; NA  &quot;2&quot;</code></pre>
+<pre class="r"><code>is_zero_mat &lt;- gt_split == 0
+is_one_mat &lt;- gt_split == 1
+is_na_mat &lt;- is.na(gt_split)</code></pre>
+<p>Make sure <code>NA</code> in <code>gt_split</code> only occurs when <code>ad_split</code> has all zeros</p>
+<pre class="r"><code>all(ad_split[, 1:2][is_na_mat][1:10] == 0)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>zero_count_mat &lt;- matrix(rowSums(ad_split[, 1:2] * is_zero_mat),
+                         nrow = nrow(ad_mat), ncol = ncol(ad_mat))
+one_count_mat  &lt;- matrix(rowSums(ad_split[, 1:2] * is_one_mat),
+                         nrow = nrow(ad_mat), ncol = ncol(ad_mat))
+rownames(zero_count_mat) &lt;- rownames(ad_mat)
+colnames(zero_count_mat) &lt;- colnames(ad_mat)
+rownames(one_count_mat) &lt;- rownames(ad_mat)
+colnames(one_count_mat) &lt;- colnames(ad_mat)</code></pre>
+<p>Visually inspect count matrices vs ad_matrix</p>
+<pre class="r"><code>for (index in 1:20) {
+  crow &lt;- sample(1:nrow(ad_mat), 1)
+  ccol &lt;- sample(1:ncol(ad_mat), 1)
+
+  cat(&quot; GT: &quot;, gt_mat[crow, ccol], &quot;\n&quot;,
+      &quot;AD: &quot;, ad_mat[crow, ccol], &quot;\n&quot;,
+      &quot; 0: &quot;, zero_count_mat[crow, ccol], &quot;\n&quot;,
+      &quot; 1: &quot;, one_count_mat[crow, ccol], &quot;\n\n&quot;)
+}</code></pre>
+<pre><code>##  GT:  0/0 
+##  AD:  21,0 
+##   0:  21 
+##   1:  0 
+## 
+##  GT:  NA 
+##  AD:  0,0 
+##   0:  NA 
+##   1:  NA 
+## 
+##  GT:  NA 
+##  AD:  0,0 
+##   0:  NA 
+##   1:  NA 
+## 
+##  GT:  NA 
+##  AD:  0,0 
+##   0:  NA 
+##   1:  NA 
+## 
+##  GT:  0/0 
+##  AD:  1,0 
+##   0:  1 
+##   1:  0 
+## 
+##  GT:  0/0 
+##  AD:  7,0 
+##   0:  7 
+##   1:  0 
+## 
+##  GT:  0/0 
+##  AD:  1,0 
+##   0:  1 
+##   1:  0 
+## 
+##  GT:  NA 
+##  AD:  0,0 
+##   0:  NA 
+##   1:  NA 
+## 
+##  GT:  NA 
+##  AD:  0,0 
+##   0:  NA 
+##   1:  NA 
+## 
+##  GT:  1/1 
+##  AD:  0,5 
+##   0:  0 
+##   1:  5 
+## 
+##  GT:  0/0 
+##  AD:  1,0 
+##   0:  1 
+##   1:  0 
+## 
+##  GT:  0/0 
+##  AD:  14,0 
+##   0:  14 
+##   1:  0 
+## 
+##  GT:  NA 
+##  AD:  0,0 
+##   0:  NA 
+##   1:  NA 
+## 
+##  GT:  NA 
+##  AD:  0,0 
+##   0:  NA 
+##   1:  NA 
+## 
+##  GT:  1/0 
+##  AD:  1,2 
+##   0:  2 
+##   1:  1 
+## 
+##  GT:  0/1 
+##  AD:  2,1 
+##   0:  2 
+##   1:  1 
+## 
+##  GT:  NA 
+##  AD:  0,0 
+##   0:  NA 
+##   1:  NA 
+## 
+##  GT:  NA 
+##  AD:  0,0 
+##   0:  NA 
+##   1:  NA 
+## 
+##  GT:  0/0 
+##  AD:  9,0 
+##   0:  9 
+##   1:  0 
+## 
+##  GT:  0/0 
+##  AD:  6,0 
+##   0:  6 
+##   1:  0</code></pre>
+<p>Now remove all variants with more than two alleles</p>
+<pre class="r"><code>zero_count_mat &lt;- zero_count_mat[which_keep, ]
+one_count_mat  &lt;- one_count_mat[which_keep, ]</code></pre>
+<p>Save Data</p>
+<pre class="r"><code>saveRDS(object = list(A = zero_count_mat, a = one_count_mat),
+        file = &quot;../output/allele_counts/chr1_ct.RDS&quot;)</code></pre>
+</div>
+<div id="automate-for-all-chromosomes" class="section level1">
+<h1>Automate for all chromosomes</h1>
+<pre class="r"><code>library(vcfR)
+library(tidyverse)
+
+for (chr_index in 1:9) {
+  inname &lt;- paste0(&quot;../data/vcf_Guilherme/myGBSGenos_mergedSNPs_mergedTaxa_chr&quot;, chr_index, &quot;.vcf&quot;)
+  outname &lt;- paste0(&quot;../output/allele_counts/chr&quot;, chr_index, &quot;_ct.RDS&quot;)
+  vcf &lt;- read.vcfR(file = inname,
+                   verbose = FALSE)
+  fixMat &lt;- as_data_frame(getFIX(vcf))
+  which_keep &lt;- !(stringr::str_length(fixMat$ALT) &gt; 1)
+  fixMat &lt;- fixMat[which_keep, ]
+  gt_mat &lt;- extract.gt(x = vcf, element = &quot;GT&quot;)
+  ad_mat &lt;- extract.gt(x = vcf, element = &quot;AD&quot;)
+  rm(vcf)
+  gt_split &lt;- stringr::str_split(gt_mat, &quot;/&quot;, simplify = TRUE)
+  ad_split &lt;- stringr::str_split(ad_mat, &quot;,&quot;, simplify = TRUE)
+  class(ad_split) &lt;- &quot;numeric&quot;
+  unique(gt_split[, 1])
+  unique(gt_split[, 2])
+  gt_split[is.na(gt_split[, 1]), 2] &lt;- NA
+  unique(gt_split[, 2])
+  is_zero_mat &lt;- gt_split == 0
+  is_one_mat &lt;- gt_split == 1
+  is_na_mat &lt;- is.na(gt_split)
+  stopifnot(all(ad_split[, 1:2][is_na_mat][1:10] == 0))
+  zero_count_mat &lt;- matrix(rowSums(ad_split[, 1:2] * is_zero_mat),
+                           nrow = nrow(ad_mat), ncol = ncol(ad_mat))
+  one_count_mat  &lt;- matrix(rowSums(ad_split[, 1:2] * is_one_mat),
+                           nrow = nrow(ad_mat), ncol = ncol(ad_mat))
+  rownames(zero_count_mat) &lt;- rownames(ad_mat)
+  colnames(zero_count_mat) &lt;- colnames(ad_mat)
+  rownames(one_count_mat) &lt;- rownames(ad_mat)
+  colnames(one_count_mat) &lt;- colnames(ad_mat)
+  zero_count_mat &lt;- zero_count_mat[which_keep, ]
+  one_count_mat  &lt;- one_count_mat[which_keep, ]
+  saveRDS(object = list(fixMat = fixMat, A = zero_count_mat, a = one_count_mat),
+          file = outname)
+  rm(list = c(&quot;ad_split&quot;, &quot;gt_split&quot;, &quot;ad_mat&quot;, &quot;gt_mat&quot;, &quot;is_zero_mat&quot;, &quot;is_one_mat&quot;,
+              &quot;is_na_mat&quot;, &quot;zero_count_mat&quot;, &quot;one_count_mat&quot;, &quot;fixMat&quot;, &quot;which_keep&quot;))
+}</code></pre>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.3.2 (2016-10-31)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: Ubuntu 16.04.2 LTS
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] dplyr_0.5.0     purrr_0.2.2     readr_1.0.0     tidyr_0.6.1    
+## [5] tibble_1.2      ggplot2_2.2.1   tidyverse_1.1.1 vcfR_1.4.0     
+## 
+## loaded via a namespace (and not attached):
+##  [1] pinfsc50_1.1.0    Rcpp_0.12.10      plyr_1.8.4       
+##  [4] forcats_0.2.0     tools_3.3.2       digest_0.6.12    
+##  [7] lubridate_1.6.0   jsonlite_1.3      gtable_0.2.0     
+## [10] evaluate_0.10     nlme_3.1-131      lattice_0.20-34  
+## [13] viridisLite_0.2.0 mgcv_1.8-17       Matrix_1.2-8     
+## [16] psych_1.6.12      DBI_0.6           yaml_2.1.14      
+## [19] parallel_3.3.2    haven_1.0.0       xml2_1.1.1       
+## [22] httr_1.2.1        stringr_1.2.0     cluster_2.0.6    
+## [25] knitr_1.15.1      hms_0.3           rprojroot_1.2    
+## [28] grid_3.3.2        R6_2.2.0          readxl_0.1.1     
+## [31] foreign_0.8-67    rmarkdown_1.3     modelr_0.1.0     
+## [34] reshape2_1.4.2    magrittr_1.5      scales_0.4.1     
+## [37] backports_1.0.5   htmltools_0.3.5   MASS_7.3-45      
+## [40] rvest_0.3.2       assertthat_0.2.0  mnormt_1.5-5     
+## [43] colorspace_1.3-2  memuse_3.0-1      permute_0.9-4    
+## [46] ape_4.1           stringi_1.1.2     lazyeval_0.2.0   
+## [49] munsell_0.4.3     broom_0.4.2       vegan_2.4-3</code></pre>
+</div>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
