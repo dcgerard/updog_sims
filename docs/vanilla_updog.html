@@ -310,7 +310,7 @@ div.tocify {
 
 
 <p><strong>Last updated:</strong> 2017-05-11</p>
-<p><strong>Code version:</strong> f3075e9c87b78094209b34244693cd0ca139acde</p>
+<p><strong>Code version:</strong> 872c0a90e110cdbed364f734c9c07bf4a24874ba</p>
 <p>Here, I try out the new bias parameter.</p>
 <div id="read-in-data" class="section level2">
 <h2>Read in Data</h2>
@@ -405,7 +405,7 @@ ggplot(data = dat, mapping = aes(x = a, y = A, color = geno, alpha = maxpostprob
   ploidy &lt;- 6
 
   uout &lt;- updog_vanilla(ocounts = ocounts, osize = osize, ploidy = ploidy, print_val = FALSE)
-  uout$par
+  print(uout$par)
   geno_vec &lt;- apply(uout$post, 1, which.max) - 1
   maxpostprob_vec &lt;- uout$post[cbind(1:nrow(uout$post), geno_vec + 1)]
 
@@ -442,7 +442,186 @@ ggplot(data = dat, mapping = aes(x = a, y = A, color = geno, alpha = maxpostprob
                  color = &quot;blue&quot;, size = 0.5)
   print(pl)
 }</code></pre>
-<p><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-1.png" width="672" /><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-2.png" width="672" /><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-3.png" width="672" /><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-4.png" width="672" /><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-5.png" width="672" /><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-6.png" width="672" /><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-7.png" width="672" /><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-8.png" width="672" /><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-9.png" width="672" /><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-10.png" width="672" /></p>
+<pre><code>## $p1geno
+## [1] 4
+## 
+## $p2geno
+## [1] 3
+## 
+## $bias
+## [1] 1.04
+## 
+## $seq_error
+## [1] 0.00225
+## 
+## $od
+## [1] 0.004462
+## 
+## $llike
+## [1] -1644</code></pre>
+<p><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre><code>## $p1geno
+## [1] 6
+## 
+## $p2geno
+## [1] 4
+## 
+## $bias
+## [1] 1.033
+## 
+## $seq_error
+## [1] 0.0005108
+## 
+## $od
+## [1] 0.004661
+## 
+## $llike
+## [1] -1216</code></pre>
+<p><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
+<pre><code>## $p1geno
+## [1] 6
+## 
+## $p2geno
+## [1] 3
+## 
+## $bias
+## [1] 2.54
+## 
+## $seq_error
+## [1] 0.0191
+## 
+## $od
+## [1] 0.1116
+## 
+## $llike
+## [1] -1307</code></pre>
+<p><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-3.png" width="672" /></p>
+<pre><code>## $p1geno
+## [1] 1
+## 
+## $p2geno
+## [1] 0
+## 
+## $bias
+## [1] 2.6e-08
+## 
+## $seq_error
+## [1] 1.457e-06
+## 
+## $od
+## [1] 6.39e-16
+## 
+## $llike
+## [1] 2323</code></pre>
+<p><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-4.png" width="672" /></p>
+<pre><code>## $p1geno
+## [1] 6
+## 
+## $p2geno
+## [1] 4
+## 
+## $bias
+## [1] 0.4016
+## 
+## $seq_error
+## [1] 0.009637
+## 
+## $od
+## [1] 0.009876
+## 
+## $llike
+## [1] -1057</code></pre>
+<p><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-5.png" width="672" /></p>
+<pre><code>## $p1geno
+## [1] 5
+## 
+## $p2geno
+## [1] 4
+## 
+## $bias
+## [1] 1.002
+## 
+## $seq_error
+## [1] 0.004327
+## 
+## $od
+## [1] 0.003204
+## 
+## $llike
+## [1] -1458</code></pre>
+<p><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-6.png" width="672" /></p>
+<pre><code>## $p1geno
+## [1] 6
+## 
+## $p2geno
+## [1] 5
+## 
+## $bias
+## [1] 0.6095
+## 
+## $seq_error
+## [1] 0.01071
+## 
+## $od
+## [1] 0.01285
+## 
+## $llike
+## [1] -1075</code></pre>
+<p><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-7.png" width="672" /></p>
+<pre><code>## $p1geno
+## [1] 6
+## 
+## $p2geno
+## [1] 5
+## 
+## $bias
+## [1] 2.55
+## 
+## $seq_error
+## [1] 0.001799
+## 
+## $od
+## [1] 0.07137
+## 
+## $llike
+## [1] -825.4</code></pre>
+<p><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-8.png" width="672" /></p>
+<pre><code>## $p1geno
+## [1] 6
+## 
+## $p2geno
+## [1] 4
+## 
+## $bias
+## [1] 1.818
+## 
+## $seq_error
+## [1] 0.002334
+## 
+## $od
+## [1] 0.03872
+## 
+## $llike
+## [1] -1375</code></pre>
+<p><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-9.png" width="672" /></p>
+<pre><code>## $p1geno
+## [1] 6
+## 
+## $p2geno
+## [1] 5
+## 
+## $bias
+## [1] 1.931
+## 
+## $seq_error
+## [1] 0.001627
+## 
+## $od
+## [1] 0.07849
+## 
+## $llike
+## [1] -946.6</code></pre>
+<p><img src="vanilla_updog_files/figure-html/unnamed-chunk-5-10.png" width="672" /></p>
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>## R version 3.3.2 (2016-10-31)
 ## Platform: x86_64-pc-linux-gnu (64-bit)

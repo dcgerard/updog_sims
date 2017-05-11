@@ -95,7 +95,7 @@ for (index in 1:length(ddat)){
   ploidy <- 6
 
   uout <- updog_vanilla(ocounts = ocounts, osize = osize, ploidy = ploidy, print_val = FALSE)
-  uout$par
+  print(uout$par)
   geno_vec <- apply(uout$post, 1, which.max) - 1
   maxpostprob_vec <- uout$post[cbind(1:nrow(uout$post), geno_vec + 1)]
 
