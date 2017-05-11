@@ -1,0 +1,139 @@
+---
+title: "Try out Vanilla Updog"
+author: "First Last"
+date: "`r Sys.Date()`"
+---
+
+**Last updated:** `r Sys.Date()`
+
+**Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
+
+Here, I try out the new bias parameter.
+
+## Read in Data
+
+I am going to choose one that shows lots of bias.
+
+```{r}
+library(updog)
+set.seed(483)
+load("../data/subset_David.Rdata")
+ddat <- subset_david
+lastp <- 12 ## number of final rows that are parents
+
+cmat <- ddat[[7]]
+p1dat <- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
+p2dat <- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
+odat  <- cmat[1:(nrow(cmat) - lastp), ]
+
+p1counts <- p1dat[, 1]
+p1size   <- rowSums(p1dat)
+p2counts <- p2dat[, 1]
+p2size   <- rowSums(p2dat)
+ocounts  <- odat[, 1]
+osize    <- rowSums(odat)
+ploidy <- 6
+```
+
+Raw plots
+
+```{r}
+plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, seq_error = 0)
+```
+
+
+```{r}
+uout <- updog_vanilla(ocounts = ocounts, osize = osize, ploidy = ploidy, print_val = FALSE)
+uout$par
+geno_vec <- apply(uout$post, 1, which.max) - 1
+maxpostprob_vec <- uout$post[cbind(1:nrow(uout$post), geno_vec + 1)]
+```
+
+Summarize data: The new lines look pretty great!
+
+```{r}
+library(tidyverse)
+dat <- data_frame(A = ocounts, a = osize - ocounts, geno = factor(geno_vec), maxpostprob = maxpostprob_vec)
+
+## get possible probabilities based on fits of updog
+pvec <- updog::get_pvec(ploidy = ploidy, bias_val = uout$par$bias, seq_error = uout$par$seq_error)
+pvec
+slopevec <- pvec / (1 - pvec)
+maxcount <- max(max(dat$A), max(dat$a))
+xend <- pmin(rep(maxcount, ploidy + 1), maxcount / slopevec)
+yend <- pmin(rep(maxcount, ploidy + 1), maxcount * slopevec)
+df_lines <- data.frame(x = rep(0, ploidy + 1), y = rep(0, ploidy + 1),
+                       xend = xend, yend = yend)
+ggplot(data = dat, mapping = aes(x = a, y = A, color = geno, alpha = maxpostprob)) +
+  geom_point() +
+  ylim(0, maxcount) +
+  xlim(0, maxcount) +
+  theme_bw() +
+  geom_segment(data = df_lines, mapping = aes(x = x, y = y, xend = xend, yend = yend), lty = 2, alpha = 1/2,
+               color = "black", size = 0.5)
+
+
+```
+
+All of the others. Original lines are in blue, new lines are in black. There seems to be a significant improvment. However, I see one major problem:
+
+In the fourth SNP, where everything should be "AAAAAA", we are instead getting everything is "aaaaaa". This is definitely from some sort of identifiability problem. I should figure out how to fix this.
+
+```{r}
+for (index in 1:length(ddat)){
+  cmat <- ddat[[index]]
+  p1dat <- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
+  p2dat <- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
+  odat  <- cmat[1:(nrow(cmat) - lastp), ]
+
+  p1counts <- p1dat[, 1]
+  p1size   <- rowSums(p1dat)
+  p2counts <- p2dat[, 1]
+  p2size   <- rowSums(p2dat)
+  ocounts  <- odat[, 1]
+  osize    <- rowSums(odat)
+  ploidy <- 6
+
+  uout <- updog_vanilla(ocounts = ocounts, osize = osize, ploidy = ploidy, print_val = FALSE)
+  uout$par
+  geno_vec <- apply(uout$post, 1, which.max) - 1
+  maxpostprob_vec <- uout$post[cbind(1:nrow(uout$post), geno_vec + 1)]
+
+
+  dat <- data_frame(A = ocounts, a = osize - ocounts, geno = factor(geno_vec), maxpostprob = maxpostprob_vec)
+  pvec <- updog::get_pvec(ploidy = ploidy, bias_val = uout$par$bias, seq_error = uout$par$seq_error)
+  pvec
+  ## estimated slope
+  slopevec <- pvec / (1 - pvec)
+  maxcount <- max(max(dat$A), max(dat$a))
+  xend <- pmin(rep(maxcount, ploidy + 1), maxcount / slopevec)
+  yend <- pmin(rep(maxcount, ploidy + 1), maxcount * slopevec)
+  df_lines <- data.frame(x = rep(0, ploidy + 1), y = rep(0, ploidy + 1),
+                         xend = xend, yend = yend)
+  
+  
+  ## original slope
+  opvec <- 0:ploidy / ploidy
+  slopevec <- opvec / (1 - opvec)
+  maxcount <- max(max(dat$A), max(dat$a))
+  xend <- pmin(rep(maxcount, ploidy + 1), maxcount / slopevec)
+  yend <- pmin(rep(maxcount, ploidy + 1), maxcount * slopevec)
+  odf_lines <- data.frame(x = rep(0, ploidy + 1), y = rep(0, ploidy + 1),
+                          xend = xend, yend = yend)
+  
+  pl <- ggplot(data = dat, mapping = aes(x = a, y = A, color = geno, alpha = maxpostprob)) +
+    geom_point() +
+    ylim(0, maxcount) +
+    xlim(0, maxcount) +
+    theme_bw() +
+    geom_segment(data = df_lines, mapping = aes(x = x, y = y, xend = xend, yend = yend), lty = 2, alpha = 1/2,
+                 color = "black", size = 0.5) +
+    geom_segment(data = odf_lines, mapping = aes(x = x, y = y, xend = xend, yend = yend), lty = 3, alpha = 1/2,
+                 color = "blue", size = 0.5)
+  print(pl)
+}
+```
+
+```{r info}
+sessionInfo()
+```
