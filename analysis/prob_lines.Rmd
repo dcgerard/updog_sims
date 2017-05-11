@@ -1,0 +1,59 @@
+---
+title: "Lots of Probability Lines"
+author: "David Gerard"
+date: "May 11, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Summary
+Here, I demonstrate how changing the bias parameter and sequencing error rates change where the probability lines are. This is just for my own visual inspection.
+
+# Analysis
+
+```{r, fig.height=6, fig.width=9}
+library(tidyverse)
+library(updog)
+ploidy <- 6
+bias_vec <- c(0.1, 0.5, 1, 1.5, 2, 10)
+seq_error_vec <- c(0.01, 0.05, 0.1, 0.2)
+
+  for (bindex in 1:length(bias_vec)) {
+      bias <- bias_vec[bindex]
+      for(sindex in 1:length(seq_error_vec)) {
+        seq_error <- seq_error_vec[sindex]
+        pvec <- updog::get_pvec(ploidy = ploidy, bias_val = bias, seq_error = seq_error)
+        slopevec <- pvec / (1 - pvec)
+        xend <- pmin(rep(1, ploidy + 1), 1 / slopevec)
+        yend <- pmin(rep(1, ploidy + 1), 1 * slopevec)
+        df_lines <- data.frame(x = rep(0, ploidy + 1), y = rep(0, ploidy + 1),
+                               xend = xend, yend = yend)
+        df_lines$bias <- bias
+        df_lines$seq_error <- seq_error
+        if (bindex == 1 & sindex == 1) {
+          df_tot <- df_lines
+        } else {
+          df_tot <- bind_rows(df_tot, df_lines)
+        }
+          
+    }
+  }
+  
+
+  pl <- ggplot(data = df_tot, mapping = aes(x = x, y = y, xend = xend, yend = yend)) +
+    geom_segment() +
+    theme_bw() +
+    theme(axis.text = element_blank(),
+          axis.ticks = element_blank()) +
+    facet_grid(seq_error ~ bias) +
+    xlab("Bias") +
+    ylab("Sequencing Error")
+print(pl)
+```
+
+```{r}
+sessionInfo()
+```

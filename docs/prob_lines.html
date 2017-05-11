@@ -9,9 +9,11 @@
 <meta name="generator" content="pandoc" />
 
 
+<meta name="author" content="David Gerard" />
 
+<meta name="date" content="2017-05-11" />
 
-<title>Home</title>
+<title>Lots of Probability Lines</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -300,35 +302,98 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Home</h1>
+<h1 class="title toc-ignore">Lots of Probability Lines</h1>
+<h4 class="author"><em>David Gerard</em></h4>
+<h4 class="date"><em>May 11, 2017</em></h4>
 
 </div>
 
 
-<p><strong>Last updated:</strong> 2017-05-11</p>
-<p><strong>Code version:</strong> 6d134a64482db92f0329cfabab22534449cad5c6</p>
-<div id="sweet-potato-project" class="section level1">
-<h1>Sweet Potato Project</h1>
-<p>Much of this code doesn’t work anymore because of modifications to the <a href="https://github.com/dcgerard/updog"><code>updog</code></a> package</p>
-<ul>
-<li><a href="snp_analysis.html">First analysis of SNP data</a></li>
-<li><a href="iter_procedure.html">Look at iterative procedure and effect of uniform prior on parents</a>. This results in a non-uniform prior on the children, as can be expected.</li>
-<li><a href="updot_overdispersion.html">First try at overdispersed updog</a></li>
-<li><a href="more_updog_over.html">Run overdispersed updog on all of the datasets Felipe gave me</a></li>
-<li><a href="updog_overdispersion_seq_est.html">Look at estimating sequencing error rate and results look promising. No more errors when I bound the overdispersion parameter.</a></li>
-<li><a href="more_updog_over_seq_est.html">Run through all datasets when overdispersion parameter is bounded and I estimate the sequencing error rate.</a></li>
-<li><a href="showoff_plots.html">Show off new methods for updog for plotting and summarizing.</a></li>
-<li><a href="vanilla_updog.html">First attempt at modeling bias parameter</a>. Looks promising, but still need to do a lot of work.</li>
-<li><a href="prob_lines.html">Plot probability lines at different levels of seq_error and bias_val</a>.</li>
-</ul>
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<p>Here, I demonstrate how changing the bias parameter and sequencing error rates change where the probability lines are. This is just for my own visual inspection.</p>
 </div>
-<div id="alfalfa-project" class="section level1">
-<h1>Alfalfa Project:</h1>
-<ul>
-<li><a href="parse_vcf.html">Parse vcf files, extract readcounts, filter out all variants with more than two alleles</a>. This file contains some EDA on the VCF files. But mostly, this code gets the read-count matrices.</li>
-<li><a href="initial_updog_fits.html">Initial fits for some SNPs</a>. These data seem messier than the sweet potato data. Though, there seems to be much less sequencing error. Bias is still a possible problem for some SNPs.</li>
-<li><a href="tons_of_plots.html">Tons of raw plots</a> Tons of raw plots. I am trying to see features of the data.</li>
-</ul>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## Loading tidyverse: ggplot2
+## Loading tidyverse: tibble
+## Loading tidyverse: tidyr
+## Loading tidyverse: readr
+## Loading tidyverse: purrr
+## Loading tidyverse: dplyr</code></pre>
+<pre><code>## Conflicts with tidy packages ----------------------------------------------</code></pre>
+<pre><code>## filter(): dplyr, stats
+## lag():    dplyr, stats</code></pre>
+<pre class="r"><code>library(updog)
+ploidy &lt;- 6
+bias_vec &lt;- c(0.1, 0.5, 1, 1.5, 2, 10)
+seq_error_vec &lt;- c(0.01, 0.05, 0.1, 0.2)
+
+  for (bindex in 1:length(bias_vec)) {
+      bias &lt;- bias_vec[bindex]
+      for(sindex in 1:length(seq_error_vec)) {
+        seq_error &lt;- seq_error_vec[sindex]
+        pvec &lt;- updog::get_pvec(ploidy = ploidy, bias_val = bias, seq_error = seq_error)
+        slopevec &lt;- pvec / (1 - pvec)
+        xend &lt;- pmin(rep(1, ploidy + 1), 1 / slopevec)
+        yend &lt;- pmin(rep(1, ploidy + 1), 1 * slopevec)
+        df_lines &lt;- data.frame(x = rep(0, ploidy + 1), y = rep(0, ploidy + 1),
+                               xend = xend, yend = yend)
+        df_lines$bias &lt;- bias
+        df_lines$seq_error &lt;- seq_error
+        if (bindex == 1 &amp; sindex == 1) {
+          df_tot &lt;- df_lines
+        } else {
+          df_tot &lt;- bind_rows(df_tot, df_lines)
+        }
+          
+    }
+  }
+  
+
+  pl &lt;- ggplot(data = df_tot, mapping = aes(x = x, y = y, xend = xend, yend = yend)) +
+    geom_segment() +
+    theme_bw() +
+    theme(axis.text = element_blank(),
+          axis.ticks = element_blank()) +
+    facet_grid(seq_error ~ bias) +
+    xlab(&quot;Bias&quot;) +
+    ylab(&quot;Sequencing Error&quot;)
+print(pl)</code></pre>
+<p><img src="prob_lines_files/figure-html/unnamed-chunk-1-1.png" width="864" /></p>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.3.2 (2016-10-31)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: Ubuntu 16.04.2 LTS
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] updog_0.1.0     dplyr_0.5.0     purrr_0.2.2     readr_1.0.0    
+## [5] tidyr_0.6.1     tibble_1.2      ggplot2_2.2.1   tidyverse_1.1.1
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rcpp_0.12.10     plyr_1.8.4       forcats_0.2.0    tools_3.3.2     
+##  [5] digest_0.6.12    jsonlite_1.3     lubridate_1.6.0  evaluate_0.10   
+##  [9] nlme_3.1-131     gtable_0.2.0     lattice_0.20-34  psych_1.6.12    
+## [13] DBI_0.6          yaml_2.1.14      parallel_3.3.2   haven_1.0.0     
+## [17] xml2_1.1.1       stringr_1.2.0    httr_1.2.1       knitr_1.15.1    
+## [21] hms_0.3          rprojroot_1.2    grid_3.3.2       R6_2.2.0        
+## [25] readxl_0.1.1     foreign_0.8-67   rmarkdown_1.3    modelr_0.1.0    
+## [29] reshape2_1.4.2   magrittr_1.5     backports_1.0.5  scales_0.4.1    
+## [33] htmltools_0.3.5  rvest_0.3.2      assertthat_0.2.0 mnormt_1.5-5    
+## [37] colorspace_1.3-2 labeling_0.3     stringi_1.1.2    lazyeval_0.2.0  
+## [41] munsell_0.4.3    broom_0.4.2</code></pre>
 </div>
 
 <hr>
