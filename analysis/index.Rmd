@@ -14,3 +14,4 @@ title: "Home"
 * [Look at estimating sequencing error rate and results look promising. No more errors when I bound the overdispersion parameter.](updog_overdispersion_seq_est.html)
 * [Run through all datasets when overdispersion parameter is bounded and I estimate the sequencing error rate.](more_updog_over_seq_est.html)
 * [Show off new methods for updog for plotting and summarizing.](showoff_plots.html)
+* [First attempt at modeling bias parameter](vanilla_updog.html). Looks promising, but still need to do a lot of work.
