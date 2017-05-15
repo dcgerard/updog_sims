@@ -20,10 +20,11 @@ Much of this code doesn't work anymore because of modifications to the [`updog`]
 * [Show off new methods for updog for plotting and summarizing.](showoff_plots.html)
 * [First attempt at modeling bias parameter](vanilla_updog.html). Looks promising, but still need to do a lot of work.
 * [Plot probability lines at different levels of seq_error and bias_val](prob_lines.html).
+* [First fits with outlier model.](vanilla_updog_outlier.html) Things look pretty good!
 
 # Alfalfa Project:
 
 * [Parse vcf files, extract readcounts, filter out all variants with more than two alleles](parse_vcf.html). This file contains some EDA on the VCF files. But mostly, this code gets the read-count matrices.
 * [Initial fits for some SNPs](initial_updog_fits.html). These data seem messier than the sweet potato data. Though, there seems to be much less sequencing error. Bias is still a possible problem for some SNPs.
-* [Tons of raw plots](tons_of_plots.html) Tons of raw plots. I am trying to see features of the data.
+* [Tons of raw plots](tons_of_plots.html) Tons of raw plots. I am trying to see features of the data.\
 
