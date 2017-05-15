@@ -21,6 +21,7 @@ Much of this code doesn't work anymore because of modifications to the [`updog`]
 * [First attempt at modeling bias parameter](vanilla_updog.html). Looks promising, but still need to do a lot of work.
 * [Plot probability lines at different levels of seq_error and bias_val](prob_lines.html).
 * [First fits with outlier model.](vanilla_updog_outlier.html) Things look pretty good!
+* [Some EDA from bad SNP](diagnostic_plot.html)
 
 # Alfalfa Project:
 
