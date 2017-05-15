@@ -77,7 +77,7 @@ ggplot(data = dat, mapping = aes(x = a, y = A, color = geno, alpha = 1 - uout$pr
 All of the others. Original lines are in blue, new lines are in black. 
 
 ```{r, cache=TRUE}
-for (index in (1:length(ddat))[-4]){
+for (index in 1:length(ddat)) {
   cmat <- ddat[[index]]
   p1dat <- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
   p2dat <- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
@@ -92,8 +92,8 @@ for (index in (1:length(ddat))[-4]){
   ploidy <- 6
 
   uout <- updog_vanilla(ocounts = ocounts, osize = osize, ploidy = ploidy, print_val = FALSE)
-  geno_vec <- apply(uout$post, 1, which.max) - 1
-  maxpostprob_vec <- uout$post[cbind(1:nrow(uout$post), geno_vec + 1)]
+  geno_vec <- uout$ogeno
+  maxpostprob_vec <- uout$maxpostprob
   prob_ok <- 1 - uout$prob_out
 
 
