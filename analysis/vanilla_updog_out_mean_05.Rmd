@@ -8,7 +8,7 @@ date: "`r Sys.Date()`"
 
 **Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
 
-Here, I try out vanilla updog with the outlier model where the dispersion has to be above 0.1.
+Here, I try out vanilla updog with the outlier model where the outlier model is Unif(0,1). This works well if `out_prop` is initially set to `0.001` but can work very poorly if `out_prop` is initialized too large. I need to worry about the large likelihood values I get for SNP 10 when I initialize at `out_prop = 0.01`.
 
 ## Read in Data
 

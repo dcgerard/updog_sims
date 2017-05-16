@@ -310,8 +310,8 @@ div.tocify {
 
 
 <p><strong>Last updated:</strong> 2017-05-16</p>
-<p><strong>Code version:</strong> 90435ac163b67595849b9c18ebc1f282e40c0b8b</p>
-<p>Here, I try out vanilla updog with the outlier model where the dispersion has to be above 0.1.</p>
+<p><strong>Code version:</strong> 8c99382f61215904fef94c67745d4c77e5d79885</p>
+<p>Here, I try out vanilla updog with the outlier model where the outlier model is Unif(0,1). This works well if <code>out_prop</code> is initially set to <code>0.001</code> but can work very poorly if <code>out_prop</code> is initialized too large. I need to worry about the large likelihood values I get for SNP 10 when I initialize at <code>out_prop = 0.01</code>.</p>
 <div id="read-in-data" class="section level2">
 <h2>Read in Data</h2>
 <pre class="r"><code>library(updog)
@@ -360,13 +360,10 @@ lastp &lt;- 12 ## number of final rows that are parents</code></pre>
 ## [1] updog_0.1.0
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_0.12.10     codetools_0.2-15 digest_0.6.12    rprojroot_1.2   
-##  [5] assertthat_0.2.0 plyr_1.8.4       grid_3.3.2       gtable_0.2.0    
-##  [9] backports_1.0.5  magrittr_1.5     scales_0.4.1     evaluate_0.10   
-## [13] ggplot2_2.2.1    stringi_1.1.2    lazyeval_0.2.0   rmarkdown_1.3   
-## [17] labeling_0.3     tools_3.3.2      stringr_1.2.0    munsell_0.4.3   
-## [21] yaml_2.1.14      colorspace_1.3-2 htmltools_0.3.5  knitr_1.15.1    
-## [25] tibble_1.2</code></pre>
+##  [1] backports_1.0.5 magrittr_1.5    rprojroot_1.2   tools_3.3.2    
+##  [5] htmltools_0.3.5 yaml_2.1.14     Rcpp_0.12.10    stringi_1.1.2  
+##  [9] rmarkdown_1.3   knitr_1.15.1    stringr_1.2.0   digest_0.6.12  
+## [13] evaluate_0.10</code></pre>
 </div>
 
 <hr>
