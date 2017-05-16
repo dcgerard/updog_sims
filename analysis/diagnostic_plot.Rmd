@@ -1,0 +1,80 @@
+---
+title: "Diagnostic plot"
+author: "David Gerard"
+date: "May 15, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Here I explore diagnostic plots
+
+
+# Data
+
+This is the problem SNP I have for updog.
+
+```{r}
+library(updog)
+set.seed(483)
+load("../data/subset_David.Rdata")
+ddat <- subset_david
+lastp <- 12 ## number of final rows that are parents
+
+cmat <- ddat[[7]]
+p1dat <- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
+p2dat <- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
+odat  <- cmat[1:(nrow(cmat) - lastp), ]
+
+p1counts <- p1dat[, 1]
+p1size   <- rowSums(p1dat)
+p2counts <- p2dat[, 1]
+p2size   <- rowSums(p2dat)
+ocounts  <- odat[, 1]
+osize    <- rowSums(odat)
+ploidy <- 6
+```
+
+Raw plots
+
+```{r}
+plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, seq_error = 0)
+```
+
+# Fit updog
+
+```{r, cache = TRUE}
+uout <- updog_vanilla(ocounts = ocounts, osize = osize, ploidy = ploidy, print_val = FALSE,
+                      update_outmean = FALSE)
+```
+
+```{r}
+plot(uout, plot_beta = FALSE)
+```
+
+# EDA
+
+My idea is to bin the genotypes and then see their discrepancy from the expecteed number under the segegation probabilities.
+
+```{r}
+tab_geno <- table(uout$ogeno)
+phat <- tab_geno / sum(tab_geno)
+
+qarray <- get_q_array(ploidy)
+probs <- qarray[uout$p1geno + 1, uout$p2geno + 1, ]
+```
+
+Notice that `phat` deviates from 0.5 by the same amount. This is also the predicted segregation probabilities. Thought I checked other fits and they don't follow this. So I think this is just a coincidence.
+
+```{r}
+phat
+probs[6:7]
+```
+
+```{r}
+sessionInfo()
+```

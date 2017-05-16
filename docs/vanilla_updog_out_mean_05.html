@@ -9,11 +9,11 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="David Gerard" />
+<meta name="author" content="First Last" />
 
-<meta name="date" content="2017-05-15" />
+<meta name="date" content="2017-05-16" />
 
-<title>Diagnostic plot</title>
+<title>First Fits with Outlier Model</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -302,65 +302,44 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Diagnostic plot</h1>
-<h4 class="author"><em>David Gerard</em></h4>
-<h4 class="date"><em>May 15, 2017</em></h4>
+<h1 class="title toc-ignore">First Fits with Outlier Model</h1>
+<h4 class="author"><em>First Last</em></h4>
+<h4 class="date"><em>2017-05-16</em></h4>
 
 </div>
 
 
-<div id="abstract" class="section level1">
-<h1>Abstract</h1>
-<p>Here I explore diagnostic plots</p>
-</div>
-<div id="data" class="section level1">
-<h1>Data</h1>
-<p>This is the problem SNP I have for updog.</p>
+<p><strong>Last updated:</strong> 2017-05-16</p>
+<p><strong>Code version:</strong> 90435ac163b67595849b9c18ebc1f282e40c0b8b</p>
+<p>Here, I try out vanilla updog with the outlier model where the dispersion has to be above 0.1.</p>
+<div id="read-in-data" class="section level2">
+<h2>Read in Data</h2>
 <pre class="r"><code>library(updog)
 set.seed(483)
 load(&quot;../data/subset_David.Rdata&quot;)
 ddat &lt;- subset_david
-lastp &lt;- 12 ## number of final rows that are parents
+lastp &lt;- 12 ## number of final rows that are parents</code></pre>
+<pre class="r"><code>for (index in 1:length(ddat)) {
+  cmat &lt;- ddat[[index]]
+  p1dat &lt;- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
+  p2dat &lt;- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
+  odat  &lt;- cmat[1:(nrow(cmat) - lastp), ]
 
-cmat &lt;- ddat[[7]]
-p1dat &lt;- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
-p2dat &lt;- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
-odat  &lt;- cmat[1:(nrow(cmat) - lastp), ]
+  p1counts &lt;- p1dat[, 1]
+  p1size   &lt;- rowSums(p1dat)
+  p2counts &lt;- p2dat[, 1]
+  p2size   &lt;- rowSums(p2dat)
+  ocounts  &lt;- odat[, 1]
+  osize    &lt;- rowSums(odat)
+  ploidy &lt;- 6
 
-p1counts &lt;- p1dat[, 1]
-p1size   &lt;- rowSums(p1dat)
-p2counts &lt;- p2dat[, 1]
-p2size   &lt;- rowSums(p2dat)
-ocounts  &lt;- odat[, 1]
-osize    &lt;- rowSums(odat)
-ploidy &lt;- 6</code></pre>
-<p>Raw plots</p>
-<pre class="r"><code>plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, seq_error = 0)</code></pre>
-<p><img src="diagnostic_plot_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
-</div>
-<div id="fit-updog" class="section level1">
-<h1>Fit updog</h1>
-<pre class="r"><code>uout &lt;- updog_vanilla(ocounts = ocounts, osize = osize, ploidy = ploidy, print_val = FALSE,
-                      update_outmean = FALSE)</code></pre>
-<pre class="r"><code>plot(uout, plot_beta = FALSE)</code></pre>
-<p><img src="diagnostic_plot_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
-</div>
-<div id="eda" class="section level1">
-<h1>EDA</h1>
-<p>My idea is to bin the genotypes and then see their discrepancy from the expecteed number under the segegation probabilities.</p>
-<pre class="r"><code>tab_geno &lt;- table(uout$ogeno)
-phat &lt;- tab_geno / sum(tab_geno)
-
-qarray &lt;- get_q_array(ploidy)
-probs &lt;- qarray[uout$p1geno + 1, uout$p2geno + 1, ]</code></pre>
-<p>Notice that <code>phat</code> deviates from 0.5 by the same amount. This is also the predicted segregation probabilities. Thought I checked other fits and they don’t follow this. So I think this is just a coincidence.</p>
-<pre class="r"><code>phat</code></pre>
-<pre><code>## 
-##      5      6 
-## 0.5165 0.4835</code></pre>
-<pre class="r"><code>probs[6:7]</code></pre>
-<pre><code>## AAAAAa AAAAAA 
-##    0.5    0.5</code></pre>
+  uout &lt;- updog_vanilla(ocounts = ocounts, osize = osize, ploidy = ploidy, min_disp = 0,
+                        print_val = FALSE, commit_num = 4)
+  print(plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, seq_error = 0))
+  plot(uout, ask = FALSE, plot_beta = TRUE)
+  
+}</code></pre>
+<p><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-1.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-2.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-3.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-4.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-5.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-6.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-7.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-8.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-9.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-10.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-11.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-12.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-13.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-14.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-15.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-16.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-17.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-18.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-19.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-20.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-21.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-22.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-23.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-24.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-25.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-26.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-27.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-28.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-29.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-30.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-31.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-32.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-33.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-34.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-35.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-36.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-37.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-38.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-39.png" width="672" /><img src="vanilla_updog_out_mean_05_files/figure-html/unnamed-chunk-2-40.png" width="672" /></p>
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>## R version 3.3.2 (2016-10-31)
 ## Platform: x86_64-pc-linux-gnu (64-bit)
@@ -381,9 +360,9 @@ probs &lt;- qarray[uout$p1geno + 1, uout$p2geno + 1, ]</code></pre>
 ## [1] updog_0.1.0
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_0.12.10     codetools_0.2-15 assertthat_0.2.0 digest_0.6.12   
-##  [5] rprojroot_1.2    plyr_1.8.4       grid_3.3.2       gtable_0.2.0    
-##  [9] backports_1.0.5  magrittr_1.5     evaluate_0.10    scales_0.4.1    
+##  [1] Rcpp_0.12.10     codetools_0.2-15 digest_0.6.12    rprojroot_1.2   
+##  [5] assertthat_0.2.0 plyr_1.8.4       grid_3.3.2       gtable_0.2.0    
+##  [9] backports_1.0.5  magrittr_1.5     scales_0.4.1     evaluate_0.10   
 ## [13] ggplot2_2.2.1    stringi_1.1.2    lazyeval_0.2.0   rmarkdown_1.3   
 ## [17] labeling_0.3     tools_3.3.2      stringr_1.2.0    munsell_0.4.3   
 ## [21] yaml_2.1.14      colorspace_1.3-2 htmltools_0.3.5  knitr_1.15.1    

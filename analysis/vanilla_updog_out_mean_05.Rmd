@@ -1,0 +1,49 @@
+---
+title: "First Fits with Outlier Model"
+author: "First Last"
+date: "`r Sys.Date()`"
+---
+
+**Last updated:** `r Sys.Date()`
+
+**Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
+
+Here, I try out vanilla updog with the outlier model where the dispersion has to be above 0.1.
+
+## Read in Data
+
+```{r}
+library(updog)
+set.seed(483)
+load("../data/subset_David.Rdata")
+ddat <- subset_david
+lastp <- 12 ## number of final rows that are parents
+```
+
+
+```{r, cache=TRUE}
+for (index in 1:length(ddat)) {
+  cmat <- ddat[[index]]
+  p1dat <- cmat[(nrow(cmat) - lastp + 1):(nrow(cmat) - lastp / 2), ]
+  p2dat <- cmat[(nrow(cmat) - lastp / 2 + 1):nrow(cmat), ]
+  odat  <- cmat[1:(nrow(cmat) - lastp), ]
+
+  p1counts <- p1dat[, 1]
+  p1size   <- rowSums(p1dat)
+  p2counts <- p2dat[, 1]
+  p2size   <- rowSums(p2dat)
+  ocounts  <- odat[, 1]
+  osize    <- rowSums(odat)
+  ploidy <- 6
+
+  uout <- updog_vanilla(ocounts = ocounts, osize = osize, ploidy = ploidy, min_disp = 0,
+                        print_val = FALSE, commit_num = 4)
+  print(plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy, seq_error = 0))
+  plot(uout, ask = FALSE, plot_beta = TRUE)
+  
+}
+```
+
+```{r info}
+sessionInfo()
+```
