@@ -4,6 +4,8 @@
 .Rhistory
 analysis/.Rhistory
 .RData
+*_files/
+*_cache/
 
 ## Compiled
 *.o

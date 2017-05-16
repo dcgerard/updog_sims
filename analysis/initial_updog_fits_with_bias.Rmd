@@ -27,13 +27,9 @@ suppressMessages(library(tidyverse))
 med_counts <- apply(obj$A + obj$a, 1, median, na.rm = TRUE)
 mean_counts <- rowMeans(obj$A + obj$a, na.rm = TRUE)
 quants <- quantile(mean_counts, probs = seq(0, 1, length = 30), na.rm = TRUE)
-quants
 match_vec <- match(round(quants, digits = 1), round(mean_counts, digits = 1))
-mean_counts[match_vec]
-
 sub_A <- obj$A[match_vec, ]
 sub_a <- obj$a[match_vec, ]
-rowMeans(sub_a + sub_A, na.rm = TRUE)
 ```
 
 For the smaller counts alleles, most of the samples don't have any read-counts (indicated by `NA`) (though, this isn't a guarantee).
@@ -63,12 +59,11 @@ for (index in 1:nrow(ocounts)) {
 
 This last SNP makes no sense. Why are they all clustered at 0.75? Is this a technical artifact? This would only make sense biologically if segregation happened in pairs. E.g. if the parental genotypes were AAAA and ABAB and AB have to cluster together in the second parent. If they all segregated independently, then you would expect to see some AABB's and some AAAA's. This is weird. 
 
-Of course, when we fit `updog`, we get weird results.
+An alternative explanation is an extreme sequencing error rate combined with an extreme mapping bias toward the non-reference allele. This is what `updog_vanilla` catches.
 ```{r, cache = TRUE}
-uout <- updog(ocounts = ocounts[nrow(ocounts), ], osize = osize[nrow(osize), ],
-              seq_error = 0.01, ploidy = 4, update_geno = TRUE, update_outlier = TRUE,
-              update_pi = TRUE, update_rho = TRUE)
-plot(uout)
+uout <- updog_vanilla(ocounts = ocounts[nrow(ocounts), ], osize = osize[nrow(osize), ],
+                      ploidy = 4)
+plot(uout, ask = FALSE)
 ```
 
 Some of these don't look too bad!
@@ -80,14 +75,11 @@ for (index in 20:29) {
   osize_nona <- osize[index, ]
   osize_nona <- osize_nona[!is.na(osize_nona)]
 
-  saveRDS(file = "alpha_err_dat.RDS", object = list(ocounts = ocounts_nona, osize = osize_nona, ploidy = 4))
-
-  suppressMessages(uout <- updog(ocounts = ocounts_nona, osize = osize_nona, ploidy = ploidy,
-                                 overdispersion = FALSE, update_geno = TRUE))
-  pl <- plot(uout, plot_beta = FALSE)
-  print(pl)
-  pl <- plot_geno(ocounts = ocounts_nona, osize = osize_nona, ploidy = 4, seq_error = 0)
-  print(pl)
+  uout <- updog_vanilla(ocounts = ocounts_nona, osize = osize_nona, ploidy = ploidy, print_val = FALSE,
+                        update_outdisp = FALSE, update_outmean = FALSE, update_outprop = TRUE,
+                        non_mono_max = 1)
+  plot(uout, ask = FALSE, plot_beta = FALSE)
+  print(plot_geno(ocounts = ocounts_nona, osize = osize_nona, ploidy = 4, seq_error = 0))
 }
 
 ```

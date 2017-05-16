@@ -18,7 +18,7 @@ First, I'll read in chromosome 1 from the files Felipe gave me.
 
 ```{r}
 library(vcfR)
-vcf <- read.vcfR(file = "../data/vcf_Guilherme/myGBSGenos_mergedSNPs_mergedTaxa_chr1.vcf",
+vcf <- read.vcfR(file = "~/Data/alfalfa/vcf_Guilherme/myGBSGenos_mergedSNPs_mergedTaxa_chr1.vcf",
                  verbose = FALSE)
 ```
 
@@ -152,8 +152,8 @@ library(vcfR)
 library(tidyverse)
 
 for (chr_index in 1:9) {
-  inname <- paste0("../data/vcf_Guilherme/myGBSGenos_mergedSNPs_mergedTaxa_chr", chr_index, ".vcf")
-  outname <- paste0("../output/allele_counts/chr", chr_index, "_ct.RDS")
+  inname <- paste0("~/Data/alfalfa/vcf_Guilherme/myGBSGenos_mergedSNPs_mergedTaxa_chr", chr_index, ".vcf")
+  outname <- paste0("~/Data/alfalfa/cleaned_alfalfa/chr", chr_index, "_ct.RDS")
   vcf <- read.vcfR(file = inname,
                    verbose = FALSE)
   fixMat <- as_data_frame(getFIX(vcf))
