@@ -23,6 +23,8 @@ Much of this code doesn't work anymore because of modifications to the [`updog`]
 * [First fits with outlier model.](vanilla_updog_outlier.html) Things look pretty good!
 * [Some EDA from bad SNP](diagnostic_plot.html) Re-ran after I made it so `out_mean` is constrained to be 0.5. It looks pretty good now!
 * [Updog where mean of outlier distribution is constrained to be 0.5](vanilla_updog_out_mean_06.html)
+* [Presentation figures.](presentation_figures.html) There are a lot of good inference results here.
+* [Messy first look at parental data](check_parental_precisions.html).
 
 # Alfalfa Project:
 
