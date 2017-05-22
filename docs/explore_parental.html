@@ -11,9 +11,9 @@
 
 <meta name="author" content="David Gerard" />
 
-<meta name="date" content="2017-05-11" />
+<meta name="date" content="2017-05-22" />
 
-<title>Lots of Probability Lines</title>
+<title>Explore Parental Data</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -302,19 +302,20 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Lots of Probability Lines</h1>
+<h1 class="title toc-ignore">Explore Parental Data</h1>
 <h4 class="author"><em>David Gerard</em></h4>
-<h4 class="date"><em>May 11, 2017</em></h4>
+<h4 class="date"><em>May 22, 2017</em></h4>
 
 </div>
 
 
-<div id="summary" class="section level1">
-<h1>Summary</h1>
-<p>Here, I demonstrate how changing the bias parameter and sequencing error rates change where the probability lines are. This is just for my own visual inspection.</p>
+<div id="abstract" class="section level1">
+<h1>Abstract</h1>
+<p>Here, I look at the parental data and see if they seem to be overdispersed between samples.</p>
 </div>
 <div id="analysis" class="section level1">
 <h1>Analysis</h1>
+<p>Read in data.</p>
 <pre class="r"><code>library(tidyverse)</code></pre>
 <pre><code>## Loading tidyverse: ggplot2
 ## Loading tidyverse: tibble
@@ -326,54 +327,155 @@ div.tocify {
 <pre><code>## filter(): dplyr, stats
 ## lag():    dplyr, stats</code></pre>
 <pre class="r"><code>library(updog)
+load(&quot;../data/subset_David.Rdata&quot;)
 ploidy &lt;- 6
-bias_vec &lt;- c(0.1, 0.5, 1, 2, 10)
-seq_error_vec &lt;- c(0.01, 0.05, 0.1)
-porig &lt;- as.factor(format(0:ploidy / ploidy, digits = 2))
+p1list &lt;- list()
+p2list &lt;- list()
+clist &lt;- list()
+for (col in 1:length(subset_david)) {
+  dat &lt;- as_data_frame(subset_david[[col]])
+  dat$id &lt;- rownames(subset_david[[col]])
+  names(dat) &lt;- c(&quot;A&quot;, &quot;a&quot;, &quot;id&quot;)
+  dat &lt;- dat %&gt;% mutate(ocounts = A, osize = a + A)
+  p1dat &lt;- filter(dat, grepl(&quot;Beauregard&quot;, id))
+  p2dat &lt;- filter(dat, grepl(&quot;Tanzania&quot;, id))
+  cdat &lt;- filter(dat, !(grepl(&quot;Beauregard&quot;, id) | grepl(&quot;Tanzania&quot;, id)))
+  p1list[[col]] &lt;- p1dat
+  p2list[[col]] &lt;- p2dat
+  clist[[col]] &lt;- cdat
+}</code></pre>
+<p>Plot raw with parental data.</p>
+<pre class="r"><code>for (col in 1:length(clist)) {
+  p1dat &lt;- p1list[[col]]
+  p2dat &lt;- p2list[[col]]
+  cdat &lt;- clist[[col]]
+  pdf(file = paste0(&quot;../output/off_and_parents/op_raw_&quot;, col, &quot;.pdf&quot;),
+       family = &quot;Times&quot;, height = 5, width = 5, colormodel = &quot;cmyk&quot;)
+  print(plot_geno(ocounts = cdat$ocounts, osize = cdat$osize, 
+                  p1counts = p1dat$ocounts, p1size = p1dat$osize,
+                  p2counts = p2dat$ocounts, p2size = p2dat$osize,
+                  ploidy = ploidy, p1geno = 0, p2geno = 4))
+  dev.off()
+  print(plot_geno(ocounts = cdat$ocounts, osize = cdat$osize, 
+                  p1counts = p1dat$ocounts, p1size = p1dat$osize,
+                  p2counts = p2dat$ocounts, p2size = p2dat$osize,
+                  ploidy = ploidy, p1geno = 0, p2geno = 4))
+}</code></pre>
+<p><img src="explore_parental_files/figure-html/unnamed-chunk-2-1.png" width="672" /><img src="explore_parental_files/figure-html/unnamed-chunk-2-2.png" width="672" /><img src="explore_parental_files/figure-html/unnamed-chunk-2-3.png" width="672" /><img src="explore_parental_files/figure-html/unnamed-chunk-2-4.png" width="672" /><img src="explore_parental_files/figure-html/unnamed-chunk-2-5.png" width="672" /><img src="explore_parental_files/figure-html/unnamed-chunk-2-6.png" width="672" /><img src="explore_parental_files/figure-html/unnamed-chunk-2-7.png" width="672" /><img src="explore_parental_files/figure-html/unnamed-chunk-2-8.png" width="672" /><img src="explore_parental_files/figure-html/unnamed-chunk-2-9.png" width="672" /><img src="explore_parental_files/figure-html/unnamed-chunk-2-10.png" width="672" /></p>
+</div>
+<div id="develop-a-likelihood-ratio-test-for-binomial-vs-beta-binomial" class="section level1">
+<h1>Develop a likelihood ratio test for binomial vs beta-binomial</h1>
+<pre class="r"><code>dbb_wrapper &lt;- function(obj, x, n) {
+  ##cat(obj, &quot;\n&quot;)
+  current_p   &lt;- updog:::expit(obj[1])
+  current_tau &lt;- updog:::expit(obj[2])
+  
+  if (current_tau == 0) {
+    llike_vec &lt;- dbinom(x = x, size = n, prob = current_p, log = TRUE)
+  } else if (current_tau == 1) {
+    return(-Inf)
+  } else {
+    llike_vec &lt;- updog:::dbetabinom_mu_rho_cpp(x = x, size = n, mu = current_p, 
+                                               rho = current_tau, return_log = TRUE)
+  }
 
-  for (bindex in 1:length(bias_vec)) {
-      bias &lt;- bias_vec[bindex]
-      for(sindex in 1:length(seq_error_vec)) {
-        seq_error &lt;- seq_error_vec[sindex]
-        pvec &lt;- updog::get_pvec(ploidy = ploidy, bias_val = bias, 
-                                seq_error = seq_error)
-        slopevec &lt;- pvec / (1 - pvec)
-        xend &lt;- pmin(rep(1, ploidy + 1), 1 / slopevec)
-        yend &lt;- pmin(rep(1, ploidy + 1), 1 * slopevec)
-        df_lines &lt;- data.frame(x = rep(0, ploidy + 1), y = rep(0, ploidy + 1),
-                               xend = xend, yend = yend, porig = porig)
-        df_lines$bias &lt;- bias
-        df_lines$seq_error &lt;- seq_error
-        if (bindex == 1 &amp; sindex == 1) {
-          df_tot &lt;- df_lines
-        } else {
-          df_tot &lt;- bind_rows(df_tot, df_lines)
-        }
-          
+  llike &lt;- sum(llike_vec)
+  ##cat(llike, &quot;\n&quot;)
+  sum(llike)
+}
+
+get_lrt &lt;- function(x, n) {
+  phat &lt;- sum(x) / sum(n) ## initial condition
+  oout &lt;- stats::optim(par = c(0, 0), fn = dbb_wrapper, x = x, n = n,
+                       control = list(fnscale = -1), method = &quot;BFGS&quot;)
+  
+  updog:::expit(oout$par[1])
+  updog:::expit(oout$par[2])
+  
+  lrt &lt;- 2 * (oout$value - sum(dbinom(x = x, size = n, prob = phat, log = TRUE)))
+  pvalue &lt;- pchisq(q = lrt, df = 1, lower.tail = FALSE)
+  return(c(lrt, pvalue))
+}</code></pre>
+<p>Test the distributional approximation of chisquared.</p>
+<pre class="r"><code>p1dat &lt;- p1list[[2]]
+n &lt;- p1dat$osize
+p &lt;- sum(p1dat$ocounts) / sum(p1dat$osize)
+
+itermax &lt;- 500
+simmat &lt;- matrix(NA, nrow = itermax, ncol = 2)
+for (index in 334:itermax) {
+  x &lt;- stats::rbinom(n = length(n), size = n, prob = p)
+  simmat[index, ] &lt;- get_lrt(x = x, n = n)
+}
+
+hist(simmat[, 1])</code></pre>
+<p><img src="explore_parental_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code>hist(simmat[, 2])</code></pre>
+<p><img src="explore_parental_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+<p>These intervals should also contain some uncertainty on estimating the mean proportion. To do this, I ad-hocly just sampled phat1 from a normal with a mean and sd given by their estimates.</p>
+<pre class="r"><code>for (col in 1:length(clist)) {
+  p1dat &lt;- p1list[[col]]
+  p2dat &lt;- p2list[[col]]
+  phat1 &lt;- sum(p1dat$A) / (sum(p1dat$A) + sum(p1dat$a))
+  phat2 &lt;- sum(p2dat$A) / (sum(p2dat$A) + sum(p2dat$a))
+  
+  sdhat &lt;- sqrt(phat1 * (1 - phat1) / sum(p1dat$osize))
+  itermax &lt;- 500
+  simmat &lt;- matrix(NA, nrow = itermax, ncol = nrow(p1dat))
+  for (index in 1:itermax) {
+    p1temp &lt;- rnorm(n = 1, mean = phat1, sd = sdhat)
+    if (p1temp &lt; 0) {
+      p1temp &lt;- 0
+    } else if (p1temp &gt; 1) {
+      p1temp &lt;- 1
     }
+    simmat[index, ] &lt;- rbinom(n = nrow(p1dat), size = p1dat$osize, prob = p1temp)    
+  }
+  intervals &lt;- apply(simmat, 2, quantile, probs = c(0.025, 0.975))
+  plot_dat &lt;- data_frame(A = p1dat$ocounts, Reads = p1dat$osize, lower = intervals[1, ],
+                         upper = intervals[2, ], parent = col)
+  
+  if (col == 1) {
+    tot_dat &lt;- plot_dat
+  } else {
+    tot_dat &lt;- bind_rows(tot_dat, plot_dat)
   }
   
-
-  pl &lt;- ggplot(data = df_tot, mapping = aes(x = x, y = y, 
-                                            xend = xend, yend = yend,
-                                            color = porig)) +
-    geom_segment() +
-    theme_bw() +
-    theme(axis.text = element_blank(),
-          axis.ticks = element_blank(),
-          strip.background = element_rect(fill = &quot;white&quot;)) +
-    facet_grid(seq_error ~ bias) +
-    xlab(&quot;Bias&quot;) +
-    ylab(&quot;Sequencing Error&quot;) +
-    scale_color_discrete(name = &quot;Original\nProbabilities&quot;)
-print(pl)</code></pre>
-<p><img src="prob_lines_files/figure-html/unnamed-chunk-1-1.png" width="960" /></p>
-<pre class="r"><code>pdf(file = &quot;../output/prob_plots.pdf&quot;, family = &quot;Times&quot;,
-    colormodel = &quot;cmyk&quot;, width = 6, height = 3)
-print(pl)
-dev.off()</code></pre>
-<pre><code>## png 
-##   2</code></pre>
+  
+  sdhat &lt;- sqrt(phat2 * (1 - phat2) / sum(p2dat$osize))
+  itermax &lt;- 500
+  simmat &lt;- matrix(NA, nrow = itermax, ncol = nrow(p2dat))
+  for (index in 1:itermax) {
+    p2temp &lt;- rnorm(n = 1, mean = phat2, sd = sdhat)
+    if (p2temp &lt; 0) {
+      p2temp &lt;- 0
+    } else if (p2temp &gt; 1) {
+      p2temp &lt;- 1
+    }
+    simmat[index, ] &lt;- rbinom(n = nrow(p2dat), size = p2dat$osize, prob = p2temp)    
+  }
+  intervals &lt;- apply(simmat, 2, quantile, probs = c(0.025, 0.975))
+  plot_dat &lt;- data_frame(A = p2dat$ocounts, Reads = p2dat$osize, lower = intervals[1, ],
+                         upper = intervals[2, ], parent = col + length(clist))
+  
+  tot_dat &lt;- bind_rows(tot_dat, plot_dat)
+}</code></pre>
+<pre class="r"><code>tot_dat$index &lt;- 1:nrow(tot_dat)
+ggplot(data = tot_dat, mapping = aes(x = Reads, y = A)) +
+  geom_point() +
+  theme_bw() +
+  geom_linerange(mapping = aes(ymin = lower, ymax = upper)) +
+  theme(strip.background = element_rect(fill = &quot;white&quot;)) +
+  geom_abline(slope = 1, intercept = 0)</code></pre>
+<p><img src="explore_parental_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code>mean(tot_dat$A &gt;= tot_dat$lower &amp; tot_dat$A &lt;= tot_dat$upper)</code></pre>
+<pre><code>## [1] 0.8667</code></pre>
+<pre class="r"><code>ggplot(data = tot_dat, mapping = aes(x = index, y = A, ymin = lower, ymax = upper)) +
+  geom_linerange() +
+  geom_point(col = 2) +
+  coord_flip() +
+  theme_bw()</code></pre>
+<p><img src="explore_parental_files/figure-html/unnamed-chunk-6-2.png" width="672" /></p>
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>## R version 3.3.2 (2016-10-31)
 ## Platform: x86_64-pc-linux-gnu (64-bit)
@@ -395,7 +497,7 @@ dev.off()</code></pre>
 ## [5] tidyr_0.6.1     tibble_1.2      ggplot2_2.2.1   tidyverse_1.1.1
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_0.12.10     plyr_1.8.4       forcats_0.2.0    tools_3.3.2     
+##  [1] Rcpp_0.12.11     plyr_1.8.4       forcats_0.2.0    tools_3.3.2     
 ##  [5] digest_0.6.12    jsonlite_1.3     lubridate_1.6.0  evaluate_0.10   
 ##  [9] nlme_3.1-131     gtable_0.2.0     lattice_0.20-34  psych_1.6.12    
 ## [13] DBI_0.6          yaml_2.1.14      parallel_3.3.2   haven_1.0.0     

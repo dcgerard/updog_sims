@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Abstract
 
-I run the bias-modeling updog on the alfalfa data.
+I run the bias-modeling updog on the alfalfa data. These are just with the SNPS with the most read_counts.
 
 # Subset Data
 
@@ -20,23 +20,15 @@ obj <- readRDS(file = "../output/allele_counts/chr1_ct.RDS")
 str(obj)
 ```
 
-I will choose SNP's that are at various levels of total read-counts.
+I will choose SNP's that have the most read counts.
 
 ```{r}
 suppressMessages(library(tidyverse))
 med_counts <- apply(obj$A + obj$a, 1, median, na.rm = TRUE)
 mean_counts <- rowMeans(obj$A + obj$a, na.rm = TRUE)
-quants <- quantile(mean_counts, probs = seq(0, 1, length = 30), na.rm = TRUE)
-match_vec <- match(round(quants, digits = 1), round(mean_counts, digits = 1))
-sub_A <- obj$A[match_vec, ]
-sub_a <- obj$a[match_vec, ]
-```
-
-For the smaller counts alleles, most of the samples don't have any read-counts (indicated by `NA`) (though, this isn't a guarantee).
-
-```{r}
-plot(rowMeans(is.na(sub_a)), type = "l")
-plot(rowMeans(is.na(sub_A)), type = "l")
+ordervec <- order(mean_counts, decreasing = TRUE)
+sub_A <- obj$A[ordervec[1:50], ]
+sub_a <- obj$a[ordervec[1:50], ]
 ```
 
 # Raw Plots
@@ -79,17 +71,8 @@ for (index in 20:30) {
                         ploidy = ploidy, print_val = FALSE,
                         update_outdisp = FALSE, update_outmean = FALSE,
                         update_outprop = TRUE,
-                        non_mono_max = 5, min_disp = 10 ^ -8)
+                        non_mono_max = 1)
   plot(uout, ask = FALSE, plot_beta = FALSE)
-  print(plot_geno(ocounts = ocounts_nona, osize = osize_nona, 
-                  ploidy = 4, seq_error = 0))
-  
-  pdf(file = paste0("../output/alfalpha_plots/alpha_fit_", index, ".pdf"),
-      family = "Times", colormodel = "cmyk", height = 5, width = 5)
-  plot(uout, ask = FALSE, plot_beta = FALSE)
-  dev.off()
-  pdf(file = paste0("../output/alfalpha_plots/alpha_raw_", index, ".pdf"),
-      family = "Times", colormodel = "cmyk", height = 5, width = 5)
   print(plot_geno(ocounts = ocounts_nona, osize = osize_nona, 
                   ploidy = 4, seq_error = 0))
   dev.off()

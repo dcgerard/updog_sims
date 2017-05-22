@@ -1,0 +1,193 @@
+---
+title: "Explore Parental Data"
+author: "David Gerard"
+date: "May 22, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Here, I look at the parental data and see if they seem to be overdispersed between samples.
+
+# Analysis
+
+Read in data.
+
+```{r}
+library(tidyverse)
+library(updog)
+load("../data/subset_David.Rdata")
+ploidy <- 6
+p1list <- list()
+p2list <- list()
+clist <- list()
+for (col in 1:length(subset_david)) {
+  dat <- as_data_frame(subset_david[[col]])
+  dat$id <- rownames(subset_david[[col]])
+  names(dat) <- c("A", "a", "id")
+  dat <- dat %>% mutate(ocounts = A, osize = a + A)
+  p1dat <- filter(dat, grepl("Beauregard", id))
+  p2dat <- filter(dat, grepl("Tanzania", id))
+  cdat <- filter(dat, !(grepl("Beauregard", id) | grepl("Tanzania", id)))
+  p1list[[col]] <- p1dat
+  p2list[[col]] <- p2dat
+  clist[[col]] <- cdat
+}
+```
+
+
+Plot raw with parental data.
+
+```{r}
+for (col in 1:length(clist)) {
+  p1dat <- p1list[[col]]
+  p2dat <- p2list[[col]]
+  cdat <- clist[[col]]
+  pdf(file = paste0("../output/off_and_parents/op_raw_", col, ".pdf"),
+       family = "Times", height = 5, width = 5, colormodel = "cmyk")
+  print(plot_geno(ocounts = cdat$ocounts, osize = cdat$osize, 
+                  p1counts = p1dat$ocounts, p1size = p1dat$osize,
+                  p2counts = p2dat$ocounts, p2size = p2dat$osize,
+                  ploidy = ploidy, p1geno = 0, p2geno = 4))
+  dev.off()
+  print(plot_geno(ocounts = cdat$ocounts, osize = cdat$osize, 
+                  p1counts = p1dat$ocounts, p1size = p1dat$osize,
+                  p2counts = p2dat$ocounts, p2size = p2dat$osize,
+                  ploidy = ploidy, p1geno = 0, p2geno = 4))
+}
+```
+
+# Develop a likelihood ratio test for binomial vs beta-binomial
+```{r}
+dbb_wrapper <- function(obj, x, n) {
+  ##cat(obj, "\n")
+  current_p   <- updog:::expit(obj[1])
+  current_tau <- updog:::expit(obj[2])
+  
+  if (current_tau == 0) {
+    llike_vec <- dbinom(x = x, size = n, prob = current_p, log = TRUE)
+  } else if (current_tau == 1) {
+    return(-Inf)
+  } else {
+    llike_vec <- updog:::dbetabinom_mu_rho_cpp(x = x, size = n, mu = current_p, 
+                                               rho = current_tau, return_log = TRUE)
+  }
+
+  llike <- sum(llike_vec)
+  ##cat(llike, "\n")
+  sum(llike)
+}
+
+get_lrt <- function(x, n) {
+  phat <- sum(x) / sum(n) ## initial condition
+  oout <- stats::optim(par = c(0, 0), fn = dbb_wrapper, x = x, n = n,
+                       control = list(fnscale = -1), method = "BFGS")
+  
+  updog:::expit(oout$par[1])
+  updog:::expit(oout$par[2])
+  
+  lrt <- 2 * (oout$value - sum(dbinom(x = x, size = n, prob = phat, log = TRUE)))
+  pvalue <- pchisq(q = lrt, df = 1, lower.tail = FALSE)
+  return(c(lrt, pvalue))
+}
+```
+
+
+Test the distributional approximation of chisquared.
+
+```{r}
+p1dat <- p1list[[2]]
+n <- p1dat$osize
+p <- sum(p1dat$ocounts) / sum(p1dat$osize)
+
+itermax <- 500
+simmat <- matrix(NA, nrow = itermax, ncol = 2)
+for (index in 334:itermax) {
+  x <- stats::rbinom(n = length(n), size = n, prob = p)
+  simmat[index, ] <- get_lrt(x = x, n = n)
+}
+
+hist(simmat[, 1])
+hist(simmat[, 2])
+
+```
+
+
+These intervals should also contain some uncertainty on estimating the mean proportion. To do this, I ad-hocly just sampled phat1 from a normal with a mean and sd given by their estimates.
+
+
+```{r}
+for (col in 1:length(clist)) {
+  p1dat <- p1list[[col]]
+  p2dat <- p2list[[col]]
+  phat1 <- sum(p1dat$A) / (sum(p1dat$A) + sum(p1dat$a))
+  phat2 <- sum(p2dat$A) / (sum(p2dat$A) + sum(p2dat$a))
+  
+  sdhat <- sqrt(phat1 * (1 - phat1) / sum(p1dat$osize))
+  itermax <- 500
+  simmat <- matrix(NA, nrow = itermax, ncol = nrow(p1dat))
+  for (index in 1:itermax) {
+    p1temp <- rnorm(n = 1, mean = phat1, sd = sdhat)
+    if (p1temp < 0) {
+      p1temp <- 0
+    } else if (p1temp > 1) {
+      p1temp <- 1
+    }
+    simmat[index, ] <- rbinom(n = nrow(p1dat), size = p1dat$osize, prob = p1temp)    
+  }
+  intervals <- apply(simmat, 2, quantile, probs = c(0.025, 0.975))
+  plot_dat <- data_frame(A = p1dat$ocounts, Reads = p1dat$osize, lower = intervals[1, ],
+                         upper = intervals[2, ], parent = col)
+  
+  if (col == 1) {
+    tot_dat <- plot_dat
+  } else {
+    tot_dat <- bind_rows(tot_dat, plot_dat)
+  }
+  
+  
+  sdhat <- sqrt(phat2 * (1 - phat2) / sum(p2dat$osize))
+  itermax <- 500
+  simmat <- matrix(NA, nrow = itermax, ncol = nrow(p2dat))
+  for (index in 1:itermax) {
+    p2temp <- rnorm(n = 1, mean = phat2, sd = sdhat)
+    if (p2temp < 0) {
+      p2temp <- 0
+    } else if (p2temp > 1) {
+      p2temp <- 1
+    }
+    simmat[index, ] <- rbinom(n = nrow(p2dat), size = p2dat$osize, prob = p2temp)    
+  }
+  intervals <- apply(simmat, 2, quantile, probs = c(0.025, 0.975))
+  plot_dat <- data_frame(A = p2dat$ocounts, Reads = p2dat$osize, lower = intervals[1, ],
+                         upper = intervals[2, ], parent = col + length(clist))
+  
+  tot_dat <- bind_rows(tot_dat, plot_dat)
+}
+```
+
+```{r}
+tot_dat$index <- 1:nrow(tot_dat)
+ggplot(data = tot_dat, mapping = aes(x = Reads, y = A)) +
+  geom_point() +
+  theme_bw() +
+  geom_linerange(mapping = aes(ymin = lower, ymax = upper)) +
+  theme(strip.background = element_rect(fill = "white")) +
+  geom_abline(slope = 1, intercept = 0)
+
+
+mean(tot_dat$A >= tot_dat$lower & tot_dat$A <= tot_dat$upper)
+ggplot(data = tot_dat, mapping = aes(x = index, y = A, ymin = lower, ymax = upper)) +
+  geom_linerange() +
+  geom_point(col = 2) +
+  coord_flip() +
+  theme_bw()
+```
+
+```{r}
+sessionInfo()
+```
