@@ -20,7 +20,7 @@ library(updog)
 ploidy <- 6
 bias_vec <- c(0.1, 0.5, 1, 2, 10)
 seq_error_vec <- c(0.01, 0.05, 0.1)
-porig <- as.factor(format(0:ploidy / ploidy, digits = 2))
+porig <- as.factor(paste0(0:ploidy, "/", ploidy))
 
   for (bindex in 1:length(bias_vec)) {
       bias <- bias_vec[bindex]
@@ -56,7 +56,8 @@ porig <- as.factor(format(0:ploidy / ploidy, digits = 2))
     facet_grid(seq_error ~ bias) +
     xlab("Bias") +
     ylab("Sequencing Error") +
-    scale_color_discrete(name = "Original\nProbabilities")
+    scale_color_discrete(name = "Original\nProbabilities") +
+    ggthemes::scale_color_colorblind()
 print(pl)
 
 pdf(file = "../output/prob_plots.pdf", family = "Times",

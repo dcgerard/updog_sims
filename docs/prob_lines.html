@@ -329,7 +329,7 @@ div.tocify {
 ploidy &lt;- 6
 bias_vec &lt;- c(0.1, 0.5, 1, 2, 10)
 seq_error_vec &lt;- c(0.01, 0.05, 0.1)
-porig &lt;- as.factor(format(0:ploidy / ploidy, digits = 2))
+porig &lt;- as.factor(paste0(0:ploidy, &quot;/&quot;, ploidy))
 
   for (bindex in 1:length(bias_vec)) {
       bias &lt;- bias_vec[bindex]
@@ -365,8 +365,11 @@ porig &lt;- as.factor(format(0:ploidy / ploidy, digits = 2))
     facet_grid(seq_error ~ bias) +
     xlab(&quot;Bias&quot;) +
     ylab(&quot;Sequencing Error&quot;) +
-    scale_color_discrete(name = &quot;Original\nProbabilities&quot;)
-print(pl)</code></pre>
+    scale_color_discrete(name = &quot;Original\nProbabilities&quot;) +
+    ggthemes::scale_color_colorblind()</code></pre>
+<pre><code>## Scale for &#39;colour&#39; is already present. Adding another scale for
+## &#39;colour&#39;, which will replace the existing scale.</code></pre>
+<pre class="r"><code>print(pl)</code></pre>
 <p><img src="prob_lines_files/figure-html/unnamed-chunk-1-1.png" width="960" /></p>
 <pre class="r"><code>pdf(file = &quot;../output/prob_plots.pdf&quot;, family = &quot;Times&quot;,
     colormodel = &quot;cmyk&quot;, width = 6, height = 3)
@@ -395,17 +398,17 @@ dev.off()</code></pre>
 ## [5] tidyr_0.6.1     tibble_1.2      ggplot2_2.2.1   tidyverse_1.1.1
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_0.12.10     plyr_1.8.4       forcats_0.2.0    tools_3.3.2     
+##  [1] Rcpp_0.12.11     plyr_1.8.4       forcats_0.2.0    tools_3.3.2     
 ##  [5] digest_0.6.12    jsonlite_1.3     lubridate_1.6.0  evaluate_0.10   
 ##  [9] nlme_3.1-131     gtable_0.2.0     lattice_0.20-34  psych_1.6.12    
 ## [13] DBI_0.6          yaml_2.1.14      parallel_3.3.2   haven_1.0.0     
 ## [17] xml2_1.1.1       stringr_1.2.0    httr_1.2.1       knitr_1.15.1    
 ## [21] hms_0.3          rprojroot_1.2    grid_3.3.2       R6_2.2.0        
 ## [25] readxl_0.1.1     foreign_0.8-67   rmarkdown_1.3    modelr_0.1.0    
-## [29] reshape2_1.4.2   magrittr_1.5     backports_1.0.5  scales_0.4.1    
-## [33] htmltools_0.3.5  rvest_0.3.2      assertthat_0.2.0 mnormt_1.5-5    
-## [37] colorspace_1.3-2 labeling_0.3     stringi_1.1.2    lazyeval_0.2.0  
-## [41] munsell_0.4.3    broom_0.4.2</code></pre>
+## [29] reshape2_1.4.2   magrittr_1.5     ggthemes_3.4.0   backports_1.0.5 
+## [33] scales_0.4.1     htmltools_0.3.5  rvest_0.3.2      assertthat_0.2.0
+## [37] mnormt_1.5-5     colorspace_1.3-2 labeling_0.3     stringi_1.1.2   
+## [41] lazyeval_0.2.0   munsell_0.4.3    broom_0.4.2</code></pre>
 </div>
 
 <hr>
