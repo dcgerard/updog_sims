@@ -84,7 +84,7 @@ Indeed, the most sure we can possibly be about a SNP for these data is about 0.7
   max(uout$maxpostprob)
 ```    
 
-We don't estimate that there are many outliers. The bias and seq-error both look ok. What looks bad is the od_param.
+There are both many outliers and the overdispersion is large. The bias and seq-error both look ok.
 ```{r}
 uout$out_prop
 uout$bias_val
