@@ -56,8 +56,7 @@ porig <- as.factor(paste0(0:ploidy, "/", ploidy))
     facet_grid(seq_error ~ bias) +
     xlab("Bias") +
     ylab("Sequencing Error") +
-    scale_color_discrete(name = "Original\nProbabilities") +
-    ggthemes::scale_color_colorblind()
+    ggthemes::scale_color_colorblind(name = "Original\nProbabilities")
 print(pl)
 
 pdf(file = "../output/prob_plots.pdf", family = "Times",

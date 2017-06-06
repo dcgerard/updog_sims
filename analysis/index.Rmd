@@ -25,6 +25,7 @@ Much of this code doesn't work anymore because of modifications to the [`updog`]
 * [Updog where mean of outlier distribution is constrained to be 0.5](vanilla_updog_out_mean_06.html)
 * [Presentation figures.](presentation_figures.html) There are a lot of good inference results here.
 * [Messy first look at parental data](check_parental_precisions.html).
+* [Diagnostics on the super overdispersed SNP](parent_info.html). It seems the best measure to remove this SNP is `maxpostprob`. This is very lower (max at 0.73 and average a little less than that).
 
 # Alfalfa Project:
 

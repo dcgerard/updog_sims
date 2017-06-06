@@ -365,11 +365,8 @@ porig &lt;- as.factor(paste0(0:ploidy, &quot;/&quot;, ploidy))
     facet_grid(seq_error ~ bias) +
     xlab(&quot;Bias&quot;) +
     ylab(&quot;Sequencing Error&quot;) +
-    scale_color_discrete(name = &quot;Original\nProbabilities&quot;) +
-    ggthemes::scale_color_colorblind()</code></pre>
-<pre><code>## Scale for &#39;colour&#39; is already present. Adding another scale for
-## &#39;colour&#39;, which will replace the existing scale.</code></pre>
-<pre class="r"><code>print(pl)</code></pre>
+    ggthemes::scale_color_colorblind(name = &quot;Original\nProbabilities&quot;)
+print(pl)</code></pre>
 <p><img src="prob_lines_files/figure-html/unnamed-chunk-1-1.png" width="960" /></p>
 <pre class="r"><code>pdf(file = &quot;../output/prob_plots.pdf&quot;, family = &quot;Times&quot;,
     colormodel = &quot;cmyk&quot;, width = 6, height = 3)

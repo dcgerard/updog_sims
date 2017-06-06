@@ -1,0 +1,99 @@
+---
+title: "Some basic diagnostics"
+author: "David Gerard"
+date: "June 5, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+Here, I look at the highly dispersed SNP. The log-likelihood plots don't show anything major. The average of `maxpostprob` is really low.
+
+
+# Analysis
+
+Read in Data
+
+```{r}
+library(updog)
+library(tidyverse)
+load("../data/subset_David.Rdata")
+ploidy <- 6
+
+cdat_list <- list()
+pdat_list <- list()
+for (col in 1:length(subset_david)){
+  dat <- as_data_frame(subset_david[[col]])
+  dat$id <- rownames(subset_david[[col]])
+  names(dat) <- c("A", "a", "id")
+  dat <- dat %>% mutate(ocounts = A, osize = a + A)
+  pdat <- filter(dat, grepl("Beauregard", id) | grepl("Tanzania", id)) %>%
+    separate("id", c("line", "id"), sep = "_") %>%
+    group_by(line) %>%
+    summarise(pcounts = sum(ocounts), psize = sum(osize)) %>%
+    ungroup()
+  cdat <- filter(dat, !(grepl("Beauregard", id) | grepl("Tanzania", id)))
+  cdat_list[[col]] <- cdat
+  pdat_list[[col]] <- pdat
+}
+```
+
+Fit `updog`.
+
+```{r, cache=TRUE}
+cdat <- cdat_list[[3]]
+pdat <- pdat_list[[3]]
+uout <- updog_vanilla(ocounts = cdat$ocounts, osize = cdat$osize, 
+                      ploidy = ploidy, 
+                      p1counts = pdat$pcounts[1], p1size = pdat$psize[1],
+                      p2counts = pdat$pcounts[2], p2size = pdat$psize[2],
+                      print_val = FALSE, non_mono_max = 1)
+stopifnot(dupdog(uout) == uout$llike)
+plot(uout, plot_beta = FALSE)
+uout$llike
+```
+
+Simulate a lot of log-likelihoods. I don't see any major discrepancy here.
+
+```{r}
+itermax <- 200
+llike_vec <- rep(NA, length = itermax)
+for (index in 1:itermax) {
+  usim <- rupdog(uout)
+  llike_vec[index] <- usim$llike  
+}
+
+llike_dat <- data_frame(llike = llike_vec)
+ggplot(data = llike_dat, mapping = aes(x = llike)) +
+  geom_histogram(bins = 30, fill = "white", color = "black") +
+  theme_bw() +
+  geom_vline(xintercept = uout$llike, lty = 2, col = 2, lwd = 2)
+```
+
+But the average `maxpostprob` is really small. We can estimate the proportion of points we expect to misclassify:
+```{r}
+1 - mean(uout$maxpostprob)
+```
+
+Indeed, the most sure we can possibly be about a SNP for these data is about 0.7
+
+```{r}
+  max(uout$maxpostprob)
+```    
+
+We don't estimate that there are many outliers. The bias and seq-error both look ok. What looks bad is the od_param.
+```{r}
+uout$out_prop
+uout$bias_val
+uout$seq_error
+uout$od_param
+plot(uout, ask = FALSE)
+```
+
+
+```{r}
+sessionInfo()
+```
