@@ -354,7 +354,7 @@ uout &lt;- updog_vanilla(ocounts = cdat$ocounts, osize = cdat$osize,
                       p2counts = pdat$pcounts[2], p2size = pdat$psize[2],
                       print_val = FALSE, non_mono_max = 1)
 stopifnot(dupdog(uout) == uout$llike)
-plot(uout, plot_beta = FALSE)</code></pre>
+plot(uout, plot_beta = FALSE, use_colorblind = TRUE)</code></pre>
 <pre><code>## Warning: Removed 1 rows containing missing values (geom_point).
 
 ## Warning: Removed 1 rows containing missing values (geom_point).
