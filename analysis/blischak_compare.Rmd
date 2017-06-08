@@ -63,9 +63,9 @@ for (index in 1:length(cdat_list)) {
 Save files for Blischak
 
 ```{r}
-write.table(x = t(cmat), file = "../output/blishak_formatted_potato/potato_ocounts.txt", 
+write.table(x = cmat, file = "../output/blishak_formatted_potato/potato_ocounts.txt", 
             row.names = FALSE, col.names = FALSE)
-write.table(x = t(tmat), file = "../output/blishak_formatted_potato/potato_osize.txt",
+write.table(x = tmat, file = "../output/blishak_formatted_potato/potato_osize.txt",
             row.names = FALSE, col.names = FALSE)
 write.table(x = seq_vec, file = "../output/blishak_formatted_potato/potato_seq_error.txt",
             row.names = FALSE, col.names = FALSE)
@@ -74,13 +74,13 @@ write.table(x = seq_vec, file = "../output/blishak_formatted_potato/potato_seq_e
 Fit Blischak using call to `system`
 
 ```{r}
-system("ebg diseq -p 6 -n 273 -l 10 -t ../output/blishak_formatted_potato/potato_osize.txt -r ../output/blishak_formatted_potato/potato_osize.txt -e ../output/blishak_formatted_potato/potato_seq_error.txt")
+system("ebg diseq -p 6 -n 273 -l 10 -t ../output/blishak_formatted_potato/potato_osize.txt -r ../output/blishak_formatted_potato/potato_ocounts.txt -e ../output/blishak_formatted_potato/potato_seq_error.txt")
 system("mv diseq* ../output/blishak_formatted_potato/")
 
-system("ebg hwe -p 6 -n 273 -l 10 -t ../output/blishak_formatted_potato/potato_osize.txt -r ../output/blishak_formatted_potato/potato_osize.txt -e ../output/blishak_formatted_potato/potato_seq_error.txt")
+system("ebg hwe -p 6 -n 273 -l 10 -t ../output/blishak_formatted_potato/potato_osize.txt -r ../output/blishak_formatted_potato/potato_ocounts.txt -e ../output/blishak_formatted_potato/potato_seq_error.txt")
 system("mv hwe* ../output/blishak_formatted_potato/")
 
-system("ebg gatk -p 6 -n 273 -l 10 -t ../output/blishak_formatted_potato/potato_osize.txt -r ../output/blishak_formatted_potato/potato_osize.txt -e ../output/blishak_formatted_potato/potato_seq_error.txt")
+system("ebg gatk -p 6 -n 273 -l 10 -t ../output/blishak_formatted_potato/potato_osize.txt -r ../output/blishak_formatted_potato/potato_ocounts.txt -e ../output/blishak_formatted_potato/potato_seq_error.txt")
 system("mv gatk* ../output/blishak_formatted_potato/")
 ```
 

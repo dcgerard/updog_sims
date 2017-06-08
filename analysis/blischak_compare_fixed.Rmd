@@ -1,0 +1,59 @@
+---
+title: "More Blischak Fits"
+author: "David Gerard"
+date: "June 8, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+This is more fits from the Blischak software. See [here](blischak_compare.html) for the first fits.
+
+# Try to get a non-6
+
+Try to modify data to get non-6
+
+```{r}
+trash <- capture.output( {
+system("ebg diseq -p 6 -n 273 -l 10 -t ../output/blishak_formatted_potato/potato_osize.txt -r ../output/blishak_formatted_potato/potato_ocounts.txt -e ../output/blishak_formatted_potato/potato_seq_error.txt")
+system("mv diseq* ../output/blishak_formatted_potato/")
+
+system("ebg hwe -p 6 -n 273 -l 10 -t ../output/blishak_formatted_potato/potato_osize.txt -r ../output/blishak_formatted_potato/potato_ocounts.txt -e ../output/blishak_formatted_potato/potato_seq_error.txt")
+system("mv hwe* ../output/blishak_formatted_potato/")
+
+system("ebg gatk -p 6 -n 273 -l 10 -t ../output/blishak_formatted_potato/potato_osize.txt -r ../output/blishak_formatted_potato/potato_ocounts.txt -e ../output/blishak_formatted_potato/potato_seq_error.txt")
+system("mv gatk* ../output/blishak_formatted_potato/") 
+}
+)
+```
+
+
+Now compare output with output from `updog`.
+
+```{r}
+library(updog)
+library(ggplot2)
+bgeno <- read.table("../output/blishak_formatted_potato/diseq-genos.txt")
+
+for (index in 1:10) {
+  uout <- readRDS(paste0("../output/potato_updog_fits/uout_", index, ".RDS"))
+  
+  pl <- plot_geno(ocounts = uout$input$ocounts, osize = uout$input$osize, ploidy = uout$input$ploidy,
+                  ogeno = uout$ogeno, use_colorblind = FALSE, seq_error = uout$seq_error, 
+                  bias_val = uout$bias_val)
+  pl <- pl + ggtitle("updog Fit")
+  print(pl)
+  pl <- plot_geno(ocounts = uout$input$ocounts, osize = uout$input$osize, ploidy = uout$input$ploidy,
+                  ogeno = bgeno[, index], use_colorblind = FALSE, seq_error = uout$seq_error)
+  pl <- pl + ggtitle("Blishak Fit")
+  print(pl)
+}
+```
+
+```{r}
+sessionInfo()
+```
