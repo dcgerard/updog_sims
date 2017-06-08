@@ -1,0 +1,40 @@
+---
+title: "Bias Prior"
+author: "David Gerard"
+date: "June 8, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Here, I try to motivate a log-normal prior on the bias parameter in `updog`.
+
+# Analysis
+
+Two is a little exteme
+```{r}
+r <- 2
+updog::plot_problines(0.01, exp(r), 6)
+```
+
+3 is a very extreme and it's hard for me to every imagine seeing such data.
+```{r}
+r <- 3
+updog::plot_problines(0.01, exp(r), 6)
+```
+
+1 is about as much bias as I want
+```{r}
+r <- -1
+updog::plot_problines(0.01, exp(r), 6)
+```
+
+If we just do a N(0, 1) prior on the log, then we would see 2 only about 5 percent of the time. This is an extreme case of bias, so I don't might setting it this much. 
+
+```{r}
+sessionInfo()
+```
