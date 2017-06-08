@@ -9,9 +9,10 @@
 <meta name="generator" content="pandoc" />
 
 
+<meta name="author" content="David Gerard" />
 
 
-<title>Home</title>
+<title>Get Seq Error Prior</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -300,45 +301,95 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Home</h1>
+<h1 class="title toc-ignore">Get Seq Error Prior</h1>
+<h4 class="author"><em>David Gerard</em></h4>
+<h4 class="date"><em>June 8, 2017</em></h4>
 
 </div>
 
 
-<p><strong>Last updated:</strong> 2017-06-08</p>
-<p><strong>Code version:</strong> bfb04cfc3234aa0ddaa95adca5db6b31d2f4e3b5</p>
-<div id="sweet-potato-project" class="section level1">
-<h1>Sweet Potato Project</h1>
-<p>Much of this code doesn’t work anymore because of modifications to the <a href="https://github.com/dcgerard/updog"><code>updog</code></a> package</p>
-<ul>
-<li><a href="snp_analysis.html">First analysis of SNP data</a></li>
-<li><a href="iter_procedure.html">Look at iterative procedure and effect of uniform prior on parents</a>. This results in a non-uniform prior on the children, as can be expected.</li>
-<li><a href="updot_overdispersion.html">First try at overdispersed updog</a></li>
-<li><a href="more_updog_over.html">Run overdispersed updog on all of the datasets Felipe gave me</a></li>
-<li><a href="updog_overdispersion_seq_est.html">Look at estimating sequencing error rate and results look promising. No more errors when I bound the overdispersion parameter.</a></li>
-<li><a href="more_updog_over_seq_est.html">Run through all datasets when overdispersion parameter is bounded and I estimate the sequencing error rate.</a></li>
-<li><a href="showoff_plots.html">Show off new methods for updog for plotting and summarizing.</a></li>
-<li><a href="vanilla_updog.html">First attempt at modeling bias parameter</a>. Looks promising, but still need to do a lot of work.</li>
-<li><a href="prob_lines.html">Plot probability lines at different levels of seq_error and bias_val</a>.</li>
-<li><a href="vanilla_updog_outlier.html">First fits with outlier model.</a> Things look pretty good!</li>
-<li><a href="diagnostic_plot.html">Some EDA from bad SNP</a> Re-ran after I made it so <code>out_mean</code> is constrained to be 0.5. It looks pretty good now!</li>
-<li><a href="vanilla_updog_out_mean_06.html">Updog where mean of outlier distribution is constrained to be 0.5</a></li>
-<li><a href="presentation_figures.html">Presentation figures.</a> There are a lot of good inference results here.</li>
-<li><a href="check_parental_precisions.html">Messy first look at parental data</a>.</li>
-<li><a href="parent_info.html">Diagnostics on the super overdispersed SNP</a>. It seems the best measure to remove this SNP is <code>maxpostprob</code>. This is very lower (max at 0.73 and average a little less than that).</li>
-<li><a href="blischak_compare.html">First try at Blischak software.</a> I had a mistake in this code. Ignore these results.</li>
-<li><a href="blischak_compare_fixed.html">Second try at Blischak software.</a> I prefer the visual display of updog better.</li>
-</ul>
+<div id="abstract" class="section level1">
+<h1>Abstract</h1>
+<p>Here, I read in the sequencing error that Blischak used and inflate it a little to derive my default prior for <code>updog</code>.</p>
 </div>
-<div id="alfalfa-project" class="section level1">
-<h1>Alfalfa Project:</h1>
-<ul>
-<li><a href="parse_vcf.html">Parse vcf files, extract readcounts, filter out all variants with more than two alleles</a>. This file contains some EDA on the VCF files. But mostly, this code gets the read-count matrices.</li>
-<li><a href="initial_updog_fits.html">Initial fits for some SNPs</a>. These data seem messier than the sweet potato data. Though, there seems to be much less sequencing error. Bias is still a possible problem for some SNPs.</li>
-<li><a href="tons_of_plots.html">Tons of raw plots</a> Tons of raw plots. I am trying to see features of the data.</li>
-<li><a href="initial_updog_fits_with_bias.html">Try the bias corrected updog on the alfalfa data.</a> Some things look good, some things look bad.</li>
-<li><a href="seq_error_prior.html">Motivate Prior on sequencing error</a>. I think a reasonable prior is Beta(mean = 0.005, od = 0.02). This is motivated by the sequencing error rates that the Blischak paper assumes.</li>
-</ul>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<pre class="r"><code>seq_error1 &lt;- read.table(&quot;~/Code/polyploid-genotyping/data/c20-pendula-error.txt&quot;)[, 1]
+seq_error2 &lt;- read.table(&quot;~/Code/polyploid-genotyping/data/c20-pubescens-error.txt&quot;)[, 1]
+
+hist(seq_error1)</code></pre>
+<p><img src="seq_error_prior_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<pre class="r"><code>hist(seq_error2)</code></pre>
+<p><img src="seq_error_prior_files/figure-html/unnamed-chunk-1-2.png" width="672" /></p>
+<pre class="r"><code>summary(seq_error1)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+## 0.00000 0.00143 0.00346 0.00496 0.00688 0.05190</code></pre>
+<pre class="r"><code>summary(seq_error2)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+## 0.00000 0.00144 0.00348 0.00498 0.00692 0.05010</code></pre>
+<p>Use method of moments to get prior values on mean and overdispersion parameters assuming a beta.</p>
+<pre class="r"><code>mu = mean(seq_error1)
+tau = var(seq_error1) / (mu * (1 - mu))
+mu</code></pre>
+<pre><code>## [1] 0.004964</code></pre>
+<pre class="r"><code>tau</code></pre>
+<pre><code>## [1] 0.004966</code></pre>
+<pre class="r"><code>mu = mean(seq_error2)
+tau = var(seq_error2) / (mu * (1 - mu))
+mu</code></pre>
+<pre><code>## [1] 0.004982</code></pre>
+<pre class="r"><code>tau</code></pre>
+<pre><code>## [1] 0.004938</code></pre>
+<p>It seems taht setting <span class="math inline">\(\mu = \tau = 0.005\)</span> would be a reasonable prior on the sequencing error rate. We can inflate <span class="math inline">\(\tau\)</span> a little bit to 0.01 or even 0.02 or 0.03 or 0.1 to be safe.</p>
+<pre class="r"><code>updog::plot_beta_dist(mu = 0.005, rho = 0.01)</code></pre>
+<p><img src="seq_error_prior_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>updog::plot_beta_dist(mu = 0.005, rho = 0.02)</code></pre>
+<p><img src="seq_error_prior_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
+<pre class="r"><code>updog::plot_beta_dist(mu = 0.005, rho = 0.03)</code></pre>
+<p><img src="seq_error_prior_files/figure-html/unnamed-chunk-3-3.png" width="672" /></p>
+<pre class="r"><code>updog::plot_beta_dist(mu = 0.005, rho = 0.04)</code></pre>
+<p><img src="seq_error_prior_files/figure-html/unnamed-chunk-3-4.png" width="672" /></p>
+<pre class="r"><code>updog::plot_beta_dist(mu = 0.005, rho = 0.05)</code></pre>
+<p><img src="seq_error_prior_files/figure-html/unnamed-chunk-3-5.png" width="672" /></p>
+<pre class="r"><code>updog::plot_beta_dist(mu = 0.005, rho = 0.1)</code></pre>
+<p><img src="seq_error_prior_files/figure-html/unnamed-chunk-3-6.png" width="672" /></p>
+<p>See if the maximum sequencing error observed in the Blischak data is consistant with this prior.</p>
+<pre class="r"><code>max1 &lt;- max(seq_error1)
+max2 &lt;- max(seq_error2)
+max1</code></pre>
+<pre><code>## [1] 0.05185</code></pre>
+<pre class="r"><code>max2</code></pre>
+<pre><code>## [1] 0.05013</code></pre>
+<pre class="r"><code>mu &lt;- 0.005
+tau &lt;- 0.02
+
+alpha &lt;- mu * (1 - tau) / tau
+beta  &lt;- (1 - mu) * (1 - tau) / tau
+pupper &lt;- pbeta(q = max1, shape1 = alpha, shape2 = beta, lower.tail = FALSE)
+pupper</code></pre>
+<pre><code>## [1] 0.008163</code></pre>
+<p>Having a 0.0082 upper tail probability is still pretty large considering that we have 49021 points.</p>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.3.2 (2016-10-31)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: Ubuntu 16.04.2 LTS
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## loaded via a namespace (and not attached):
+##  [1] backports_1.0.5  assertthat_0.2.0 magrittr_1.5     rprojroot_1.2   
+##  [5] tools_3.3.2      htmltools_0.3.5  yaml_2.1.14      Rcpp_0.12.11    
+##  [9] updog_0.1.0      stringi_1.1.2    rmarkdown_1.3    knitr_1.15.1    
+## [13] stringr_1.2.0    digest_0.6.12    evaluate_0.10</code></pre>
 </div>
 
 <hr>

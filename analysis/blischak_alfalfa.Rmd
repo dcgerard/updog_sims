@@ -1,0 +1,53 @@
+---
+title: "Blischak and Alfalfa"
+author: "David Gerard"
+date: "June 8, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Here, I compare `updog` fits with those from `ebg` on some alfalfa SNPs.
+
+
+```{r}
+obj <- readRDS(file = "~/Data/alfalfa/cleaned_alfalfa/chr1_ct.RDS")
+str(obj)
+```
+
+```{r}
+num_look <- 20
+suppressMessages(library(tidyverse))
+med_counts <- apply(obj$A + obj$a, 1, median, na.rm = TRUE)
+mean_counts <- rowMeans(obj$A + obj$a, na.rm = TRUE)
+ordervec <- order(mean_counts, decreasing = TRUE)
+sub_A <- obj$A[ordervec[1:num_look], ]
+sub_a <- obj$a[ordervec[1:num_look], ]
+
+tot_mat <- sub_A + sub_a
+
+write.table(t(tot_mat), file = "../output/blischak_formatted_alfalfa/alfalfa_osize.txt")
+write.table(t(sub_A), file = "../output/blischak_formatted_alfalfa/alfalfa_ocounts.txt")
+```
+
+```{r}
+for (index in 1:num_look) {
+  pl <- plot_geno(ocounts = sub_A[index, ], osize = sub_A[index, ] + sub_a[index, ], ploidy = 4)
+  print(pl)
+}
+```
+
+```{r}
+for (index in 1:num_look) {
+  uout <- updog_vanilla(ocounts = sub_A[index, ], osize = tot_mat[index, ], ploidy = 4, print_val = TRUE)
+  plot(uout, plot_beta = FALSE)
+}
+```
+
+```{r}
+sessionInfo()
+```

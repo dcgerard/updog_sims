@@ -1,0 +1,75 @@
+---
+title: "Get Seq Error Prior"
+author: "David Gerard"
+date: "June 8, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Here, I read in the sequencing error that Blischak used and inflate it a little to derive my default prior for `updog`.
+
+# Analysis
+
+```{r}
+seq_error1 <- read.table("~/Code/polyploid-genotyping/data/c20-pendula-error.txt")[, 1]
+seq_error2 <- read.table("~/Code/polyploid-genotyping/data/c20-pubescens-error.txt")[, 1]
+
+hist(seq_error1)
+hist(seq_error2)
+summary(seq_error1)
+summary(seq_error2)
+```
+
+Use method of moments to get prior values on mean and overdispersion parameters assuming a beta.
+
+```{r}
+mu = mean(seq_error1)
+tau = var(seq_error1) / (mu * (1 - mu))
+mu
+tau
+
+mu = mean(seq_error2)
+tau = var(seq_error2) / (mu * (1 - mu))
+mu
+tau
+```
+
+It seems taht setting $\mu = \tau = 0.005$ would be a reasonable prior on the sequencing error rate. We can inflate $\tau$ a little bit to 0.01 or even 0.02 or 0.03 or 0.1 to be safe.
+
+```{r}
+updog::plot_beta_dist(mu = 0.005, rho = 0.01)
+updog::plot_beta_dist(mu = 0.005, rho = 0.02)
+updog::plot_beta_dist(mu = 0.005, rho = 0.03)
+updog::plot_beta_dist(mu = 0.005, rho = 0.04)
+updog::plot_beta_dist(mu = 0.005, rho = 0.05)
+updog::plot_beta_dist(mu = 0.005, rho = 0.1)
+```
+
+See if the maximum sequencing error observed in the Blischak data is consistant with this prior.
+
+```{r}
+max1 <- max(seq_error1)
+max2 <- max(seq_error2)
+max1
+max2
+
+mu <- 0.005
+tau <- 0.02
+
+alpha <- mu * (1 - tau) / tau
+beta  <- (1 - mu) * (1 - tau) / tau
+pupper <- pbeta(q = max1, shape1 = alpha, shape2 = beta, lower.tail = FALSE)
+pupper
+```
+
+Having a `r pupper` upper tail probability is still pretty large considering that we have `r length(seq_error1)` points.
+
+
+```{r}
+sessionInfo()
+```
