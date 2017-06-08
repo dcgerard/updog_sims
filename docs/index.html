@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8" />
+<meta charset="utf-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -305,8 +305,8 @@ div.tocify {
 </div>
 
 
-<p><strong>Last updated:</strong> 2017-06-06</p>
-<p><strong>Code version:</strong> ‘3a81ced5a526fe3cd99657aa207bc56765bbdd79’</p>
+<p><strong>Last updated:</strong> 2017-06-08</p>
+<p><strong>Code version:</strong> 4a97f954a64d3345ea5243d53bdfb755f86a1e8c</p>
 <div id="sweet-potato-project" class="section level1">
 <h1>Sweet Potato Project</h1>
 <p>Much of this code doesn’t work anymore because of modifications to the <a href="https://github.com/dcgerard/updog"><code>updog</code></a> package</p>
@@ -326,6 +326,7 @@ div.tocify {
 <li><a href="presentation_figures.html">Presentation figures.</a> There are a lot of good inference results here.</li>
 <li><a href="check_parental_precisions.html">Messy first look at parental data</a>.</li>
 <li><a href="parent_info.html">Diagnostics on the super overdispersed SNP</a>. It seems the best measure to remove this SNP is <code>maxpostprob</code>. This is very lower (max at 0.73 and average a little less than that).</li>
+<li><a href="blischak_compare.html">First try at Blischak software.</a> Doesn’t do so well. It is just saying they are all 6. Perhaps I am not doing something right?</li>
 </ul>
 </div>
 <div id="alfalfa-project" class="section level1">
@@ -387,7 +388,7 @@ $(document).ready(function () {
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

@@ -26,6 +26,7 @@ Much of this code doesn't work anymore because of modifications to the [`updog`]
 * [Presentation figures.](presentation_figures.html) There are a lot of good inference results here.
 * [Messy first look at parental data](check_parental_precisions.html).
 * [Diagnostics on the super overdispersed SNP](parent_info.html). It seems the best measure to remove this SNP is `maxpostprob`. This is very lower (max at 0.73 and average a little less than that).
+* [First try at Blischak software.](blischak_compare.html) Doesn't do so well. It is just saying they are all 6. Perhaps I am not doing something right?
 
 # Alfalfa Project:
 
