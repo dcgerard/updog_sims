@@ -1,0 +1,104 @@
+---
+title: "Fit EBG"
+author: "David Gerard"
+date: "June 8, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Here, I fit the Blischak model and compare it to `updog`.
+
+# Fit updog, output fits
+
+
+Read in data.
+```{r}
+library(updog)
+library(tidyverse)
+load("../data/subset_David.Rdata")
+ploidy <- 6
+cdat_list <- list()
+pdat_list <- list()
+cmat <- matrix(NA, nrow = 273, ncol = length(subset_david))
+tmat <- matrix(NA, nrow = 273, ncol = length(subset_david))
+for (col in 1:length(subset_david)){
+  dat <- as_data_frame(subset_david[[col]])
+  dat$id <- rownames(subset_david[[col]])
+  names(dat) <- c("A", "a", "id")
+  dat <- dat %>% mutate(ocounts = A, osize = a + A)
+  pdat <- filter(dat, grepl("Beauregard", id) | grepl("Tanzania", id)) %>%
+    separate("id", c("line", "id"), sep = "_") %>%
+    group_by(line) %>%
+    summarise(pcounts = sum(ocounts), psize = sum(osize)) %>%
+    ungroup()
+  cdat <- filter(dat, !(grepl("Beauregard", id) | grepl("Tanzania", id)))
+  cdat_list[[col]] <- cdat
+  cmat[, col] <- cdat$ocounts
+  tmat[, col] <- cdat$osize
+  pdat_list[[col]] <- pdat
+}
+```
+
+Fit updog and get error rate
+```{r}
+seq_vec <- rep(NA, length = length(cdat_list))
+for (index in 1:length(cdat_list)) {
+  cdat <- cdat_list[[index]]
+  pdat <- pdat_list[[index]]
+  uout <- updog_vanilla(ocounts = cdat$ocounts, osize = cdat$osize, 
+                        ploidy = ploidy, 
+                        p1counts = pdat$pcounts[1], p1size = pdat$psize[1],
+                        p2counts = pdat$pcounts[2], p2size = pdat$psize[2],
+                        print_val = FALSE, non_mono_max = 1)
+  seq_vec[index] <- uout$seq_error
+  saveRDS(object = uout, file = paste0("../output/potato_updog_fits/uout_", index,".RDS"))
+}
+```
+
+Save files for Blischak
+
+```{r}
+write.table(x = t(cmat), file = "../output/blishak_formatted_potato/potato_ocounts.txt", 
+            row.names = FALSE, col.names = FALSE)
+write.table(x = t(tmat), file = "../output/blishak_formatted_potato/potato_osize.txt",
+            row.names = FALSE, col.names = FALSE)
+write.table(x = seq_vec, file = "../output/blishak_formatted_potato/potato_seq_error.txt",
+            row.names = FALSE, col.names = FALSE)
+```
+
+Fit Blischak using call to `system`
+
+```{r}
+system("ebg diseq -p 6 -n 273 -l 10 -t ../output/blishak_formatted_potato/potato_osize.txt -r ../output/blishak_formatted_potato/potato_osize.txt -e ../output/blishak_formatted_potato/potato_seq_error.txt")
+system("mv diseq* ../output/blishak_formatted_potato/")
+
+system("ebg hwe -p 6 -n 273 -l 10 -t ../output/blishak_formatted_potato/potato_osize.txt -r ../output/blishak_formatted_potato/potato_osize.txt -e ../output/blishak_formatted_potato/potato_seq_error.txt")
+system("mv hwe* ../output/blishak_formatted_potato/")
+
+system("ebg gatk -p 6 -n 273 -l 10 -t ../output/blishak_formatted_potato/potato_osize.txt -r ../output/blishak_formatted_potato/potato_osize.txt -e ../output/blishak_formatted_potato/potato_seq_error.txt")
+system("mv gatk* ../output/blishak_formatted_potato/")
+```
+
+Read in Blishak genotype estimates
+
+```{r}
+bout <- read.table("../output/blishak_formatted_potato/diseq-genos.txt")
+```
+
+Hmm, the Blischak method is saying that everything is 6:
+
+```{r}
+for (index in 1:ncol(bout)) {
+  print(table(bout[, index]))
+}
+```
+
+
+```{r}
+sessionInfo()
+```

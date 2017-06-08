@@ -1,0 +1,34 @@
+---
+title: "First SNP Analaysis"
+author: "First Last"
+date: "`r Sys.Date()`"
+---
+
+**Last updated:** `r Sys.Date()`
+
+**Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
+
+# Abstract
+
+Look at the potato data that is distributed from `fitTetra`.
+
+# Read in Data
+```{r}
+library(fitTetra)
+library(tidyverse)
+library(updog)
+data(tetra.potato.SNP)
+dat <- filter(tetra.potato.SNP, MarkerName == "PotSNP016")
+
+dat$ocounts <- dat$X_Raw
+dat$osize   <- dat$X_Raw + dat$Y_Raw 
+
+plot_geno(ocounts = dat$ocounts, osize = dat$osize, ploidy = 4)
+
+```
+
+# Session information
+
+```{r info}
+sessionInfo()
+```
