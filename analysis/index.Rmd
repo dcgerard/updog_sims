@@ -36,5 +36,7 @@ Much of this code doesn't work anymore because of modifications to the [`updog`]
 * [Tons of raw plots](tons_of_plots.html) Tons of raw plots. I am trying to see features of the data.
 * [Try the bias corrected updog on the alfalfa data.](initial_updog_fits_with_bias.html) Some things look good, some things look bad.
 * [Motivate Prior on sequencing error](seq_error_prior.html). I think a reasonable prior is Beta(mean = 0.005, od = 0.02). This is motivated by the sequencing error rates that the Blischak paper assumes.
+* [Better prior on sequencing errorr rate](seq_error_prior_nonbeta.html). Here, I just use a logit-normal. This is better because the beta has an infinite spike at 0 for reasonable priors. The logit normal works much nicer in practice and is intuitive.
 * [Motivate Prior on bias parameter](bias_prior.html). I think a reasonable prior is N(0, 1) on the log-bias parameter. Values of -3 and 3 are super extreme and I would consider to be extremely poorly behaved SNPs that I would probably throw out if we ever saw them.
+
 

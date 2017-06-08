@@ -1,0 +1,55 @@
+---
+title: "Get Seq Error Prior"
+author: "David Gerard"
+date: "June 8, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Here, I explore various levels of sequencing error to come up with a good prior.
+
+# Analysis
+
+```{r}
+library(updog)
+eps <- updog:::expit(-4.7)
+plot_problines(seq_error = eps, bias_val = 1, ploidy = 6)
+```
+
+Three standard deviations away would be extreme:
+```{r}
+eps <- updog:::expit(-1.7)
+eps
+plot_problines(seq_error = eps, bias_val = 1, ploidy = 6)
+```
+
+Even two standard deviations away is pretty extreme
+```{r}
+eps <- updog:::expit(-2.7)
+eps
+plot_problines(seq_error = eps, bias_val = 1, ploidy = 6)
+```
+
+Does this match up with the Blischak data? Yes! It's even much bigger than the max observed.
+
+```{r}
+seq_error1 <- read.table("~/Code/polyploid-genotyping/data/c20-pendula-error.txt")[, 1]
+seq_error2 <- read.table("~/Code/polyploid-genotyping/data/c20-pubescens-error.txt")[, 1]
+mean(seq_error1)
+mean(seq_error2)
+updog:::expit(-4.7)
+
+max(seq_error1)
+max(seq_error2)
+updog:::expit(-1.7)
+```
+
+
+```{r}
+sessionInfo()
+```

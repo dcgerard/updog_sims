@@ -15,6 +15,7 @@ Here, I compare `updog` fits with those from `ebg` on some alfalfa SNPs.
 
 
 ```{r}
+library(updog)
 obj <- readRDS(file = "~/Data/alfalfa/cleaned_alfalfa/chr1_ct.RDS")
 str(obj)
 ```
@@ -43,6 +44,7 @@ for (index in 1:num_look) {
 
 ```{r}
 for (index in 1:num_look) {
+  plot_geno(ocounts = sub_A[index, ], osize = tot_mat[index, ], ploidy = 4)
   uout <- updog_vanilla(ocounts = sub_A[index, ], osize = tot_mat[index, ], ploidy = 4, print_val = TRUE)
   plot(uout, plot_beta = FALSE)
 }
