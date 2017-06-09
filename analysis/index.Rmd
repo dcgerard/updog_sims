@@ -39,4 +39,7 @@ Much of this code doesn't work anymore because of modifications to the [`updog`]
 * [Better prior on sequencing errorr rate](seq_error_prior_nonbeta.html). Here, I just use a logit-normal. This is better because the beta has an infinite spike at 0 for reasonable priors. The logit normal works much nicer in practice and is intuitive.
 * [Motivate Prior on bias parameter](bias_prior.html). I think a reasonable prior is N(0, 1) on the log-bias parameter. Values of -3 and 3 are super extreme and I would consider to be extremely poorly behaved SNPs that I would probably throw out if we ever saw them.
 
+# Non-sibling Project
+* [Data that Blischak uses has super low coverage!](blischak_data_eda.html)
+
 
