@@ -335,6 +335,12 @@ plot(uout, plot_beta = FALSE, show_maxpostprob = TRUE)</code></pre>
 <pre><code>## [1] 1.022</code></pre>
 <pre class="r"><code>uout$od_param ## somewhat large OD param</code></pre>
 <pre><code>## [1] 0.01264</code></pre>
+<pre class="r"><code>## Pearson&#39;s Chi-square for deviations from theoretical
+test_stat &lt;- length(uout$ogeno) * sum((table(uout$ogeno) / length(uout$ogeno) - c(0.25, 0.5, 0.25)) ^ 2 / c(0.25, 0.5, 0.25))
+stats::pchisq(test_stat, df = 3, lower.tail = FALSE)</code></pre>
+<pre><code>## [1] 0.8913</code></pre>
+<pre class="r"><code>stats::pchisq(test_stat, df = 2, lower.tail = FALSE) ## not significantly different</code></pre>
+<pre><code>## [1] 0.7326</code></pre>
 </div>
 <div id="read-mapping-bias" class="section level1">
 <h1>Read-mapping bias</h1>
@@ -353,6 +359,12 @@ plot(uout, plot_beta = FALSE, show_maxpostprob = TRUE)</code></pre>
 <pre><code>## [1] 0.5607</code></pre>
 <pre class="r"><code>uout$od_param ## somewhat large OD param</code></pre>
 <pre><code>## [1] 0.003945</code></pre>
+<pre class="r"><code>## Pearson&#39;s Chi-square for deviations from theoretical
+test_stat &lt;- length(uout$ogeno) * sum((table(uout$ogeno) / length(uout$ogeno) - c(0.25, 0.5, 0.25)) ^ 2 / c(0.25, 0.5, 0.25))
+stats::pchisq(test_stat, df = 3, lower.tail = FALSE)</code></pre>
+<pre><code>## [1] 0.1365</code></pre>
+<pre class="r"><code>stats::pchisq(test_stat, df = 2, lower.tail = FALSE) ## not significantly different</code></pre>
+<pre><code>## [1] 0.06281</code></pre>
 </div>
 <div id="outliers" class="section level1">
 <h1>Outliers</h1>
@@ -370,6 +382,12 @@ plot(uout, plot_beta = FALSE, show_maxpostprob = TRUE)</code></pre>
 <pre><code>## [1] 1.056</code></pre>
 <pre class="r"><code>uout$od_param ## somewhat large OD param</code></pre>
 <pre><code>## [1] 0.007556</code></pre>
+<pre class="r"><code>## Pearson&#39;s Chi-square for deviations from theoretical
+test_stat &lt;- length(uout$ogeno) * sum((table(uout$ogeno) / length(uout$ogeno) - c(0.25, 0.5, 0.25)) ^ 2 / c(0.25, 0.5, 0.25))
+stats::pchisq(test_stat, df = 3, lower.tail = FALSE)</code></pre>
+<pre><code>## [1] 0.6879</code></pre>
+<pre class="r"><code>stats::pchisq(test_stat, df = 2, lower.tail = FALSE) ## not significantly different</code></pre>
+<pre><code>## [1] 0.4782</code></pre>
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>## R version 3.3.2 (2016-10-31)
 ## Platform: x86_64-pc-linux-gnu (64-bit)

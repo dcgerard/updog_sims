@@ -32,6 +32,12 @@ plot(uout, plot_beta = FALSE, show_maxpostprob = TRUE)
 uout$seq_error
 uout$bias_val
 uout$od_param ## somewhat large OD param
+
+## Pearson's Chi-square for deviations from theoretical
+test_stat <- length(uout$ogeno) * sum((table(uout$ogeno) / length(uout$ogeno) - c(0.25, 0.5, 0.25)) ^ 2 / c(0.25, 0.5, 0.25))
+stats::pchisq(test_stat, df = 3, lower.tail = FALSE)
+stats::pchisq(test_stat, df = 2, lower.tail = FALSE) ## not significantly different
+
 ```
 
 # Read-mapping bias
@@ -47,6 +53,11 @@ plot(uout, plot_beta = FALSE, show_maxpostprob = TRUE)
 uout$seq_error
 uout$bias_val
 uout$od_param ## somewhat large OD param
+
+## Pearson's Chi-square for deviations from theoretical
+test_stat <- length(uout$ogeno) * sum((table(uout$ogeno) / length(uout$ogeno) - c(0.25, 0.5, 0.25)) ^ 2 / c(0.25, 0.5, 0.25))
+stats::pchisq(test_stat, df = 3, lower.tail = FALSE)
+stats::pchisq(test_stat, df = 2, lower.tail = FALSE) ## not significantly different
 ```
 
 # Outliers
@@ -62,6 +73,12 @@ plot(uout, plot_beta = FALSE, show_maxpostprob = TRUE)
 uout$seq_error
 uout$bias_val
 uout$od_param ## somewhat large OD param
+
+## Pearson's Chi-square for deviations from theoretical
+test_stat <- length(uout$ogeno) * sum((table(uout$ogeno) / length(uout$ogeno) - c(0.25, 0.5, 0.25)) ^ 2 / c(0.25, 0.5, 0.25))
+stats::pchisq(test_stat, df = 3, lower.tail = FALSE)
+stats::pchisq(test_stat, df = 2, lower.tail = FALSE) ## not significantly different
+
 ```
 
 
