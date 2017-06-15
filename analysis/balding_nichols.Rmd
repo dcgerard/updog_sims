@@ -1,0 +1,23 @@
+---
+title: "Blischak and Alfalfa"
+author: "David Gerard"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Here, I try to get some intuition behind the Balding-Nichols model.
+
+# Set up
+
+The Balding-Nichols model states that the genotype for individual $i$ is distributed $BB(K, p, F_i)$, where $K$ is the ploidy of the species, $p$ is the allele-frequency, and $F_i$ is the individual-specific "inbreeding coefficient." The reason why this isn't saturated is that each genetic locus shares the same $F_i$. Hence, they estimate the $F_i$ jointy with all loci.
+
+
+```{r}
+sessionInfo()
+```

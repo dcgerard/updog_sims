@@ -1,0 +1,28 @@
+---
+title: "Poland EDA"
+author: "David Gerard"
+date: "June 9, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+EDA on the Poland (2012) data. See \href{https://doi.org/10.1371/journal.pone.0032253}{https://doi.org/10.1371/journal.pone.0032253}.
+
+# Analysis
+
+```{r}
+dat <- read.table("~/Data/journal.pone.0032253.s004.TXT", header = TRUE)
+table(dat$diff)
+table(dat$snp_posInTag)
+plot(dat$bin_lower)
+dat$OWB004
+```
+
+```{r}
+sessionInfo()
+```

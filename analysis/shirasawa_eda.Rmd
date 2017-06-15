@@ -1,0 +1,70 @@
+---
+title: "Shirasawa EDA"
+author: "David Gerard"
+date: "June 15, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I chose SNPs using [this](https://github.com/dcgerard/updog_sims/blob/gh-pages/analysis/eda_vcf_sp.R) code. I will show try fitting updog to these data to try and demonstrate its use.
+
+# Overdispersion.
+
+```{r}
+library(updog)
+ploidy <- 6
+ocounts_mat <- read.csv("../output/shirasawa_snps/example_refcounts.csv", row.names = 1)
+osize_mat <- read.csv("../output/shirasawa_snps/example_readcounts.csv", row.names = 1)
+
+ocounts <- ocounts_mat[, 1]
+osize   <- osize_mat[, 1]
+
+plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy)
+
+uout <- updog_vanilla(ocounts = ocounts[!is.na(ocounts)], osize = osize[!is.na(ocounts)], 
+                      ploidy = ploidy, p1geno = 5, p2geno = 5, update_pgeno = FALSE)
+plot(uout, plot_beta = FALSE, show_maxpostprob = TRUE)
+uout$seq_error
+uout$bias_val
+uout$od_param ## somewhat large OD param
+```
+
+# Read-mapping bias
+
+```{r}
+ocounts <- ocounts_mat[, 2]
+osize   <- osize_mat[, 2]
+plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy)
+
+uout <- updog_vanilla(ocounts = ocounts[!is.na(ocounts)], osize = osize[!is.na(ocounts)], 
+                      ploidy = ploidy, p1geno = 5, p2geno = 5, update_pgeno = FALSE)
+plot(uout, plot_beta = FALSE, show_maxpostprob = TRUE)
+uout$seq_error
+uout$bias_val
+uout$od_param ## somewhat large OD param
+```
+
+# Outliers
+
+```{r}
+ocounts <- ocounts_mat[, 3]
+osize   <- osize_mat[, 3]
+plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy)
+
+uout <- updog_vanilla(ocounts = ocounts[!is.na(ocounts)], osize = osize[!is.na(ocounts)], 
+                      ploidy = ploidy, p1geno = 5, p2geno = 5, update_pgeno = FALSE)
+plot(uout, plot_beta = FALSE, show_maxpostprob = TRUE)
+uout$seq_error
+uout$bias_val
+uout$od_param ## somewhat large OD param
+```
+
+
+```{r}
+sessionInfo()
+```

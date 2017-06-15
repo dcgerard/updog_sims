@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="David Gerard" />
+
+
+<title>Uitdewilligen EDA</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">temp</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Uitdewilligen EDA</h1>
+<h4 class="author"><em>David Gerard</em></h4>
+<h4 class="date"><em>June 9, 2017</em></h4>
+
+</div>
+
+
+<div id="abstract" class="section level1">
+<h1>Abstract</h1>
+<p>EDA for data from Uitdewilligen etal (2013). See .</p>
+</div>
+<div id="anlaysis-with-genome-calls" class="section level1">
+<h1>Anlaysis with genome calls</h1>
+<p>“uitdewilligen_etal_2013_varients.csv” just contains the estimated genotypes, not the actual counts.</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## Loading tidyverse: ggplot2
+## Loading tidyverse: tibble
+## Loading tidyverse: tidyr
+## Loading tidyverse: readr
+## Loading tidyverse: purrr
+## Loading tidyverse: dplyr</code></pre>
+<pre><code>## Conflicts with tidy packages ----------------------------------------------</code></pre>
+<pre><code>## filter(): dplyr, stats
+## lag():    dplyr, stats</code></pre>
+<pre class="r"><code>dat &lt;- read.csv(&quot;~/Data/uitdewilligen_raw_data/uitdewilligen_etal_2013_varients.csv&quot;, sep = &quot;;&quot;)
+table(dat$P1PEM01)</code></pre>
+<pre><code>## 
+##     0     1     2     3     4 
+## 55446 20864  7635  3742  2950</code></pre>
+</div>
+<div id="try-and-extract-raw-counts" class="section level1">
+<h1>Try and extract raw counts</h1>
+<pre class="r"><code>library(vcfR)</code></pre>
+<pre><code>## 
+##    *****       ***   vcfR   ***       *****
+##    This is vcfR 1.4.0 
+##      browseVignettes(&#39;vcfR&#39;) # Documentation
+##      citation(&#39;vcfR&#39;) # Citation
+##    *****       *****      *****       *****</code></pre>
+<pre class="r"><code>vcfdat &lt;- read.vcfR(file = &quot;~/Data/uitdewilligen_raw_data/NewPlusOldCalls.headed.vcf&quot;)</code></pre>
+<pre><code>## 
+Meta line 57 read in.
+## All meta lines processed.
+## Character matrix gt created.
+## Character matrix gt rows: 135193
+## Character matrix gt cols: 93
+## skip: 0
+## nrows: 135193
+## row_num: 0
+## 
+## 
+Processed variant 1000
+Processed variant 2000
+Processed variant 3000
+Processed variant 4000
+Processed variant 5000
+Processed variant 6000
+Processed variant 7000
+Processed variant 8000
+Processed variant 9000
+Processed variant 10000
+Processed variant 11000
+Processed variant 12000
+Processed variant 13000
+Processed variant 14000
+Processed variant 15000
+Processed variant 16000
+Processed variant 17000
+Processed variant 18000
+Processed variant 19000
+Processed variant 20000
+Processed variant 21000
+Processed variant 22000
+Processed variant 23000
+Processed variant 24000
+Processed variant 25000
+Processed variant 26000
+Processed variant 27000
+Processed variant 28000
+Processed variant 29000
+Processed variant 30000
+Processed variant 31000
+Processed variant 32000
+Processed variant 33000
+Processed variant 34000
+Processed variant 35000
+Processed variant 36000
+Processed variant 37000
+Processed variant 38000
+Processed variant 39000
+Processed variant 40000
+Processed variant 41000
+Processed variant 42000
+Processed variant 43000
+Processed variant 44000
+Processed variant 45000
+Processed variant 46000
+Processed variant 47000
+Processed variant 48000
+Processed variant 49000
+Processed variant 50000
+Processed variant 51000
+Processed variant 52000
+Processed variant 53000
+Processed variant 54000
+Processed variant 55000
+Processed variant 56000
+Processed variant 57000
+Processed variant 58000
+Processed variant 59000
+Processed variant 60000
+Processed variant 61000
+Processed variant 62000
+Processed variant 63000
+Processed variant 64000
+Processed variant 65000
+Processed variant 66000
+Processed variant 67000
+Processed variant 68000
+Processed variant 69000
+Processed variant 70000
+Processed variant 71000
+Processed variant 72000
+Processed variant 73000
+Processed variant 74000
+Processed variant 75000
+Processed variant 76000
+Processed variant 77000
+Processed variant 78000
+Processed variant 79000
+Processed variant 80000
+Processed variant 81000
+Processed variant 82000
+Processed variant 83000
+Processed variant 84000
+Processed variant 85000
+Processed variant 86000
+Processed variant 87000
+Processed variant 88000
+Processed variant 89000
+Processed variant 90000
+Processed variant 91000
+Processed variant 92000
+Processed variant 93000
+Processed variant 94000
+Processed variant 95000
+Processed variant 96000
+Processed variant 97000
+Processed variant 98000
+Processed variant 99000
+Processed variant 100000
+Processed variant 101000
+Processed variant 102000
+Processed variant 103000
+Processed variant 104000
+Processed variant 105000
+Processed variant 106000
+Processed variant 107000
+Processed variant 108000
+Processed variant 109000
+Processed variant 110000
+Processed variant 111000
+Processed variant 112000
+Processed variant 113000
+Processed variant 114000
+Processed variant 115000
+Processed variant 116000
+Processed variant 117000
+Processed variant 118000
+Processed variant 119000
+Processed variant 120000
+Processed variant 121000
+Processed variant 122000
+Processed variant 123000
+Processed variant 124000
+Processed variant 125000
+Processed variant 126000
+Processed variant 127000
+Processed variant 128000
+Processed variant 129000
+Processed variant 130000
+Processed variant 131000
+Processed variant 132000
+Processed variant 133000
+Processed variant 134000
+Processed variant 135000
+Processed variant: 135193
+## All variants processed</code></pre>
+<pre class="r"><code>unique_id &lt;- stringr::str_replace(queryMETA(vcfdat), &quot;^.+=ID=&quot;, &quot;&quot;)
+unique_id &lt;- unique_id[-length(unique_id)]
+unique_id</code></pre>
+<pre><code>##  [1] &quot;NS&quot;     &quot;DP&quot;     &quot;AC&quot;     &quot;AN&quot;     &quot;AF&quot;     &quot;HETAR&quot;  &quot;HOMA&quot;  
+##  [8] &quot;HOMR&quot;   &quot;RA&quot;     &quot;AA&quot;     &quot;SRF&quot;    &quot;SRR&quot;    &quot;SAF&quot;    &quot;SAR&quot;   
+## [15] &quot;SRB&quot;    &quot;SAB&quot;    &quot;SRP&quot;    &quot;SAP&quot;    &quot;ABR&quot;    &quot;ABA&quot;    &quot;AB&quot;    
+## [22] &quot;ABP&quot;    &quot;RUN&quot;    &quot;RL&quot;     &quot;RR&quot;     &quot;RPP&quot;    &quot;EL&quot;     &quot;ER&quot;    
+## [29] &quot;EPP&quot;    &quot;BL&quot;     &quot;BR&quot;     &quot;LRB&quot;    &quot;LRBP&quot;   &quot;BVAR&quot;   &quot;SNP&quot;   
+## [36] &quot;TS&quot;     &quot;TV&quot;     &quot;CpG&quot;    &quot;MNP&quot;    &quot;INS&quot;    &quot;DEL&quot;    &quot;REPEAT&quot;
+## [43] &quot;MQM&quot;    &quot;GT&quot;     &quot;GQ&quot;     &quot;GL&quot;     &quot;DP&quot;     &quot;RA&quot;     &quot;AA&quot;    
+## [50] &quot;SR&quot;     &quot;SA&quot;</code></pre>
+<pre class="r"><code>for(index in 1:length(unique_id)) {
+  print(queryMETA(vcfdat, element = unique_id[index]))
+}</code></pre>
+<pre><code>## [[1]]
+## [1] &quot;INFO=ID=NS&quot;                             
+## [2] &quot;Number=1&quot;                               
+## [3] &quot;Type=Integer&quot;                           
+## [4] &quot;Description=Number of samples with data&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=INS&quot;                           
+## [2] &quot;Number=1&quot;                              
+## [3] &quot;Type=Integer&quot;                          
+## [4] &quot;Description=Length of insertion allele&quot;
+## [5] &quot; if present&quot;                           
+## 
+## [[1]]
+## [1] &quot;INFO=ID=DP&quot;                               
+## [2] &quot;Number=1&quot;                                 
+## [3] &quot;Type=Integer&quot;                             
+## [4] &quot;Description=Total read depth at the locus&quot;
+## 
+## [[2]]
+## [1] &quot;FORMAT=ID=DP&quot;           &quot;Number=1&quot;              
+## [3] &quot;Type=Integer&quot;           &quot;Description=Read Depth&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=AC&quot;                                                       
+## [2] &quot;Number=1&quot;                                                         
+## [3] &quot;Type=Integer&quot;                                                     
+## [4] &quot;Description=Total number of alternate alleles in called genotypes&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=AN&quot;                                             
+## [2] &quot;Number=1&quot;                                               
+## [3] &quot;Type=Integer&quot;                                           
+## [4] &quot;Description=Total number of alleles in called genotypes&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=AF&quot;                                            
+## [2] &quot;Number=1&quot;                                              
+## [3] &quot;Type=Float&quot;                                            
+## [4] &quot;Description=Estimated allele frequency in the range (0&quot;
+## [5] &quot;1]&quot;                                                    
+## 
+## [[2]]
+## [1] &quot;INFO=ID=SAF&quot;                                                       
+## [2] &quot;Number=1&quot;                                                          
+## [3] &quot;Type=Integer&quot;                                                      
+## [4] &quot;Description=Number of alternate observations on the forward strand&quot;
+## 
+## [[3]]
+## [1] &quot;INFO=ID=SAB&quot;                                                          
+## [2] &quot;Number=1&quot;                                                             
+## [3] &quot;Type=Float&quot;                                                           
+## [4] &quot;Description=Strand bias for the alternate allele: SAF / ( SAF + SAR )&quot;
+## 
+## [[4]]
+## [1] &quot;INFO=ID=SAP&quot;                                                                                                                                                                                 
+## [2] &quot;Number=1&quot;                                                                                                                                                                                    
+## [3] &quot;Type=Float&quot;                                                                                                                                                                                  
+## [4] &quot;Description=Strand balance probability for the alternate allele: Phred-scaled upper-bounds estimate of the probability of observing the deviation between SAF and SAR given E(SAF/SAR) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                                                       
+## 
+## [[1]]
+## [1] &quot;INFO=ID=HETAR&quot;                                                       
+## [2] &quot;Number=1&quot;                                                            
+## [3] &quot;Type=Integer&quot;                                                        
+## [4] &quot;Description=Number of individuals heterozygous alternate / reference&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=HOMA&quot;                                                  
+## [2] &quot;Number=1&quot;                                                      
+## [3] &quot;Type=Integer&quot;                                                  
+## [4] &quot;Description=Number of individuals homozygous for the alternate&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=HOMR&quot;                                                  
+## [2] &quot;Number=1&quot;                                                      
+## [3] &quot;Type=Integer&quot;                                                  
+## [4] &quot;Description=Number of individuals homozygous for the reference&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=RA&quot;                               
+## [2] &quot;Number=1&quot;                                 
+## [3] &quot;Type=Integer&quot;                             
+## [4] &quot;Description=Reference allele observations&quot;
+## 
+## [[2]]
+## [1] &quot;FORMAT=ID=RA&quot;                             
+## [2] &quot;Number=1&quot;                                 
+## [3] &quot;Type=Integer&quot;                             
+## [4] &quot;Description=Reference allele observations&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=AA&quot;                               
+## [2] &quot;Number=1&quot;                                 
+## [3] &quot;Type=Integer&quot;                             
+## [4] &quot;Description=Alternate allele observations&quot;
+## 
+## [[2]]
+## [1] &quot;FORMAT=ID=AA&quot;                             
+## [2] &quot;Number=1&quot;                                 
+## [3] &quot;Type=Integer&quot;                             
+## [4] &quot;Description=Alternate allele observations&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=SRF&quot;                                                       
+## [2] &quot;Number=1&quot;                                                          
+## [3] &quot;Type=Integer&quot;                                                      
+## [4] &quot;Description=Number of reference observations on the forward strand&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=SRB&quot;                                                          
+## [2] &quot;Number=1&quot;                                                             
+## [3] &quot;Type=Float&quot;                                                           
+## [4] &quot;Description=Strand bias for the reference allele: SRF / ( SRF + SRR )&quot;
+## 
+## [[3]]
+## [1] &quot;INFO=ID=SRP&quot;                                                                                                                                                                                 
+## [2] &quot;Number=1&quot;                                                                                                                                                                                    
+## [3] &quot;Type=Float&quot;                                                                                                                                                                                  
+## [4] &quot;Description=Strand balance probability for the reference allele: Phred-scaled upper-bounds estimate of the probability of observing the deviation between SRF and SRR given E(SRF/SRR) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                                                       
+## 
+## [[1]]
+## [1] &quot;INFO=ID=SRR&quot;                                                       
+## [2] &quot;Number=1&quot;                                                          
+## [3] &quot;Type=Integer&quot;                                                      
+## [4] &quot;Description=Number of reference observations on the reverse strand&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=SRB&quot;                                                          
+## [2] &quot;Number=1&quot;                                                             
+## [3] &quot;Type=Float&quot;                                                           
+## [4] &quot;Description=Strand bias for the reference allele: SRF / ( SRF + SRR )&quot;
+## 
+## [[3]]
+## [1] &quot;INFO=ID=SRP&quot;                                                                                                                                                                                 
+## [2] &quot;Number=1&quot;                                                                                                                                                                                    
+## [3] &quot;Type=Float&quot;                                                                                                                                                                                  
+## [4] &quot;Description=Strand balance probability for the reference allele: Phred-scaled upper-bounds estimate of the probability of observing the deviation between SRF and SRR given E(SRF/SRR) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                                                       
+## 
+## [[1]]
+## [1] &quot;INFO=ID=SAF&quot;                                                       
+## [2] &quot;Number=1&quot;                                                          
+## [3] &quot;Type=Integer&quot;                                                      
+## [4] &quot;Description=Number of alternate observations on the forward strand&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=SAB&quot;                                                          
+## [2] &quot;Number=1&quot;                                                             
+## [3] &quot;Type=Float&quot;                                                           
+## [4] &quot;Description=Strand bias for the alternate allele: SAF / ( SAF + SAR )&quot;
+## 
+## [[3]]
+## [1] &quot;INFO=ID=SAP&quot;                                                                                                                                                                                 
+## [2] &quot;Number=1&quot;                                                                                                                                                                                    
+## [3] &quot;Type=Float&quot;                                                                                                                                                                                  
+## [4] &quot;Description=Strand balance probability for the alternate allele: Phred-scaled upper-bounds estimate of the probability of observing the deviation between SAF and SAR given E(SAF/SAR) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                                                       
+## 
+## [[1]]
+## [1] &quot;INFO=ID=SAR&quot;                                                       
+## [2] &quot;Number=1&quot;                                                          
+## [3] &quot;Type=Integer&quot;                                                      
+## [4] &quot;Description=Number of alternate observations on the reverse strand&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=SAB&quot;                                                          
+## [2] &quot;Number=1&quot;                                                             
+## [3] &quot;Type=Float&quot;                                                           
+## [4] &quot;Description=Strand bias for the alternate allele: SAF / ( SAF + SAR )&quot;
+## 
+## [[3]]
+## [1] &quot;INFO=ID=SAP&quot;                                                                                                                                                                                 
+## [2] &quot;Number=1&quot;                                                                                                                                                                                    
+## [3] &quot;Type=Float&quot;                                                                                                                                                                                  
+## [4] &quot;Description=Strand balance probability for the alternate allele: Phred-scaled upper-bounds estimate of the probability of observing the deviation between SAF and SAR given E(SAF/SAR) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                                                       
+## 
+## [[1]]
+## [1] &quot;INFO=ID=SRB&quot;                                                          
+## [2] &quot;Number=1&quot;                                                             
+## [3] &quot;Type=Float&quot;                                                           
+## [4] &quot;Description=Strand bias for the reference allele: SRF / ( SRF + SRR )&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=SAB&quot;                                                          
+## [2] &quot;Number=1&quot;                                                             
+## [3] &quot;Type=Float&quot;                                                           
+## [4] &quot;Description=Strand bias for the alternate allele: SAF / ( SAF + SAR )&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=SRP&quot;                                                                                                                                                                                 
+## [2] &quot;Number=1&quot;                                                                                                                                                                                    
+## [3] &quot;Type=Float&quot;                                                                                                                                                                                  
+## [4] &quot;Description=Strand balance probability for the reference allele: Phred-scaled upper-bounds estimate of the probability of observing the deviation between SRF and SRR given E(SRF/SRR) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                                                       
+## 
+## [[1]]
+## [1] &quot;INFO=ID=SAP&quot;                                                                                                                                                                                 
+## [2] &quot;Number=1&quot;                                                                                                                                                                                    
+## [3] &quot;Type=Float&quot;                                                                                                                                                                                  
+## [4] &quot;Description=Strand balance probability for the alternate allele: Phred-scaled upper-bounds estimate of the probability of observing the deviation between SAF and SAR given E(SAF/SAR) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                                                       
+## 
+## [[1]]
+## [1] &quot;INFO=ID=ABR&quot;                                                                                                                         
+## [2] &quot;Number=1&quot;                                                                                                                            
+## [3] &quot;Type=Integer&quot;                                                                                                                        
+## [4] &quot;Description=Reference allele balance count: the number of sequence reads from apparent heterozygotes supporting the reference allele&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=ABP&quot;                                                                                                                                                                              
+## [2] &quot;Number=1&quot;                                                                                                                                                                                 
+## [3] &quot;Type=Float&quot;                                                                                                                                                                               
+## [4] &quot;Description=Allele balance probability at heterozygous sites: Phred-scaled upper-bounds estimate of the probability of observing the deviation between ABR and ABA given E(ABR/ABA) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                                                    
+## 
+## [[1]]
+## [1] &quot;INFO=ID=ABA&quot;                                                                                                                         
+## [2] &quot;Number=1&quot;                                                                                                                            
+## [3] &quot;Type=Integer&quot;                                                                                                                        
+## [4] &quot;Description=Alternate allele balance count: the number of sequence reads from apparent heterozygotes supporting the alternate allele&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=ABP&quot;                                                                                                                                                                              
+## [2] &quot;Number=1&quot;                                                                                                                                                                                 
+## [3] &quot;Type=Float&quot;                                                                                                                                                                               
+## [4] &quot;Description=Allele balance probability at heterozygous sites: Phred-scaled upper-bounds estimate of the probability of observing the deviation between ABR and ABA given E(ABR/ABA) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                                                    
+## 
+## [[1]]
+## [1] &quot;INFO=ID=SAB&quot;                                                          
+## [2] &quot;Number=1&quot;                                                             
+## [3] &quot;Type=Float&quot;                                                           
+## [4] &quot;Description=Strand bias for the alternate allele: SAF / ( SAF + SAR )&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=ABR&quot;                                                                                                                         
+## [2] &quot;Number=1&quot;                                                                                                                            
+## [3] &quot;Type=Integer&quot;                                                                                                                        
+## [4] &quot;Description=Reference allele balance count: the number of sequence reads from apparent heterozygotes supporting the reference allele&quot;
+## 
+## [[3]]
+## [1] &quot;INFO=ID=ABA&quot;                                                                                                                         
+## [2] &quot;Number=1&quot;                                                                                                                            
+## [3] &quot;Type=Integer&quot;                                                                                                                        
+## [4] &quot;Description=Alternate allele balance count: the number of sequence reads from apparent heterozygotes supporting the alternate allele&quot;
+## 
+## [[4]]
+## [1] &quot;INFO=ID=AB&quot;                                                                                                                                          
+## [2] &quot;Number=1&quot;                                                                                                                                            
+## [3] &quot;Type=Float&quot;                                                                                                                                          
+## [4] &quot;Description=Allele balance at heterozygous sites: a number between 0 and 1 representing the ratio of reads showing the reference allele to all reads&quot;
+## [5] &quot; considering only reads from individuals called as heterozygous&quot;                                                                                     
+## 
+## [[5]]
+## [1] &quot;INFO=ID=ABP&quot;                                                                                                                                                                              
+## [2] &quot;Number=1&quot;                                                                                                                                                                                 
+## [3] &quot;Type=Float&quot;                                                                                                                                                                               
+## [4] &quot;Description=Allele balance probability at heterozygous sites: Phred-scaled upper-bounds estimate of the probability of observing the deviation between ABR and ABA given E(ABR/ABA) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                                                    
+## 
+## [[1]]
+## [1] &quot;INFO=ID=ABP&quot;                                                                                                                                                                              
+## [2] &quot;Number=1&quot;                                                                                                                                                                                 
+## [3] &quot;Type=Float&quot;                                                                                                                                                                               
+## [4] &quot;Description=Allele balance probability at heterozygous sites: Phred-scaled upper-bounds estimate of the probability of observing the deviation between ABR and ABA given E(ABR/ABA) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                                                    
+## 
+## [[1]]
+## [1] &quot;INFO=ID=RUN&quot;                                                                                                                                                  
+## [2] &quot;Number=1&quot;                                                                                                                                                     
+## [3] &quot;Type=Integer&quot;                                                                                                                                                 
+## [4] &quot;Description=Homopolymer run length: the number of consecutive nucleotides in the reference genome matching the alternate allele prior to the current position&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=RL&quot;                                                                                                               
+## [2] &quot;Number=1&quot;                                                                                                                 
+## [3] &quot;Type=Integer&quot;                                                                                                             
+## [4] &quot;Description=Reads Placed Left: number of reads supporting the alternate balanced to the left (5&#39;) of the alternate allele&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=SRR&quot;                                                       
+## [2] &quot;Number=1&quot;                                                          
+## [3] &quot;Type=Integer&quot;                                                      
+## [4] &quot;Description=Number of reference observations on the reverse strand&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=SRB&quot;                                                          
+## [2] &quot;Number=1&quot;                                                             
+## [3] &quot;Type=Float&quot;                                                           
+## [4] &quot;Description=Strand bias for the reference allele: SRF / ( SRF + SRR )&quot;
+## 
+## [[3]]
+## [1] &quot;INFO=ID=SRP&quot;                                                                                                                                                                                 
+## [2] &quot;Number=1&quot;                                                                                                                                                                                    
+## [3] &quot;Type=Float&quot;                                                                                                                                                                                  
+## [4] &quot;Description=Strand balance probability for the reference allele: Phred-scaled upper-bounds estimate of the probability of observing the deviation between SRF and SRR given E(SRF/SRR) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                                                       
+## 
+## [[4]]
+## [1] &quot;INFO=ID=RR&quot;                                                                                                                 
+## [2] &quot;Number=1&quot;                                                                                                                   
+## [3] &quot;Type=Integer&quot;                                                                                                               
+## [4] &quot;Description=Reads Placed Right: number of reads supporting the alternate balanced to the right (3&#39;) of the alternate allele&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=RPP&quot;                                                                                                                                                        
+## [2] &quot;Number=1&quot;                                                                                                                                                           
+## [3] &quot;Type=Float&quot;                                                                                                                                                         
+## [4] &quot;Description=Read Placement Probability: Phred-scaled upper-bounds estimate of the probability of observing the deviation between RPL and RPR given E(RPL/RPR) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                              
+## 
+## [[1]]
+## [1] &quot;INFO=ID=EL&quot;                                                                                                                 
+## [2] &quot;Number=1&quot;                                                                                                                   
+## [3] &quot;Type=Integer&quot;                                                                                                               
+## [4] &quot;Description=Allele End Left: number of observations of the alternate where the alternate occurs in the left end of the read&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=EPP&quot;                                                                                                                                                   
+## [2] &quot;Number=1&quot;                                                                                                                                                      
+## [3] &quot;Type=Integer&quot;                                                                                                                                                  
+## [4] &quot;Description=End Placement Probability: Phred-scaled upper-bounds estimate of the probability of observing the deviation between EL and ER given E(EL/ER) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                         
+## 
+## [[3]]
+## [1] &quot;INFO=ID=DEL&quot;                          
+## [2] &quot;Number=1&quot;                             
+## [3] &quot;Type=Integer&quot;                         
+## [4] &quot;Description=Length of deletion allele&quot;
+## [5] &quot; if present&quot;                          
+## 
+## [[1]]
+## [1] &quot;INFO=ID=ER&quot;                                                                                                                   
+## [2] &quot;Number=1&quot;                                                                                                                     
+## [3] &quot;Type=Integer&quot;                                                                                                                 
+## [4] &quot;Description=Allele End Right: number of observations of the alternate where the alternate occurs in the right end of the read&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=EPP&quot;                                                                                                                                                   
+## [2] &quot;Number=1&quot;                                                                                                                                                      
+## [3] &quot;Type=Integer&quot;                                                                                                                                                  
+## [4] &quot;Description=End Placement Probability: Phred-scaled upper-bounds estimate of the probability of observing the deviation between EL and ER given E(EL/ER) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                         
+## 
+## [[1]]
+## [1] &quot;INFO=ID=EPP&quot;                                                                                                                                                   
+## [2] &quot;Number=1&quot;                                                                                                                                                      
+## [3] &quot;Type=Integer&quot;                                                                                                                                                  
+## [4] &quot;Description=End Placement Probability: Phred-scaled upper-bounds estimate of the probability of observing the deviation between EL and ER given E(EL/ER) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                         
+## 
+## [[1]]
+## [1] &quot;INFO=ID=BL&quot;                                                                                                                  
+## [2] &quot;Number=1&quot;                                                                                                                    
+## [3] &quot;Type=Integer&quot;                                                                                                                
+## [4] &quot;Description=Base Pairs Left: number of base pairs in reads supporting the alternate to the left (5&#39;) of the alternate allele&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=LRB&quot;                                                                                                                     
+## [2] &quot;Number=1&quot;                                                                                                                        
+## [3] &quot;Type=Float&quot;                                                                                                                      
+## [4] &quot;Description=((max(BR&quot;                                                                                                            
+## [5] &quot; BL) / (BR + BL)) - 0.5) * 2 : The proportion of base pairs in reads on one side of the alternate allele relative to total bases&quot;
+## [6] &quot; scaled from [0.5&quot;                                                                                                               
+## [7] &quot;1] to [0&quot;                                                                                                                        
+## [8] &quot;1]&quot;                                                                                                                              
+## 
+## [[3]]
+## [1] &quot;INFO=ID=LRBP&quot;                                                                                                                                                       
+## [2] &quot;Number=1&quot;                                                                                                                                                           
+## [3] &quot;Type=Float&quot;                                                                                                                                                         
+## [4] &quot;Description=Left-Right Balance Probability: Phred-scaled upper-bounds estimate of the probability of observing the deviation between BL and BR given E(BR/BL) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                              
+## 
+## [[1]]
+## [1] &quot;INFO=ID=ABR&quot;                                                                                                                         
+## [2] &quot;Number=1&quot;                                                                                                                            
+## [3] &quot;Type=Integer&quot;                                                                                                                        
+## [4] &quot;Description=Reference allele balance count: the number of sequence reads from apparent heterozygotes supporting the reference allele&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=ABP&quot;                                                                                                                                                                              
+## [2] &quot;Number=1&quot;                                                                                                                                                                                 
+## [3] &quot;Type=Float&quot;                                                                                                                                                                               
+## [4] &quot;Description=Allele balance probability at heterozygous sites: Phred-scaled upper-bounds estimate of the probability of observing the deviation between ABR and ABA given E(ABR/ABA) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                                                    
+## 
+## [[3]]
+## [1] &quot;INFO=ID=BR&quot;                                                                                                                    
+## [2] &quot;Number=1&quot;                                                                                                                      
+## [3] &quot;Type=Integer&quot;                                                                                                                  
+## [4] &quot;Description=Base Pairs Right: number of base pairs in reads supporting the alternate to the right (3&#39;) of the alternate allele&quot;
+## 
+## [[4]]
+## [1] &quot;INFO=ID=LRB&quot;                                                                                                                     
+## [2] &quot;Number=1&quot;                                                                                                                        
+## [3] &quot;Type=Float&quot;                                                                                                                      
+## [4] &quot;Description=((max(BR&quot;                                                                                                            
+## [5] &quot; BL) / (BR + BL)) - 0.5) * 2 : The proportion of base pairs in reads on one side of the alternate allele relative to total bases&quot;
+## [6] &quot; scaled from [0.5&quot;                                                                                                               
+## [7] &quot;1] to [0&quot;                                                                                                                        
+## [8] &quot;1]&quot;                                                                                                                              
+## 
+## [[5]]
+## [1] &quot;INFO=ID=LRBP&quot;                                                                                                                                                       
+## [2] &quot;Number=1&quot;                                                                                                                                                           
+## [3] &quot;Type=Float&quot;                                                                                                                                                         
+## [4] &quot;Description=Left-Right Balance Probability: Phred-scaled upper-bounds estimate of the probability of observing the deviation between BL and BR given E(BR/BL) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                              
+## 
+## [[1]]
+## [1] &quot;INFO=ID=LRB&quot;                                                                                                                     
+## [2] &quot;Number=1&quot;                                                                                                                        
+## [3] &quot;Type=Float&quot;                                                                                                                      
+## [4] &quot;Description=((max(BR&quot;                                                                                                            
+## [5] &quot; BL) / (BR + BL)) - 0.5) * 2 : The proportion of base pairs in reads on one side of the alternate allele relative to total bases&quot;
+## [6] &quot; scaled from [0.5&quot;                                                                                                               
+## [7] &quot;1] to [0&quot;                                                                                                                        
+## [8] &quot;1]&quot;                                                                                                                              
+## 
+## [[2]]
+## [1] &quot;INFO=ID=LRBP&quot;                                                                                                                                                       
+## [2] &quot;Number=1&quot;                                                                                                                                                           
+## [3] &quot;Type=Float&quot;                                                                                                                                                         
+## [4] &quot;Description=Left-Right Balance Probability: Phred-scaled upper-bounds estimate of the probability of observing the deviation between BL and BR given E(BR/BL) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                              
+## 
+## [[1]]
+## [1] &quot;INFO=ID=LRBP&quot;                                                                                                                                                       
+## [2] &quot;Number=1&quot;                                                                                                                                                           
+## [3] &quot;Type=Float&quot;                                                                                                                                                         
+## [4] &quot;Description=Left-Right Balance Probability: Phred-scaled upper-bounds estimate of the probability of observing the deviation between BL and BR given E(BR/BL) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                              
+## 
+## [[1]]
+## [1] &quot;INFO=ID=BVAR&quot;                                                                           
+## [2] &quot;Number=0&quot;                                                                               
+## [3] &quot;Type=Flag&quot;                                                                              
+## [4] &quot;Description=The best genotype combination in the posterior is variant (non homozygous).&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=SNP&quot;            &quot;Number=0&quot;              
+## [3] &quot;Type=Flag&quot;              &quot;Description=SNP allele&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=TS&quot;                 &quot;Number=0&quot;                  
+## [3] &quot;Type=Flag&quot;                  &quot;Description=transition SNP&quot;
+## 
+## [[3]]
+## [1] &quot;INFO=ID=TV&quot;                   &quot;Number=0&quot;                    
+## [3] &quot;Type=Flag&quot;                    &quot;Description=transversion SNP&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=TS&quot;                 &quot;Number=0&quot;                  
+## [3] &quot;Type=Flag&quot;                  &quot;Description=transition SNP&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=TV&quot;                   &quot;Number=0&quot;                    
+## [3] &quot;Type=Flag&quot;                    &quot;Description=transversion SNP&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=CpG&quot;                      &quot;Number=0&quot;                        
+## [3] &quot;Type=Flag&quot;                        &quot;Description=CpG site (either CpG&quot;
+## [5] &quot; TpG or CpA)&quot;                    
+## 
+## [[1]]
+## [1] &quot;INFO=ID=MNP&quot;                      &quot;Number=0&quot;                        
+## [3] &quot;Type=Integer&quot;                     &quot;Description=Length of MNP allele&quot;
+## [5] &quot; if present&quot;                     
+## 
+## [[1]]
+## [1] &quot;INFO=ID=INS&quot;                           
+## [2] &quot;Number=1&quot;                              
+## [3] &quot;Type=Integer&quot;                          
+## [4] &quot;Description=Length of insertion allele&quot;
+## [5] &quot; if present&quot;                           
+## 
+## [[1]]
+## [1] &quot;INFO=ID=DEL&quot;                          
+## [2] &quot;Number=1&quot;                             
+## [3] &quot;Type=Integer&quot;                         
+## [4] &quot;Description=Length of deletion allele&quot;
+## [5] &quot; if present&quot;                          
+## 
+## [[1]]
+## [1] &quot;INFO=ID=REPEAT&quot;                                                                      
+## [2] &quot;Number=1&quot;                                                                            
+## [3] &quot;Type=String&quot;                                                                         
+## [4] &quot;Description=Description of the local repeat structures flanking the current position&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=MQM&quot;                                                   
+## [2] &quot;Number=1&quot;                                                      
+## [3] &quot;Type=Float&quot;                                                    
+## [4] &quot;Description=Mean mapping quality of observed alternate alleles&quot;
+## 
+## [[1]]
+## [1] &quot;FORMAT=ID=GT&quot;         &quot;Number=1&quot;             &quot;Type=String&quot;         
+## [4] &quot;Description=Genotype&quot;
+## 
+## [[1]]
+## [1] &quot;FORMAT=ID=GQ&quot;                                                                    
+## [2] &quot;Number=1&quot;                                                                        
+## [3] &quot;Type=Integer&quot;                                                                    
+## [4] &quot;Description=Genotype Quality&quot;                                                    
+## [5] &quot; the Phred-scaled marginal (or unconditional) probability of the called genotype&quot;
+## 
+## [[1]]
+## [1] &quot;FORMAT=ID=GL&quot;                                                
+## [2] &quot;Number=1&quot;                                                    
+## [3] &quot;Type=Float&quot;                                                  
+## [4] &quot;Description=Genotype Likelihood&quot;                             
+## [5] &quot; log-scaled likeilhood of the data given the called genotype&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=DP&quot;                               
+## [2] &quot;Number=1&quot;                                 
+## [3] &quot;Type=Integer&quot;                             
+## [4] &quot;Description=Total read depth at the locus&quot;
+## 
+## [[2]]
+## [1] &quot;FORMAT=ID=DP&quot;           &quot;Number=1&quot;              
+## [3] &quot;Type=Integer&quot;           &quot;Description=Read Depth&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=RA&quot;                               
+## [2] &quot;Number=1&quot;                                 
+## [3] &quot;Type=Integer&quot;                             
+## [4] &quot;Description=Reference allele observations&quot;
+## 
+## [[2]]
+## [1] &quot;FORMAT=ID=RA&quot;                             
+## [2] &quot;Number=1&quot;                                 
+## [3] &quot;Type=Integer&quot;                             
+## [4] &quot;Description=Reference allele observations&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=AA&quot;                               
+## [2] &quot;Number=1&quot;                                 
+## [3] &quot;Type=Integer&quot;                             
+## [4] &quot;Description=Alternate allele observations&quot;
+## 
+## [[2]]
+## [1] &quot;FORMAT=ID=AA&quot;                             
+## [2] &quot;Number=1&quot;                                 
+## [3] &quot;Type=Integer&quot;                             
+## [4] &quot;Description=Alternate allele observations&quot;
+## 
+## [[1]]
+## [1] &quot;INFO=ID=SRF&quot;                                                       
+## [2] &quot;Number=1&quot;                                                          
+## [3] &quot;Type=Integer&quot;                                                      
+## [4] &quot;Description=Number of reference observations on the forward strand&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=SRR&quot;                                                       
+## [2] &quot;Number=1&quot;                                                          
+## [3] &quot;Type=Integer&quot;                                                      
+## [4] &quot;Description=Number of reference observations on the reverse strand&quot;
+## 
+## [[3]]
+## [1] &quot;INFO=ID=SRB&quot;                                                          
+## [2] &quot;Number=1&quot;                                                             
+## [3] &quot;Type=Float&quot;                                                           
+## [4] &quot;Description=Strand bias for the reference allele: SRF / ( SRF + SRR )&quot;
+## 
+## [[4]]
+## [1] &quot;INFO=ID=SRP&quot;                                                                                                                                                                                 
+## [2] &quot;Number=1&quot;                                                                                                                                                                                    
+## [3] &quot;Type=Float&quot;                                                                                                                                                                                  
+## [4] &quot;Description=Strand balance probability for the reference allele: Phred-scaled upper-bounds estimate of the probability of observing the deviation between SRF and SRR given E(SRF/SRR) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                                                       
+## 
+## [[5]]
+## [1] &quot;FORMAT=ID=SR&quot;                                          
+## [2] &quot;Number=1&quot;                                              
+## [3] &quot;Type=Integer&quot;                                          
+## [4] &quot;Description=Number of reference observations by strand&quot;
+## [5] &quot; delimited by |: [forward]|[reverse]&quot;                  
+## 
+## [[1]]
+## [1] &quot;INFO=ID=SAF&quot;                                                       
+## [2] &quot;Number=1&quot;                                                          
+## [3] &quot;Type=Integer&quot;                                                      
+## [4] &quot;Description=Number of alternate observations on the forward strand&quot;
+## 
+## [[2]]
+## [1] &quot;INFO=ID=SAR&quot;                                                       
+## [2] &quot;Number=1&quot;                                                          
+## [3] &quot;Type=Integer&quot;                                                      
+## [4] &quot;Description=Number of alternate observations on the reverse strand&quot;
+## 
+## [[3]]
+## [1] &quot;INFO=ID=SAB&quot;                                                          
+## [2] &quot;Number=1&quot;                                                             
+## [3] &quot;Type=Float&quot;                                                           
+## [4] &quot;Description=Strand bias for the alternate allele: SAF / ( SAF + SAR )&quot;
+## 
+## [[4]]
+## [1] &quot;INFO=ID=SAP&quot;                                                                                                                                                                                 
+## [2] &quot;Number=1&quot;                                                                                                                                                                                    
+## [3] &quot;Type=Float&quot;                                                                                                                                                                                  
+## [4] &quot;Description=Strand balance probability for the alternate allele: Phred-scaled upper-bounds estimate of the probability of observing the deviation between SAF and SAR given E(SAF/SAR) ~ 0.5&quot;
+## [5] &quot; derived using Hoeffding&#39;s inequality&quot;                                                                                                                                                       
+## 
+## [[5]]
+## [1] &quot;FORMAT=ID=SA&quot;                                          
+## [2] &quot;Number=1&quot;                                              
+## [3] &quot;Type=Integer&quot;                                          
+## [4] &quot;Description=Number of alternate observations by strand&quot;
+## [5] &quot; delimited by |: [forward]|[reverse]&quot;</code></pre>
+<p>The important ones are RA for the number of reference alleles, AA for the number of alternative alleles, MQM for mean mapping quality, GQ for Phred-scaled probability of the called genotype, AN = total number of reference alleles int eh called genotypes, AC = total number of alternative alleles in the called genotypes.</p>
+<pre class="r"><code>aa_mat &lt;- extract.gt(x = vcfdat, element = &quot;AA&quot;)
+aa_mat &lt;- apply(aa_mat, 1, as.numeric)
+ra_mat &lt;- extract.gt(x = vcfdat, element = &quot;RA&quot;)
+ra_mat &lt;- apply(ra_mat, 1, as.numeric)
+dp_mat &lt;- extract.gt(x = vcfdat, element = &quot;DP&quot;)
+dp_mat &lt;- apply(dp_mat, 1, as.numeric)
+
+dp_mat[1:10, 1:10] - (aa_mat[1:10, 1:10] + ra_mat[1:10, 1:10])</code></pre>
+<pre><code>##       PotVar0000001 PotVar0000002 PotVar0000003 PotVar0000004
+##  [1,]             0             0             0             0
+##  [2,]             0             0             0             0
+##  [3,]             0             0             0             0
+##  [4,]            NA            NA            NA            NA
+##  [5,]             0             0             0             0
+##  [6,]             0             0             0             0
+##  [7,]             0             0             0             0
+##  [8,]             0             0             0             0
+##  [9,]             0             0             0             0
+## [10,]             0             0             0             0
+##       PotVar0000005 PotVar0000006 PotVar0000007 PotVar0000008
+##  [1,]             0             0             0             0
+##  [2,]             0             0             0             0
+##  [3,]             0             0             0             0
+##  [4,]             0             0             0            NA
+##  [5,]             0             0             0             0
+##  [6,]             0             0             0             0
+##  [7,]             0             1             0             0
+##  [8,]             0             0             0             0
+##  [9,]             0             0             0             0
+## [10,]             0             0             0             2
+##       PotVar0000009 PotVar0000010
+##  [1,]             0             0
+##  [2,]             0             0
+##  [3,]             0             0
+##  [4,]             0             0
+##  [5,]             0             0
+##  [6,]             0             0
+##  [7,]             1             0
+##  [8,]             0             0
+##  [9,]             0             0
+## [10,]             0             0</code></pre>
+<pre class="r"><code>order_vec &lt;- order(colSums(dp_mat), decreasing = TRUE)</code></pre>
+<p>Subset to get highest coverage SNPs</p>
+<pre class="r"><code>osize_mat &lt;- dp_mat[, order_vec[1:100]]
+ocounts_mat &lt;- ra_mat[, order_vec[1:100]]</code></pre>
+<p>Genotype plots. It’s not nearly as clean-looking as the potato plots we have.</p>
+<pre class="r"><code>library(updog)
+for (index in 51:100) {
+  ocounts &lt;- ocounts_mat[, index]
+  osize   &lt;- osize_mat[, index]
+  ploidy &lt;- 4
+  print(plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy))
+}</code></pre>
+<p><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-1.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-2.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-3.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-4.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-5.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-6.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-7.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-8.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-9.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-10.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-11.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-12.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-13.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-14.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-15.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-16.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-17.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-18.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-19.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-20.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-21.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-22.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-23.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-24.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-25.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-26.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-27.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-28.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-29.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-30.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-31.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-32.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-33.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-34.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-35.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-36.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-37.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-38.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-39.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-40.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-41.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-42.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-43.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-44.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-45.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-46.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-47.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-48.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-49.png" width="672" /><img src="uitdewilligen_eda_files/figure-html/unnamed-chunk-5-50.png" width="672" /></p>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.3.2 (2016-10-31)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: Ubuntu 16.04.2 LTS
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] updog_0.1.0     vcfR_1.4.0      dplyr_0.5.0     purrr_0.2.2    
+## [5] readr_1.0.0     tidyr_0.6.1     tibble_1.2      ggplot2_2.2.1  
+## [9] tidyverse_1.1.1
+## 
+## loaded via a namespace (and not attached):
+##  [1] memuse_3.0-1      reshape2_1.4.2    haven_1.0.0      
+##  [4] lattice_0.20-34   colorspace_1.3-2  htmltools_0.3.5  
+##  [7] viridisLite_0.2.0 yaml_2.1.14       mgcv_1.8-17      
+## [10] foreign_0.8-67    DBI_0.6           modelr_0.1.0     
+## [13] readxl_0.1.1      plyr_1.8.4        stringr_1.2.0    
+## [16] munsell_0.4.3     gtable_0.2.0      rvest_0.3.2      
+## [19] psych_1.6.12      evaluate_0.10     labeling_0.3     
+## [22] knitr_1.15.1      forcats_0.2.0     permute_0.9-4    
+## [25] parallel_3.3.2    broom_0.4.2       Rcpp_0.12.11     
+## [28] pinfsc50_1.1.0    scales_0.4.1      backports_1.0.5  
+## [31] vegan_2.4-3       jsonlite_1.3      mnormt_1.5-5     
+## [34] hms_0.3           digest_0.6.12     stringi_1.1.2    
+## [37] grid_3.3.2        rprojroot_1.2     tools_3.3.2      
+## [40] magrittr_1.5      lazyeval_0.2.0    cluster_2.0.6    
+## [43] ape_4.1           MASS_7.3-45       Matrix_1.2-8     
+## [46] xml2_1.1.1        lubridate_1.6.0   assertthat_0.2.0 
+## [49] rmarkdown_1.3     httr_1.2.1        R6_2.2.0         
+## [52] nlme_3.1-131</code></pre>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

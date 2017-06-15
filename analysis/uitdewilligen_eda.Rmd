@@ -1,0 +1,76 @@
+---
+title: "Uitdewilligen EDA"
+author: "David Gerard"
+date: "June 9, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+EDA for data from Uitdewilligen etal (2013). See \href{https://doi.org/10.1371/journal.pone.0062355}{https://doi.org/10.1371/journal.pone.0062355}.
+
+# Anlaysis with genome calls
+
+"uitdewilligen_etal_2013_varients.csv" just contains the estimated genotypes, not the actual counts.
+```{r}
+library(tidyverse)
+dat <- read.csv("~/Data/uitdewilligen_raw_data/uitdewilligen_etal_2013_varients.csv", sep = ";")
+table(dat$P1PEM01)
+```
+
+# Try and extract raw counts
+
+```{r}
+library(vcfR)
+vcfdat <- read.vcfR(file = "~/Data/uitdewilligen_raw_data/NewPlusOldCalls.headed.vcf")
+unique_id <- stringr::str_replace(queryMETA(vcfdat), "^.+=ID=", "")
+unique_id <- unique_id[-length(unique_id)]
+unique_id
+for(index in 1:length(unique_id)) {
+  print(queryMETA(vcfdat, element = unique_id[index]))
+}
+```
+
+
+The important ones are RA for the number of reference alleles, AA for the number of alternative alleles, MQM for mean mapping quality, GQ for Phred-scaled probability of the called genotype, AN = total number of reference alleles int eh called genotypes, AC = total number of alternative alleles in the called genotypes.
+
+```{r}
+aa_mat <- extract.gt(x = vcfdat, element = "AA")
+aa_mat <- apply(aa_mat, 1, as.numeric)
+ra_mat <- extract.gt(x = vcfdat, element = "RA")
+ra_mat <- apply(ra_mat, 1, as.numeric)
+dp_mat <- extract.gt(x = vcfdat, element = "DP")
+dp_mat <- apply(dp_mat, 1, as.numeric)
+
+dp_mat[1:10, 1:10] - (aa_mat[1:10, 1:10] + ra_mat[1:10, 1:10])
+
+order_vec <- order(colSums(dp_mat), decreasing = TRUE)
+```
+
+Subset to get highest coverage SNPs
+
+```{r}
+osize_mat <- dp_mat[, order_vec[1:100]]
+ocounts_mat <- ra_mat[, order_vec[1:100]]
+```
+
+Genotype plots. It's not nearly as clean-looking as the potato plots we have.
+
+```{r}
+library(updog)
+for (index in 51:100) {
+  ocounts <- ocounts_mat[, index]
+  osize   <- osize_mat[, index]
+  ploidy <- 4
+  print(plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy))
+}
+
+```
+
+```{r}
+sessionInfo()
+```
