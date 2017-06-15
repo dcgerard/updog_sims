@@ -28,6 +28,7 @@ Much of this code doesn't work anymore because of modifications to the [`updog`]
 * [Diagnostics on the super overdispersed SNP](parent_info.html). It seems the best measure to remove this SNP is `maxpostprob`. This is very lower (max at 0.73 and average a little less than that).
 * [First try at Blischak software.](blischak_compare.html) I had a mistake in this code. Ignore these results.
 * [Second try at Blischak software.](blischak_compare_fixed.html) I prefer the visual display of updog better.
+* [EDA of Shirasawa data](shirasawa_eda.html) I think I have the SNPs I want to demonstrate the method on.
 
 # Alfalfa Project:
 
