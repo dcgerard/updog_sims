@@ -29,6 +29,7 @@ Much of this code doesn't work anymore because of modifications to the [`updog`]
 * [First try at Blischak software.](blischak_compare.html) I had a mistake in this code. Ignore these results.
 * [Second try at Blischak software.](blischak_compare_fixed.html) I prefer the visual display of updog better.
 * [EDA of Shirasawa data](shirasawa_eda.html) I think I have the SNPs I want to demonstrate the method on.
+* [Same as above to estimate the parental genotype.](shirasawa_est_p1.html) Each time I get 5 as the parental genotype.
 
 # Alfalfa Project:
 
