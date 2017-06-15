@@ -1,0 +1,70 @@
+---
+title: "Shirasawa EDA"
+author: "David Gerard"
+date: "June 15, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I chose SNPs using [this](https://github.com/dcgerard/updog_sims/blob/gh-pages/analysis/eda_vcf_sp.R) code. I will try to estimate the parental genotype. In each case it is saying the parental genotype is 5, which is what I eyeballed.
+
+# Overdispersion.
+
+```{r}
+library(updog)
+ploidy <- 6
+ocounts_mat <- read.csv("../output/shirasawa_snps/example_refcounts.csv", row.names = 1)
+osize_mat <- read.csv("../output/shirasawa_snps/example_readcounts.csv", row.names = 1)
+
+ocounts <- ocounts_mat[, 1]
+osize   <- osize_mat[, 1]
+
+plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy)
+
+uout <- updog_vanilla(ocounts = ocounts[!is.na(ocounts)][-1], osize = osize[!is.na(ocounts)][-1],
+                      p1counts = ocounts[1], p1size = osize[1],
+                      ploidy = ploidy, model = "s1")
+plot(uout, plot_beta = FALSE, show_maxpostprob = TRUE)
+uout$p1geno
+uout$p2geno
+```
+
+# Read-mapping bias
+
+```{r}
+ocounts <- ocounts_mat[, 2]
+osize   <- osize_mat[, 2]
+plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy)
+
+uout <- updog_vanilla(ocounts = ocounts[!is.na(ocounts)][-1], osize = osize[!is.na(ocounts)][-1],
+                      p1counts = ocounts[1], p1size = osize[1],
+                      ploidy = ploidy, model = "s1")
+plot(uout, plot_beta = FALSE, show_maxpostprob = TRUE)
+uout$p1geno
+uout$p2geno
+```
+
+# Outliers
+
+```{r}
+ocounts <- ocounts_mat[, 3]
+osize   <- osize_mat[, 3]
+plot_geno(ocounts = ocounts, osize = osize, ploidy = ploidy)
+
+uout <- updog_vanilla(ocounts = ocounts[!is.na(ocounts)][-1], osize = osize[!is.na(ocounts)][-1],
+                      p1counts = ocounts[1], p1size = osize[1],
+                      ploidy = ploidy, model = "s1")
+plot(uout, plot_beta = FALSE, show_maxpostprob = TRUE)
+uout$p1geno
+uout$p2geno
+```
+
+
+```{r}
+sessionInfo()
+```
