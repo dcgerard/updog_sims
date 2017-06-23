@@ -1,0 +1,66 @@
+---
+title: "Local Minima"
+author: "David Gerard"
+date: "June 23, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Over-dispersion saves us because fewer local minima.
+
+# Local Minima
+
+The following is a simulated dataset that I had trouble on.
+
+```{r}
+library(updog)
+rout <- readRDS("../data/rout.RDS")
+plot(rout, plot_beta = FALSE)
+```
+
+We get a much smaller bias than what we should if we start at the defaults in `updog`.
+
+```{r}
+uout1 <- updog::updog_vanilla(ocounts = rout$input$ocounts, 
+                              osize = rout$input$osize, 
+                              ploidy = rout$input$ploidy, 
+                              model = "hw",
+                              out_prop = 0, 
+                              update_outprop = FALSE)
+plot(uout1, plot_beta = FALSE)
+```
+
+But if we start at the correct bias, we get good results
+
+```{r}
+uout2 <- updog::updog_vanilla(ocounts = rout$input$ocounts, 
+                              osize = rout$input$osize, 
+                              ploidy = rout$input$ploidy, 
+                              model = "hw",
+                              out_prop = 0, 
+                              bias_val = rout$bias_val,
+                              update_outprop = FALSE)
+plot(uout2, plot_beta = FALSE)
+```
+
+The likelihood is higher for this second one
+```{r}
+uout1$llike
+uout2$llike
+```
+
+And the allele-frequency is closer to the correct value
+```{r}
+rout$allele_freq
+uout1$allele_freq
+uout2$allele_freq
+```
+
+```{r}
+sessionInfo()
+```

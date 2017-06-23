@@ -18,7 +18,7 @@ First, I'll read in chromosome 1 from the files Felipe gave me.
 
 ```{r}
 library(vcfR)
-vcf <- read.vcfR(file = "~/Data/alfalfa/vcf_Guilherme/myGBSGenos_mergedSNPs_mergedTaxa_chr1.vcf",
+vcf <- read.vcfR(file = "~/Documents/data/vcf_Guilherme/myGBSGenos_mergedSNPs_mergedTaxa_chr1.vcf",
                  verbose = FALSE)
 ```
 
