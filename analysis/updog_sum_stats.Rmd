@@ -1,0 +1,122 @@
+---
+title: "Explore Fits"
+author: "David Gerard"
+date: "June 28, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+We explore the `updog` fits from the Shirasawa et al data.
+
+# Analysis
+
+```{r}
+library(updog)
+library(tidyverse)
+numfiles <- length(list.files("~/Code/reproduce_genotyping/Output/updog_fits/"))
+parmat <- matrix(NA, nrow = numfiles, ncol = 6)
+colnames(parmat) <- c("bias", "seq_error", "od", "pgeno", "out_prop", "allele_freq")
+for (index in 1:numfiles) {
+  uout <- readRDS(paste0("~/Code/reproduce_genotyping/Output/updog_fits/uout", index, ".RDS"))
+  parmat[index, 1] <- uout$bias_val
+  parmat[index, 2] <- uout$seq_error
+  parmat[index, 3] <- uout$od_param
+  parmat[index, 4] <- uout$p1geno
+  parmat[index, 5] <- uout$out_prop
+  parmat[index, 6] <- uout$allele_freq
+}
+pardat <- as_data_frame(parmat)
+```
+
+## Parental Genotype
+
+Shirasawa et al removed possible AAaaaa, AAAaaa, and AAAAaa parental genotypes.
+
+```{r}
+unique(pardat$pgeno)
+```
+
+## Overdispersion
+
+Let's look at the overdispersion parameter estimates:
+```{r}
+hist(pardat$od)
+```
+We don't see anything like the estimates we see in the simulations when $\tau = 0.1$, so it's pretty safe to say that this data does not exhibit very large amounts of overdispersion, and we can be fairly trustworthy of the results.
+
+The SNP with the largest OD estimate looks like this
+```{r}
+uout <- readRDS(paste0("~/Code/reproduce_genotyping/Output/updog_fits/uout", which.max(pardat$od), ".RDS"))
+plot(uout, plot_beta = FALSE, show_outlier = FALSE)
+```
+We might want to remove this SNP. Not too sure.
+
+## Bias
+
+The estimates of the bias:
+```{r}
+hist(pardat$bias)
+summary(pardat$bias)
+```
+
+The worst bias we see is $h = 0.4$. This SNP looks like
+
+```{r}
+uout <- readRDS(paste0("~/Code/reproduce_genotyping/Output/updog_fits/uout", which.min(pardat$bias), ".RDS"))
+plot(uout, plot_beta = FALSE, show_outlier = FALSE)
+```
+
+This looks OK to me.
+
+## Sequencing Error Rate
+
+The sequencing error rate:
+```{r}
+hist(pardat$seq_error)
+```
+
+The SNP with the largest sequencing error rate also has a large OD.
+```{r}
+uout <- readRDS(paste0("~/Code/reproduce_genotyping/Output/updog_fits/uout", which.max(pardat$seq_error), ".RDS"))
+plot(uout, plot_beta = FALSE, show_outlier = FALSE)
+pardat$od[which.max(pardat$seq_error)]
+```
+
+
+
+
+## Outlier proportion
+
+
+```{r}
+hist(pardat$out_prop)
+```
+
+The SNP with the largest $\pi$ also has a large amount of overdispersion.
+```{r}
+uout <- readRDS(paste0("~/Code/reproduce_genotyping/Output/updog_fits/uout", which.max(pardat$out_prop), ".RDS"))
+plot(uout, plot_beta = FALSE, show_outlier = FALSE)
+pardat$od[which.max(pardat$out_prop)]
+```
+
+## Correlation with OD
+
+```{r, fig.width=7, fig.height=20}
+longdat <- pardat %>% select(od, bias, seq_error, out_prop) %>%
+  gather(key = "Parameter", value = "Value", bias:out_prop)
+ggplot(data = longdat, mapping = aes(x = od, y = Value)) +
+  facet_grid(Parameter ~ ., scales = "free") +
+  geom_point()
+```
+
+There does seem to be a tiny amount of correlation between overdispersion and sequencing error rate and outlier proportion. But not enough to get excited about.
+
+
+```{r}
+sessionInfo()
+```

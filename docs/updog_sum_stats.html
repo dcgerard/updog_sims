@@ -9,9 +9,11 @@
 <meta name="generator" content="pandoc" />
 
 
+<meta name="author" content="David Gerard" />
 
+<meta name="date" content="2017-06-28" />
 
-<title>Home</title>
+<title>Explore Fits</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -300,58 +302,138 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Home</h1>
+<h1 class="title toc-ignore">Explore Fits</h1>
+<h4 class="author"><em>David Gerard</em></h4>
+<h4 class="date"><em>June 28, 2017</em></h4>
 
 </div>
 
 
-<p><strong>Last updated:</strong> 2017-06-28</p>
-<p><strong>Code version:</strong> 367b444ec03f1b6de371d02820c1e15d97492873</p>
-<div id="sweet-potato-project" class="section level1">
-<h1>Sweet Potato Project</h1>
-<p>Much of this code doesn’t work anymore because of modifications to the <a href="https://github.com/dcgerard/updog"><code>updog</code></a> package</p>
-<ul>
-<li><a href="snp_analysis.html">First analysis of SNP data</a></li>
-<li><a href="iter_procedure.html">Look at iterative procedure and effect of uniform prior on parents</a>. This results in a non-uniform prior on the children, as can be expected.</li>
-<li><a href="updot_overdispersion.html">First try at overdispersed updog</a></li>
-<li><a href="more_updog_over.html">Run overdispersed updog on all of the datasets Felipe gave me</a></li>
-<li><a href="updog_overdispersion_seq_est.html">Look at estimating sequencing error rate and results look promising. No more errors when I bound the overdispersion parameter.</a></li>
-<li><a href="more_updog_over_seq_est.html">Run through all datasets when overdispersion parameter is bounded and I estimate the sequencing error rate.</a></li>
-<li><a href="showoff_plots.html">Show off new methods for updog for plotting and summarizing.</a></li>
-<li><a href="vanilla_updog.html">First attempt at modeling bias parameter</a>. Looks promising, but still need to do a lot of work.</li>
-<li><a href="prob_lines.html">Plot probability lines at different levels of seq_error and bias_val</a>.</li>
-<li><a href="vanilla_updog_outlier.html">First fits with outlier model.</a> Things look pretty good!</li>
-<li><a href="diagnostic_plot.html">Some EDA from bad SNP</a> Re-ran after I made it so <code>out_mean</code> is constrained to be 0.5. It looks pretty good now!</li>
-<li><a href="vanilla_updog_out_mean_06.html">Updog where mean of outlier distribution is constrained to be 0.5</a></li>
-<li><a href="presentation_figures.html">Presentation figures.</a> There are a lot of good inference results here.</li>
-<li><a href="check_parental_precisions.html">Messy first look at parental data</a>.</li>
-<li><a href="parent_info.html">Diagnostics on the super overdispersed SNP</a>. It seems the best measure to remove this SNP is <code>maxpostprob</code>. This is very lower (max at 0.73 and average a little less than that).</li>
-<li><a href="blischak_compare.html">First try at Blischak software.</a> I had a mistake in this code. Ignore these results.</li>
-<li><a href="blischak_compare_fixed.html">Second try at Blischak software.</a> I prefer the visual display of updog better.</li>
-<li><a href="shirasawa_eda.html">EDA of Shirasawa data</a> I think I have the SNPs I want to demonstrate the method on.</li>
-<li><a href="shirasawa_est_p1.html">Same as above to estimate the parental genotype.</a> Each time I get 5 as the parental genotype.</li>
-<li><a href="updog_sum_stats.html">Histograms of updog fits in Shirasawa data.</a> OD isn’t too large.</li>
-</ul>
+<div id="abstract" class="section level1">
+<h1>Abstract</h1>
+<p>We explore the <code>updog</code> fits from the Shirasawa et al data.</p>
 </div>
-<div id="alfalfa-project" class="section level1">
-<h1>Alfalfa Project:</h1>
-<ul>
-<li><a href="parse_vcf.html">Parse vcf files, extract readcounts, filter out all variants with more than two alleles</a>. This file contains some EDA on the VCF files. But mostly, this code gets the read-count matrices.</li>
-<li><a href="initial_updog_fits.html">Initial fits for some SNPs</a>. These data seem messier than the sweet potato data. Though, there seems to be much less sequencing error. Bias is still a possible problem for some SNPs.</li>
-<li><a href="tons_of_plots.html">Tons of raw plots</a> Tons of raw plots. I am trying to see features of the data.</li>
-<li><a href="initial_updog_fits_with_bias.html">Try the bias corrected updog on the alfalfa data.</a> Some things look good, some things look bad.</li>
-<li><a href="seq_error_prior.html">Motivate Prior on sequencing error</a>. I think a reasonable prior is Beta(mean = 0.005, od = 0.02). This is motivated by the sequencing error rates that the Blischak paper assumes.</li>
-<li><a href="seq_error_prior_nonbeta.html">Better prior on sequencing errorr rate</a>. Here, I just use a logit-normal. This is better because the beta has an infinite spike at 0 for reasonable priors. The logit normal works much nicer in practice and is intuitive.</li>
-<li><a href="bias_prior.html">Motivate Prior on bias parameter</a>. I think a reasonable prior is N(0, 1) on the log-bias parameter. Values of -3 and 3 are super extreme and I would consider to be extremely poorly behaved SNPs that I would probably throw out if we ever saw them.</li>
-</ul>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<pre class="r"><code>library(updog)
+library(tidyverse)</code></pre>
+<pre><code>## Loading tidyverse: ggplot2
+## Loading tidyverse: tibble
+## Loading tidyverse: tidyr
+## Loading tidyverse: readr
+## Loading tidyverse: purrr
+## Loading tidyverse: dplyr</code></pre>
+<pre><code>## Conflicts with tidy packages ----------------------------------------------</code></pre>
+<pre><code>## filter(): dplyr, stats
+## lag():    dplyr, stats</code></pre>
+<pre class="r"><code>numfiles &lt;- length(list.files(&quot;~/Code/reproduce_genotyping/Output/updog_fits/&quot;))
+parmat &lt;- matrix(NA, nrow = numfiles, ncol = 6)
+colnames(parmat) &lt;- c(&quot;bias&quot;, &quot;seq_error&quot;, &quot;od&quot;, &quot;pgeno&quot;, &quot;out_prop&quot;, &quot;allele_freq&quot;)
+for (index in 1:numfiles) {
+  uout &lt;- readRDS(paste0(&quot;~/Code/reproduce_genotyping/Output/updog_fits/uout&quot;, index, &quot;.RDS&quot;))
+  parmat[index, 1] &lt;- uout$bias_val
+  parmat[index, 2] &lt;- uout$seq_error
+  parmat[index, 3] &lt;- uout$od_param
+  parmat[index, 4] &lt;- uout$p1geno
+  parmat[index, 5] &lt;- uout$out_prop
+  parmat[index, 6] &lt;- uout$allele_freq
+}
+pardat &lt;- as_data_frame(parmat)</code></pre>
+<div id="parental-genotype" class="section level2">
+<h2>Parental Genotype</h2>
+<p>Shirasawa et al removed possible AAaaaa, AAAaaa, and AAAAaa parental genotypes.</p>
+<pre class="r"><code>unique(pardat$pgeno)</code></pre>
+<pre><code>## [1] 5 1</code></pre>
 </div>
-<div id="non-sibling-project" class="section level1">
-<h1>Non-sibling Project</h1>
-<ul>
-<li><a href="blischak_data_eda.html">Data that Blischak uses has super low coverage!</a></li>
-<li><a href="uitdewilligen_eda.html">EDA on Uitdewillegen Data.</a> It’s not as clean as the sweet potato.</li>
-<li><a href="local_minima.html">Updog can run into local minima if the bias is high and the od is low.</a></li>
-</ul>
+<div id="overdispersion" class="section level2">
+<h2>Overdispersion</h2>
+<p>Let’s look at the overdispersion parameter estimates:</p>
+<pre class="r"><code>hist(pardat$od)</code></pre>
+<p><img src="updog_sum_stats_files/figure-html/unnamed-chunk-3-1.png" width="672" /> We don’t see anything like the estimates we see in the simulations when <span class="math inline">\(\tau = 0.1\)</span>, so it’s pretty safe to say that this data does not exhibit very large amounts of overdispersion, and we can be fairly trustworthy of the results.</p>
+<p>The SNP with the largest OD estimate looks like this</p>
+<pre class="r"><code>uout &lt;- readRDS(paste0(&quot;~/Code/reproduce_genotyping/Output/updog_fits/uout&quot;, which.max(pardat$od), &quot;.RDS&quot;))
+plot(uout, plot_beta = FALSE, show_outlier = FALSE)</code></pre>
+<p><img src="updog_sum_stats_files/figure-html/unnamed-chunk-4-1.png" width="672" /> We might want to remove this SNP. Not too sure.</p>
+</div>
+<div id="bias" class="section level2">
+<h2>Bias</h2>
+<p>The estimates of the bias:</p>
+<pre class="r"><code>hist(pardat$bias)</code></pre>
+<p><img src="updog_sum_stats_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>summary(pardat$bias)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   0.408   0.832   0.981   0.949   1.050   2.050</code></pre>
+<p>The worst bias we see is <span class="math inline">\(h = 0.4\)</span>. This SNP looks like</p>
+<pre class="r"><code>uout &lt;- readRDS(paste0(&quot;~/Code/reproduce_genotyping/Output/updog_fits/uout&quot;, which.min(pardat$bias), &quot;.RDS&quot;))
+plot(uout, plot_beta = FALSE, show_outlier = FALSE)</code></pre>
+<p><img src="updog_sum_stats_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>This looks OK to me.</p>
+</div>
+<div id="sequencing-error-rate" class="section level2">
+<h2>Sequencing Error Rate</h2>
+<p>The sequencing error rate:</p>
+<pre class="r"><code>hist(pardat$seq_error)</code></pre>
+<p><img src="updog_sum_stats_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>The SNP with the largest sequencing error rate also has a large OD.</p>
+<pre class="r"><code>uout &lt;- readRDS(paste0(&quot;~/Code/reproduce_genotyping/Output/updog_fits/uout&quot;, which.max(pardat$seq_error), &quot;.RDS&quot;))
+plot(uout, plot_beta = FALSE, show_outlier = FALSE)</code></pre>
+<p><img src="updog_sum_stats_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<pre class="r"><code>pardat$od[which.max(pardat$seq_error)]</code></pre>
+<pre><code>## [1] 0.03205</code></pre>
+</div>
+<div id="outlier-proportion" class="section level2">
+<h2>Outlier proportion</h2>
+<pre class="r"><code>hist(pardat$out_prop)</code></pre>
+<p><img src="updog_sum_stats_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>The SNP with the largest <span class="math inline">\(\pi\)</span> also has a large amount of overdispersion.</p>
+<pre class="r"><code>uout &lt;- readRDS(paste0(&quot;~/Code/reproduce_genotyping/Output/updog_fits/uout&quot;, which.max(pardat$out_prop), &quot;.RDS&quot;))
+plot(uout, plot_beta = FALSE, show_outlier = FALSE)</code></pre>
+<p><img src="updog_sum_stats_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>pardat$od[which.max(pardat$out_prop)]</code></pre>
+<pre><code>## [1] 0.02458</code></pre>
+</div>
+<div id="correlation-with-od" class="section level2">
+<h2>Correlation with OD</h2>
+<pre class="r"><code>longdat &lt;- pardat %&gt;% select(od, bias, seq_error, out_prop) %&gt;%
+  gather(key = &quot;Parameter&quot;, value = &quot;Value&quot;, bias:out_prop)
+ggplot(data = longdat, mapping = aes(x = od, y = Value)) +
+  facet_grid(Parameter ~ ., scales = &quot;free&quot;) +
+  geom_point()</code></pre>
+<p><img src="updog_sum_stats_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>There does seem to be a tiny amount of correlation between overdispersion and sequencing error rate and outlier proportion. But not enough to get excited about.</p>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.3.2 (2016-10-31)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: Ubuntu 16.04.2 LTS
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] dplyr_0.5.0     purrr_0.2.2     readr_1.0.0     tidyr_0.6.1    
+## [5] tibble_1.2      ggplot2_2.2.1   tidyverse_1.1.1 updog_0.1.0    
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rcpp_0.12.11     plyr_1.8.4       forcats_0.2.0    tools_3.3.2     
+##  [5] digest_0.6.12    lubridate_1.6.0  jsonlite_1.3     evaluate_0.10   
+##  [9] nlme_3.1-131     gtable_0.2.0     lattice_0.20-34  psych_1.6.12    
+## [13] DBI_0.6          yaml_2.1.14      parallel_3.3.2   haven_1.0.0     
+## [17] xml2_1.1.1       stringr_1.2.0    httr_1.2.1       knitr_1.15.1    
+## [21] hms_0.3          rprojroot_1.2    grid_3.3.2       R6_2.2.0        
+## [25] readxl_0.1.1     foreign_0.8-67   rmarkdown_1.3    modelr_0.1.0    
+## [29] reshape2_1.4.2   magrittr_1.5     ggthemes_3.4.0   backports_1.0.5 
+## [33] scales_0.4.1     htmltools_0.3.5  rvest_0.3.2      assertthat_0.2.0
+## [37] mnormt_1.5-5     colorspace_1.3-2 labeling_0.3     stringi_1.1.2   
+## [41] lazyeval_0.2.0   munsell_0.4.3    broom_0.4.2</code></pre>
+</div>
 </div>
 
 <hr>
