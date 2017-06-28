@@ -1,0 +1,106 @@
+---
+title: "Try ASH on updog fits"
+author: "David Gerard"
+date: "June 28, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Here, I just play around with fitting ASH onthe fits from `updog`.
+
+```{r}
+library(updog)
+library(tidyverse)
+numfiles <- length(list.files("~/Code/reproduce_genotyping/Output/updog_fits/"))
+parmat <- matrix(NA, nrow = numfiles, ncol = 9)
+colnames(parmat) <- c("bias", "seq_error", "od", "s", "ell", "r", "se_s", "se_ell", "se_r")
+for (index in 1:numfiles) {
+  uout <- readRDS(paste0("~/Code/reproduce_genotyping/Output/updog_fits/uout", index, ".RDS"))
+  parmat[index, 1]   <- uout$bias_val
+  parmat[index, 2]   <- uout$seq_error
+  parmat[index, 3]   <- uout$od_param
+  parmat[index, 4]   <- log(uout$bias_val)
+  parmat[index, 5]   <- log(uout$seq_error / (1 - uout$seq_error))
+  parmat[index, 6]   <- log((1 - uout$od_param) / uout$od_param)
+  parmat[index, 7:9] <- sqrt(-1 * diag(solve(uout$hessian)))
+}
+pardat <- as_data_frame(parmat)
+```
+
+There are a couple points with a relatively large standard error in s and r.
+```{r}
+qplot(pardat$se_s, bins = 30)
+qplot(pardat$se_ell, bins = 30)
+qplot(pardat$se_r, bins = 30)
+```
+
+## ASH on Bias
+```{r}
+library(ashr)
+aout <- ash(betahat = pardat$s, sebetahat = pardat$se_s)
+```
+
+There are a couple points that really move toward 1:
+```{r}
+bias_est <- exp(get_pm(aout))
+qplot(pardat$bias, bias_est) +
+  geom_abline(color = "red")
+```
+
+## ASH on Sequencing Error Rate
+```{r}
+aout <- ash(betahat = pardat$ell, sebetahat = pardat$se_ell, mode = "estimate", mixcompdist = "halfuniform")
+```
+
+There are a couple points that really move toward 1:
+```{r}
+seq_est <- exp(get_pm(aout)) / (1 + exp(get_pm(aout)))
+qplot(pardat$seq_error, seq_est) +
+  geom_abline(color = "red")
+```
+
+## ASH on OD param
+```{r}
+aout <- ash(betahat = pardat$r, sebetahat = pardat$se_r, mode = "estimate", mixcompdist = "halfuniform")
+```
+
+```{r}
+od_est <- exp(-1 * get_pm(aout)) / (1 + exp(-1 * get_pm(aout)))
+qplot(pardat$od, od_est) +
+  geom_abline(color = "red")
+```
+
+# Refit updog with new fits
+We will compare fits where the differences in OD are very large
+
+```{r}
+index <- which(pardat$od > 0.007 & od_est < 0.005)
+uout <- readRDS(paste0("~/Code/reproduce_genotyping/Output/updog_fits/uout", index, ".RDS"))
+unew <- updog_vanilla(ocounts = uout$input$ocounts, osize = uout$input$osize, ploidy = uout$input$ploidy, 
+                      p1counts = uout$input$p1counts, p1size = uout$input$p1size, od_param = od_est[index],
+                      bias_val = bias_est[index], seq_error = seq_est[index], update_od_param = FALSE,
+                      update_bias_val = FALSE, update_seq_error = FALSE)
+uout$od_param
+unew$od_param
+```
+
+Minor difference in genotyping
+```{r}
+sum(uout$ogeno != unew$ogeno)
+```
+
+It's just a low-count point that changes genotype.
+```{r}
+plot(uout, plot_beta = FALSE)
+plot(unew, plot_beta = FALSE)
+```
+
+
+```{r}
+sessionInfo()
+```

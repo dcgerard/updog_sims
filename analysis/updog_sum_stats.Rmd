@@ -31,6 +31,7 @@ for (index in 1:numfiles) {
   parmat[index, 6] <- uout$allele_freq
 }
 pardat <- as_data_frame(parmat)
+saveRDS(pardat, file = "../output/param_fits.RDS")
 ```
 
 ## Parental Genotype
