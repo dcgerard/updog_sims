@@ -32,6 +32,7 @@ Much of this code doesn't work anymore because of modifications to the [`updog`]
 * [Same as above to estimate the parental genotype.](shirasawa_est_p1.html) Each time I get 5 as the parental genotype.
 * [Histograms of updog fits in Shirasawa data.](updog_sum_stats.html) OD isn't too large.
 * [Fit ASH to updog estimates](updog_ash.html) Don't know how worthwhile it is.
+* [Screen Via Oracle Estimator](oracle_screen.html)
 
 # Alfalfa Project:
 

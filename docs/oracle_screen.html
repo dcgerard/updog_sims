@@ -9,9 +9,11 @@
 <meta name="generator" content="pandoc" />
 
 
+<meta name="author" content="David Gerard" />
 
+<meta name="date" content="2017-06-28" />
 
-<title>Home</title>
+<title>Test Oracle Screen</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -300,60 +302,39 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Home</h1>
+<h1 class="title toc-ignore">Test Oracle Screen</h1>
+<h4 class="author"><em>David Gerard</em></h4>
+<h4 class="date"><em>June 28, 2017</em></h4>
 
 </div>
 
 
-<p><strong>Last updated:</strong> 2017-06-28</p>
-<p><strong>Code version:</strong> 8dd09f0054ac262c3c9d7ec0388517af32fb16c4</p>
-<div id="sweet-potato-project" class="section level1">
-<h1>Sweet Potato Project</h1>
-<p>Much of this code doesn’t work anymore because of modifications to the <a href="https://github.com/dcgerard/updog"><code>updog</code></a> package</p>
-<ul>
-<li><a href="snp_analysis.html">First analysis of SNP data</a></li>
-<li><a href="iter_procedure.html">Look at iterative procedure and effect of uniform prior on parents</a>. This results in a non-uniform prior on the children, as can be expected.</li>
-<li><a href="updot_overdispersion.html">First try at overdispersed updog</a></li>
-<li><a href="more_updog_over.html">Run overdispersed updog on all of the datasets Felipe gave me</a></li>
-<li><a href="updog_overdispersion_seq_est.html">Look at estimating sequencing error rate and results look promising. No more errors when I bound the overdispersion parameter.</a></li>
-<li><a href="more_updog_over_seq_est.html">Run through all datasets when overdispersion parameter is bounded and I estimate the sequencing error rate.</a></li>
-<li><a href="showoff_plots.html">Show off new methods for updog for plotting and summarizing.</a></li>
-<li><a href="vanilla_updog.html">First attempt at modeling bias parameter</a>. Looks promising, but still need to do a lot of work.</li>
-<li><a href="prob_lines.html">Plot probability lines at different levels of seq_error and bias_val</a>.</li>
-<li><a href="vanilla_updog_outlier.html">First fits with outlier model.</a> Things look pretty good!</li>
-<li><a href="diagnostic_plot.html">Some EDA from bad SNP</a> Re-ran after I made it so <code>out_mean</code> is constrained to be 0.5. It looks pretty good now!</li>
-<li><a href="vanilla_updog_out_mean_06.html">Updog where mean of outlier distribution is constrained to be 0.5</a></li>
-<li><a href="presentation_figures.html">Presentation figures.</a> There are a lot of good inference results here.</li>
-<li><a href="check_parental_precisions.html">Messy first look at parental data</a>.</li>
-<li><a href="parent_info.html">Diagnostics on the super overdispersed SNP</a>. It seems the best measure to remove this SNP is <code>maxpostprob</code>. This is very lower (max at 0.73 and average a little less than that).</li>
-<li><a href="blischak_compare.html">First try at Blischak software.</a> I had a mistake in this code. Ignore these results.</li>
-<li><a href="blischak_compare_fixed.html">Second try at Blischak software.</a> I prefer the visual display of updog better.</li>
-<li><a href="shirasawa_eda.html">EDA of Shirasawa data</a> I think I have the SNPs I want to demonstrate the method on.</li>
-<li><a href="shirasawa_est_p1.html">Same as above to estimate the parental genotype.</a> Each time I get 5 as the parental genotype.</li>
-<li><a href="updog_sum_stats.html">Histograms of updog fits in Shirasawa data.</a> OD isn’t too large.</li>
-<li><a href="updog_ash.html">Fit ASH to updog estimates</a> Don’t know how worthwhile it is.</li>
-<li><a href="oracle_screen.html">Screen Via Oracle Estimator</a></li>
-</ul>
-</div>
-<div id="alfalfa-project" class="section level1">
-<h1>Alfalfa Project:</h1>
-<ul>
-<li><a href="parse_vcf.html">Parse vcf files, extract readcounts, filter out all variants with more than two alleles</a>. This file contains some EDA on the VCF files. But mostly, this code gets the read-count matrices.</li>
-<li><a href="initial_updog_fits.html">Initial fits for some SNPs</a>. These data seem messier than the sweet potato data. Though, there seems to be much less sequencing error. Bias is still a possible problem for some SNPs.</li>
-<li><a href="tons_of_plots.html">Tons of raw plots</a> Tons of raw plots. I am trying to see features of the data.</li>
-<li><a href="initial_updog_fits_with_bias.html">Try the bias corrected updog on the alfalfa data.</a> Some things look good, some things look bad.</li>
-<li><a href="seq_error_prior.html">Motivate Prior on sequencing error</a>. I think a reasonable prior is Beta(mean = 0.005, od = 0.02). This is motivated by the sequencing error rates that the Blischak paper assumes.</li>
-<li><a href="seq_error_prior_nonbeta.html">Better prior on sequencing errorr rate</a>. Here, I just use a logit-normal. This is better because the beta has an infinite spike at 0 for reasonable priors. The logit normal works much nicer in practice and is intuitive.</li>
-<li><a href="bias_prior.html">Motivate Prior on bias parameter</a>. I think a reasonable prior is N(0, 1) on the log-bias parameter. Values of -3 and 3 are super extreme and I would consider to be extremely poorly behaved SNPs that I would probably throw out if we ever saw them.</li>
-</ul>
-</div>
-<div id="non-sibling-project" class="section level1">
-<h1>Non-sibling Project</h1>
-<ul>
-<li><a href="blischak_data_eda.html">Data that Blischak uses has super low coverage!</a></li>
-<li><a href="uitdewilligen_eda.html">EDA on Uitdewillegen Data.</a> It’s not as clean as the sweet potato.</li>
-<li><a href="local_minima.html">Updog can run into local minima if the bias is high and the od is low.</a></li>
-</ul>
+<div id="abstract" class="section level1">
+<h1>Abstract</h1>
+<p>Here, I test the ability of an oracle screener to screen SNP’s when the OD is large.</p>
+<pre class="r"><code>library(updog)
+library(tidyverse)</code></pre>
+<pre><code>## Loading tidyverse: ggplot2
+## Loading tidyverse: tibble
+## Loading tidyverse: tidyr
+## Loading tidyverse: readr
+## Loading tidyverse: purrr
+## Loading tidyverse: dplyr</code></pre>
+<pre><code>## Conflicts with tidy packages ----------------------------------------------</code></pre>
+<pre><code>## filter(): dplyr, stats
+## lag():    dplyr, stats</code></pre>
+<pre class="r"><code>data(snpdat)
+snp1 &lt;- filter(snpdat, snp == &quot;SNP1&quot;)
+uout &lt;- updog(ocounts = snp1$counts, osize = snp1$size, ploidy = 6)
+uout$od_param </code></pre>
+<pre><code>## [1] 0.01264</code></pre>
+<pre class="r"><code>scout1 &lt;- screen_oracle(uout)
+hist(scout1)</code></pre>
+<p><img src="oracle_screen_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<pre class="r"><code>uout$od_param &lt;- 0.1
+scout2 &lt;- screen_oracle(uout)
+hist(scout2)</code></pre>
+<p><img src="oracle_screen_files/figure-html/unnamed-chunk-1-2.png" width="672" /></p>
 </div>
 
 <hr>

@@ -1,0 +1,29 @@
+---
+title: "Test Oracle Screen"
+author: "David Gerard"
+date: "June 28, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Here, I test the ability of an oracle screener to screen SNP's when the OD is large.
+
+```{r}
+library(updog)
+library(tidyverse)
+data(snpdat)
+snp1 <- filter(snpdat, snp == "SNP1")
+uout <- updog(ocounts = snp1$counts, osize = snp1$size, ploidy = 6)
+uout$od_param 
+scout1 <- screen_oracle(uout)
+hist(scout1)
+uout$od_param <- 0.1
+scout2 <- screen_oracle(uout)
+hist(scout2)
+```
+
