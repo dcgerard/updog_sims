@@ -1,0 +1,29 @@
+---
+title: "Check OD Thresh"
+author: "David Gerard"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+I see if the proportion correctly genotyped is associated with the estimated OD parameter, even if the true OD parameter does not change. The answer is not really. A little bit when there is small od.
+
+# Analysis
+```{r}
+library(tidyverse)
+sims <- as_data_frame(read.csv("~/Code/reproduce_genotyping/Output/sims_out/sims_out.csv"))
+ggplot(sims, mapping = aes(x = uod_param, y = uham)) +
+  geom_point() +
+  facet_grid(od_param ~ bias_val)
+
+group_by(sims, bias_val, od_param) %>% summarize(cor = cor(uod_param, umse)) %>%
+  ungroup()
+```
+
+```{r}
+sessionInfo()
+```

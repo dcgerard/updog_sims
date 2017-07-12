@@ -401,7 +401,7 @@ dev.off()</code></pre>
 <pre><code>## png 
 ##   2</code></pre>
 <pre class="r"><code>mean(sim_df$ocounts &lt; lower | sim_df$ocounts &gt; upper)</code></pre>
-<pre><code>## [1] 0.2105</code></pre>
+<pre><code>## [1] 0.2018</code></pre>
 <pre class="r"><code># pbinom(q = sum(sim_df$ocounts &lt; lower | sim_df$ocounts &gt; upper),
 #        size = nrow(bindat), prob = 0.05, lower.tail = FALSE)
 # pbinom(q = bindat$ocounts, size = bindat$osize, prob = pvec[pk_index], lower.tail = FALSE)</code></pre>
@@ -559,11 +559,11 @@ library(VGAM)</code></pre>
 ## 
 ##     dbetabinom</code></pre>
 <pre class="r"><code>VGAM::pbetabinom(q = 0, size = 116, prob = possible_probs[5], rho = uout$od_param)</code></pre>
-<pre><code>## [1] 2.266e-19</code></pre>
+<pre><code>## [1] 4.708e-19</code></pre>
 <pre class="r"><code>VGAM::pbetabinom(q = 2, size = 116, prob = possible_probs[5], rho = uout$od_param)</code></pre>
-<pre><code>## [1] 8.416e-17</code></pre>
+<pre><code>## [1] 1.647e-16</code></pre>
 <pre class="r"><code>VGAM::pbetabinom(q = 1, size = 84, prob = possible_probs[5], rho = uout$od_param)</code></pre>
-<pre><code>## [1] 7.555e-15</code></pre>
+<pre><code>## [1] 1.254e-14</code></pre>
 <pre class="r"><code>## Probabilities of points under naive binomial model
 pbinom(0, 116, 2/3)</code></pre>
 <pre><code>## [1] 4.507e-56</code></pre>
@@ -577,7 +577,8 @@ pbinom(0, 116, 2/3)</code></pre>
 <p>Fit all updog</p>
 <pre class="r"><code>for(col in 1:length(dat_list)) {
   dat &lt;- dat_list[[col]]
-  uout &lt;- updog_vanilla(ocounts = dat$ocounts, osize = dat$osize, ploidy = 6)
+  uout &lt;- updog_vanilla(ocounts = dat$ocounts, osize = dat$osize, ploidy = 6, print_val = FALSE,
+                        seq_error_sd = Inf, bias_val_sd = Inf)
 
   pdf(file = paste0(&quot;../output/updog_plots/uout&quot;, col, &quot;.pdf&quot;), family = &quot;Times&quot;, height = 5, width = 5)
   plot(uout, plot_beta = FALSE)
@@ -588,13 +589,6 @@ pbinom(0, 116, 2/3)</code></pre>
   print(pl)
   dev.off()
 }</code></pre>
-<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
-<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).
-
-## Warning: Removed 2 rows containing missing values (geom_point).
-
-## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
-<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
 <pre class="r"><code>## no overdispersion
 col &lt;- 6
 dat &lt;- dat_list[[col]]
@@ -603,9 +597,8 @@ uout &lt;- updog_vanilla(ocounts = dat$ocounts, osize = dat$osize, ploidy = 6,
                       od_param = 10^-7)
 
 pdf(file = paste0(&quot;../output/updog_plots/uout_alt&quot;, col, &quot;.pdf&quot;), family = &quot;Times&quot;, height = 5, width = 5)
-plot(uout, plot_beta = FALSE)</code></pre>
-<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
-<pre class="r"><code>dev.off()</code></pre>
+plot(uout, plot_beta = FALSE)
+dev.off()</code></pre>
 <pre><code>## png 
 ##   2</code></pre>
 <p>How likely are some aaaAAA child genotypes when AAAAAA and aaaAAA?</p>
@@ -618,7 +611,7 @@ qout[4, 7, 4] * nrow(dat)</code></pre>
 <pre class="r"><code>dat &lt;- dat_list[[3]]
 uout &lt;- updog_vanilla(ocounts = dat$ocounts, osize = dat$osize, ploidy = 6)
 1 - uout$out_prop</code></pre>
-<pre><code>## [1] 0.6936</code></pre>
+<pre><code>## [1] 0.6979</code></pre>
 <pre class="r"><code>plot_beta_dist_gg(mu = uout$out_mean, rho = uout$out_disp)</code></pre>
 <p><img src="presentation_figures_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 <pre class="r"><code>## Plot the overdispersed beta
@@ -648,18 +641,9 @@ pl &lt;- ggplot(data = tempdat, mapping = aes(x = x, y = y)) +
   plot(uout, plot_beta = FALSE)
   dev.off()
 }</code></pre>
-<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
-<pre><code>## Warning in updog_update_all(ocounts, osize, ploidy, print_val =
-## print_val, : Non-monotone likelihood.
-
-## Warning in updog_update_all(ocounts, osize, ploidy, print_val =
-## print_val, : Non-monotone likelihood.</code></pre>
-<pre><code>## Warning in updog_update_all(ocounts, osize, ploidy, print_val = print_val, : out_disp estimated at minimum. Be wary of prob_ok results.</code></pre>
-<pre><code>## Warning: Removed 45 rows containing missing values (geom_point).</code></pre>
-<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).
-
-## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
-<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
+<pre><code>## Warning in updog_update_all(ocounts, osize, ploidy, p1counts = p1counts, :
+## Non-monotone likelihood.</code></pre>
+<pre><code>## Warning in updog_update_all(ocounts, osize, ploidy, p1counts = p1counts, : out_disp estimated at minimum. Be wary of prob_ok results.</code></pre>
 <pre class="r"><code>## Seven works poorly because of updating outlier
 dat &lt;- dat_list[[7]]
 uout &lt;- updog_vanilla(ocounts = dat$ocounts, osize = dat$osize, ploidy = 6,
@@ -674,7 +658,7 @@ dev.off()</code></pre>
 <pre><code>## png 
 ##   2</code></pre>
 <pre class="r"><code>uout$out_prop</code></pre>
-<pre><code>## [1] 0.3377</code></pre>
+<pre><code>## [1] 0.3367</code></pre>
 <p>Does the fit for 7 now more-closely match the segregation probabilities?</p>
 <pre class="r"><code>xtab &lt;- matrix(NA, nrow = 2, ncol = 2)
 ogeno_vec &lt;- uout$ogeno
@@ -683,7 +667,7 @@ ogeno_vec[is.na(ogeno_vec)] &lt;- 5
 xtab[2, ] &lt;- table(ogeno_vec) / length(ogeno_vec)
 xtable::xtable(xtab)</code></pre>
 <pre><code>## % latex table generated in R 3.3.2 by xtable 1.8-2 package
-## % Fri Jun  2 10:16:36 2017
+## % Wed Jul  5 15:44:16 2017
 ## \begin{table}[ht]
 ## \centering
 ## \begin{tabular}{rrr}
@@ -699,7 +683,7 @@ xtable::xtable(xtab)</code></pre>
 <pre><code>## aaaaaa Aaaaaa AAaaaa AAAaaa AAAAaa AAAAAa AAAAAA 
 ##    0.0    0.0    0.0    0.0    0.0    0.5    0.5</code></pre>
 <pre class="r"><code>colMeans(uout$postmat)</code></pre>
-<pre><code>## [1] 0.05773 0.05773 0.05773 0.05773 0.05773 0.17526 0.53611</code></pre>
+<pre><code>## [1] 0.05763 0.05763 0.05763 0.05763 0.05763 0.17579 0.53604</code></pre>
 <pre class="r"><code>## Ten works fine with bound
 dat &lt;- dat_list[[10]]
 uout &lt;- updog_vanilla(ocounts = dat$ocounts, osize = dat$osize, ploidy = 6,
@@ -707,15 +691,13 @@ uout &lt;- updog_vanilla(ocounts = dat$ocounts, osize = dat$osize, ploidy = 6,
                       update_outmean = TRUE, bound_bias = FALSE, 
                       print_val = FALSE)
 plot(uout, ask = FALSE)</code></pre>
-<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
-<p><img src="presentation_figures_files/figure-html/unnamed-chunk-15-1.png" width="672" /><img src="presentation_figures_files/figure-html/unnamed-chunk-15-2.png" width="672" /><img src="presentation_figures_files/figure-html/unnamed-chunk-15-3.png" width="672" /></p>
+<p><img src="presentation_figures_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
 <pre class="r"><code>uout2 &lt;- updog_vanilla(ocounts = dat$ocounts, osize = dat$osize, ploidy = 6, update_outdisp = TRUE,
                       update_outmean = TRUE, bound = TRUE, non_mono_max = 200, print_val = FALSE,
                       bias_val = uout$bias_val, od_param = uout$od_param, 
                       seq_error = uout$seq_error, out_prop = uout$out_prop)
 plot(uout, ask = FALSE)</code></pre>
-<pre><code>## Warning: Removed 3 rows containing missing values (geom_point).</code></pre>
-<p><img src="presentation_figures_files/figure-html/unnamed-chunk-15-4.png" width="672" /><img src="presentation_figures_files/figure-html/unnamed-chunk-15-5.png" width="672" /><img src="presentation_figures_files/figure-html/unnamed-chunk-15-6.png" width="672" /></p>
+<p><img src="presentation_figures_files/figure-html/unnamed-chunk-15-2.png" width="672" /></p>
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>## R version 3.3.2 (2016-10-31)
 ## Platform: x86_64-pc-linux-gnu (64-bit)

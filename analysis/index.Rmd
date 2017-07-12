@@ -33,6 +33,7 @@ Much of this code doesn't work anymore because of modifications to the [`updog`]
 * [Histograms of updog fits in Shirasawa data.](updog_sum_stats.html) OD isn't too large.
 * [Fit ASH to updog estimates](updog_ash.html) Don't know how worthwhile it is.
 * [Screen Via Oracle Estimator](oracle_screen.html)
+* [OD estimate weakly correlates with genotyping performance when OD is constant and not too large](check_od_thresh.html).
 
 # Alfalfa Project:
 

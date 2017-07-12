@@ -263,8 +263,7 @@ Fit all updog
 ```{r}
 for(col in 1:length(dat_list)) {
   dat <- dat_list[[col]]
-  uout <- updog_vanilla(ocounts = dat$ocounts, osize = dat$osize, ploidy = 6, print_val = FALSE,
-                        seq_error_sd = Inf, bias_val_sd = Inf)
+  uout <- updog_vanilla(ocounts = dat$ocounts, osize = dat$osize, ploidy = 6, print_val = FALSE)
 
   pdf(file = paste0("../output/updog_plots/uout", col, ".pdf"), family = "Times", height = 5, width = 5)
   plot(uout, plot_beta = FALSE)

@@ -23,7 +23,7 @@ Hopefully, I won't see systematic Bias. Since there is no reference genome, we w
 # Subset Data
 
 ```{r}
-obj <- readRDS(file = "../output/allele_counts/chr1_ct.RDS")
+obj <- readRDS(file = "~/Data/alfalfa/cleaned_alfalfa/chr1_ct.RDS")
 str(obj)
 ```
 
@@ -84,10 +84,17 @@ This last SNP makes no sense. Why are they all clustered at 0.75? Is this a tech
 
 Of course, when we fit `updog`, we get weird results.
 ```{r, cache = TRUE}
-uout <- updog(ocounts = ocounts[nrow(ocounts), ], osize = osize[nrow(osize), ],
-              seq_error = 0.01, ploidy = 4, update_geno = TRUE, update_outlier = TRUE,
-              update_pi = TRUE, update_rho = TRUE)
-plot(uout)
+uout1 <- updog(ocounts = ocounts[nrow(ocounts), ], osize = osize[nrow(osize), ], ploidy = 4, 
+              seq_error_sd = Inf, bias_val_sd = Inf)
+
+uout2 <- updog(ocounts = ocounts[nrow(ocounts), ], osize = osize[nrow(osize), ], ploidy = 4)
+
+pdf(file = "../output/alfalpha_plots/bad_alfalfa_1.pdf", family = "Times", colormodel = "cmyk", height = 5, width = 5)
+plot(uout1)
+dev.off()
+pdf(file = "../output/alfalpha_plots/bad_alfalfa_2.pdf", family = "Times", colormodel = "cmyk", height = 5, width = 5)
+plot(uout2)
+dev.off()
 ```
 
 Some of these don't look too bad!
