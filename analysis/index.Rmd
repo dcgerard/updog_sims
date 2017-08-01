@@ -34,6 +34,7 @@ Much of this code doesn't work anymore because of modifications to the [`updog`]
 * [Fit ASH to updog estimates](updog_ash.html) Don't know how worthwhile it is.
 * [Screen Via Oracle Estimator](oracle_screen.html)
 * [OD estimate weakly correlates with genotyping performance when OD is constant and not too large](check_od_thresh.html).
+* [Autotetraploid species](autotetraploid_init.html) Looks messy.
 
 # Alfalfa Project:
 

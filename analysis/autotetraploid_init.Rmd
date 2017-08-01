@@ -1,0 +1,58 @@
+---
+title: "First look at some tetraploids"
+author: "David Gerard"
+date: "`r Sys.Date()`"
+---
+
+## Abstract
+
+Here, I look at some autotetraploids.
+
+## Read in data
+
+```{r}
+ref <- read.table("../data/reference_david.txt")
+alt <- read.table("../data/alternative_david.txt")
+```
+
+## Make a few plots
+
+```{r, cache=TRUE}
+library(updog)
+for (index in 1:5) {
+  ocounts <- ref[, index]
+  osize   <- alt[, index] + ref[, index]
+  print(plot_geno(ocounts, osize, 4))
+}
+```
+
+```{r, cache=TRUE}
+ulist <- list()
+for (index in 1:5) {
+  ocounts <- ref[, index]
+  osize   <- alt[, index] + ref[, index]
+  uout <- updog(ocounts = ocounts, osize = osize, model = "f1", ploidy = 4, print_val = FALSE)
+  ulist[[index]] <- uout
+  print(plot(uout))
+}
+```
+
+It doesn't seem to fit too well. But the OD is huge in all of them, indicating that these data aren't too trustworthy.
+
+```{r}
+sapply(ulist, function(x) { x$od_param })
+```
+
+## Some thoughts
+
+It seems that a lot of these SNP's have quite a lot of points really close to all AAAA and then everything else is dispersed. Indeed, almost every SNP has at least half of their reads being 95\% or more AAAA.
+
+```{r}
+library(tidyverse)
+prop_mat <- ref / (ref + alt)
+hist(colMeans(prop_mat > 0.95, na.rm = TRUE))
+```
+
+```{r info}
+sessionInfo()
+```
