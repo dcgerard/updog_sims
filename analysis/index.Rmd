@@ -35,6 +35,7 @@ Much of this code doesn't work anymore because of modifications to the [`updog`]
 * [Screen Via Oracle Estimator](oracle_screen.html)
 * [OD estimate weakly correlates with genotyping performance when OD is constant and not too large](check_od_thresh.html).
 * [Autotetraploid species](autotetraploid_init.html) Looks messy.
+* [More autotetraploid species](tet_explore.html). This looks cleaner. There seems to be less bias in these data, but they are still messy. EBG and UPDOG appear to perform about the same. I used uniform updog while only updating the sequencing error rate. I did this because other genotype models don't make sense for these data and I was woried about the strong genotype distribution assumptions when estimating read mapping bias, overdispersion, and outlying observations. I think I'll need the pedigree info to get a better idea on how well these methods are performing.
 
 # Alfalfa Project:
 
