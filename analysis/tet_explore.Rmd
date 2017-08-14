@@ -1,0 +1,78 @@
+---
+title: "Explore more autotetraploid data"
+author: "David Gerard"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I explore more of the autotetraploid data Felipe sent me.
+
+# Analysis
+
+```{r}
+ref <- read.csv("~/Data/blueberry_felipe/david_ref.csv")
+alt <- read.csv("~/Data/blueberry_felipe/david_alt.csv")
+tot <- ref + alt
+write.table(ref, file = "~/Data/blueberry_felipe/ref_tab.txt", col.names = FALSE, row.names = FALSE, na = "-9")
+write.table(alt, file = "~/Data/blueberry_felipe/alt_tab.txt", col.names = FALSE, row.names = FALSE, na = "-9")
+write.table(tot, file = "~/Data/blueberry_felipe/tot_tab.txt", col.names = FALSE, row.names = FALSE, na = "-9")
+```
+
+```{r}
+library(updog)
+ploidy <- 4
+```
+
+## Run updog to get sequencing error rate
+
+```{r, eval=FALSE}
+ulist <- list()
+seq_error_vec <- rep(NA, length = ncol(ref))
+for (index in 1:ncol(ref)) {
+  uout <- updog_vanilla(ocounts = ref[, index], osize = tot[, index], ploidy = ploidy, 
+                        update_outmean = FALSE,
+                        update_outdisp = FALSE, update_outprop = FALSE, update_bias_val = FALSE, 
+                        update_seq_error = TRUE, update_od_param = FALSE, update_pgeno = TRUE, 
+                        model = "uniform", od_param = 10^-6, out_prop = 0)  
+  ulist[[index]] <- uout
+  seq_error_vec[index] <- uout$seq_error
+}
+saveRDS(object = ulist, file = "~/Data/blueberry_felipe/updog_fit.RDS")
+seq_error_vec[seq_error_vec > 0.5] <- 1 - seq_error_vec[seq_error_vec > 0.5]
+write.table(x = seq_error_vec, file = "~/Data/blueberry_felipe/seq_error.txt", row.names = FALSE, col.names = FALSE)
+```
+
+```{r, echo=FALSE}
+ufits <- readRDS("~/Data/blueberry_felipe/updog_fit.RDS")
+```
+
+## Run EBG
+
+```{r, eval = FALSE}
+system("ebg diseq -p 4 -n 1849 -l 579 -t ~/Data/blueberry_felipe/tot_tab.txt -r ~/Data/blueberry_felipe/ref_tab.txt -e ~/Data/blueberry_felipe/seq_error.txt")
+system("mv diseq* ~/Data/blueberry_felipe/")
+```
+
+```{r}
+ebg_geno <- read.table("~/Data/blueberry_felipe/diseq-genos.txt", na.strings = "-9")
+```
+
+## Plot comparisons of EBG and UPDOG
+
+```{r, warning=FALSE}
+for (index in 1:40) {
+  print(plot_geno(ocounts = ref[, index], osize = tot[, index], ploidy = ploidy))
+  print(plot_geno(ocounts = ref[, index], osize = tot[, index], ploidy = ploidy, ogeno = ebg_geno[, index]))
+  print(plot_geno(ocounts = ref[, index], osize = tot[, index], ploidy = ploidy, ogeno = ufits[[index]]$ogeno))
+}
+```
+
+```{r}
+sessionInfo()
+```
